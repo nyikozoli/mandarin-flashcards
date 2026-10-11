@@ -164,6 +164,41 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .s-learning { background: var(--learn); }
 .s-unmarked { background: #6b7489; }
 .pv-section { margin-top: 20px; }
+.seal-grid { list-style: none; margin: 6px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+.seal-item { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; padding: 10px 6px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface2); }
+.seal-mark { min-width: 48px; height: 48px; padding: 0 6px; display: grid; place-items: center; border-radius: 9px; border: 2px dashed var(--line); color: var(--muted); font-family: var(--kai-font); font-size: 22px; }
+.seal-item.on .seal-mark { border: 0; background: var(--cinnabar); color: var(--paper); box-shadow: inset 0 0 0 3px var(--cinnabar), inset 0 0 0 4.5px rgba(241, 236, 226, .55); transform: rotate(-4deg); }
+.seal-name { font-size: 13px; font-weight: 700; }
+.seal-how { font-size: 11.5px; color: var(--muted); line-height: 1.3; }
+.seal-stamp { position: fixed; left: 50%; top: 38%; z-index: 110; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 10px; pointer-events: none; animation: stamp-in .45s cubic-bezier(.2, 1.6, .4, 1) both; }
+.seal-stamp.out { animation: stamp-out .5s ease forwards; }
+.seal-stamp-mark { min-width: 120px; height: 120px; padding: 0 14px; display: grid; place-items: center; border-radius: 16px; background: var(--cinnabar); color: var(--paper); font-family: var(--kai-font); font-size: 64px; box-shadow: inset 0 0 0 6px var(--cinnabar), inset 0 0 0 9px rgba(241, 236, 226, .6), 0 18px 40px rgba(0, 0, 0, .5); transform: rotate(-6deg); }
+.seal-stamp-text { padding: 8px 14px; border-radius: 999px; background: var(--surface2); border: 1px solid var(--line); font-weight: 700; color: var(--text); }
+@keyframes stamp-in { from { opacity: 0; transform: translate(-50%, -50%) scale(2.2); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+@keyframes stamp-out { to { opacity: 0; transform: translate(-50%, -60%) scale(.9); } }
+.ch-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-top: 6px; }
+.ch-btn { display: grid; grid-template-columns: auto 1fr; grid-template-areas: "zh name" "zh sub"; column-gap: 10px; align-items: center; text-align: left; padding: 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface2); color: var(--text); }
+.ch-btn.passed { border-color: var(--known); }
+.ch-zh { grid-area: zh; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 8px; background: var(--surface3); font-family: var(--kai-font); font-size: 24px; }
+.ch-btn.passed .ch-zh { background: var(--cinnabar); color: var(--paper); }
+.ch-name { grid-area: name; font-weight: 700; font-size: 14px; }
+.ch-sub { grid-area: sub; font-size: 12px; color: var(--muted); }
+.qz-body { display: flex; flex-direction: column; gap: 12px; }
+.qz-top { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.qz-score { margin-left: auto; color: var(--known); }
+.qz-time { flex: 1 1 100%; height: 6px; border-radius: 999px; background: var(--surface2); overflow: hidden; }
+.qz-time-fill { display: block; height: 100%; background: var(--learn); transition: width .25s linear; }
+.qz-q { text-align: center; padding: 10px 0 4px; }
+.qz-q p { margin: 0; }
+.qz-zh { font-family: var(--zh-font); font-size: clamp(44px, 14vw, 64px); color: var(--paper); line-height: 1.2; }
+.qz-py { font-size: 20px; color: var(--pinyin); margin-top: 4px !important; }
+.qz-ask { color: var(--muted); font-size: 14px; margin-bottom: 6px !important; }
+.qz-en { font-size: 24px; font-weight: 700; }
+.qz-choices { display: grid; gap: 8px; }
+.qz-result { margin: 8px 0 0; text-align: center; font-size: 56px; font-weight: 800; color: var(--learn); font-variant-numeric: tabular-nums; }
+.qz-result.pass { color: var(--known); }
+.qz-msg { margin: 0; text-align: center; color: var(--soft); }
+.qz-again { align-self: center; margin-top: 6px; }
 .wotd { display: flex; gap: 12px; align-items: flex-start; margin: 10px 0 0; padding: 10px 10px 10px 12px; border-radius: 14px; border: 1px solid var(--line); background: linear-gradient(135deg, rgba(224, 74, 47, .14), rgba(224, 74, 47, 0) 60%), var(--surface); }
 .wotd p { margin: 0; }
 .wotd-seal { flex: none; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 8px; background: var(--cinnabar); color: var(--paper); font-family: var(--kai-font); font-size: 22px; margin-top: 2px; }
@@ -924,6 +959,16 @@ label.btn { cursor: pointer; }
   </div>
 </div>
 
+<div id="quizView" class="overlay" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="quizTitle">
+    <div class="sheet-head">
+      <h2 id="quizTitle">Challenge</h2>
+      <button type="button" class="close-btn" id="btnCloseQuiz" aria-label="Close the challenge">✕</button>
+    </div>
+    <div class="pv-body qz-body" id="quizBody" aria-live="polite"></div>
+  </div>
+</div>
+
 <div id="topicView" class="overlay" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="topicTitle">
     <div class="sheet-head">
@@ -1005,6 +1050,7 @@ label.btn { cursor: pointer; }
           <dt>Tap a word</dt><dd>In any example sentence, and on sentence cards, the words from HSK 1–3 have a dotted underline. Tap one to see its pinyin and meaning; tap elsewhere or press Esc to close it. On a word card the word itself is highlighted instead.</dd>
           <dt>Word of the day</dt><dd>Each day a useful word you do not know yet appears above the card. “Study it” opens it; ✕ hides it until tomorrow.</dd>
           <dt>Daily quests</dt><dd>Three small goals each day, shown in the progress view. Each finished quest gives 30 XP; all three give 50 XP more and a 🧊 streak freeze. You can save two, and a saved freeze keeps your streak alive over a missed day. Every Monday a short recap of last week appears.</dd>
+          <dt>Seals and challenges</dt><dd>The progress view collects 20 red seals (印章) for milestones such as 100 words, a 7-day streak or a passed exam, each worth 50 XP. Its challenges are a 60-second blitz (as many meanings as you can) and a 20-question exam per HSK level (pass at 80%). Challenges never change your review schedule.</dd>
           <dt>Topics</dt><dd>The button under the level row picks a topic (food, travel, time…). Every study mode then works inside it, and a topic's seal turns red when you know all its words.</dd>
           <dt>What you can read</dt><dd>The progress view counts the example sentences whose HSK words you all know, shows how much of everyday Chinese text your words cover, and suggests the next word to learn. Word frequencies come from <i>wordfreq</i> by Robyn Speer and contributors (CC BY-SA 4.0).</dd>
           <dt>XP, ranks, combo</dt><dd>Every answer earns XP (10 for a known card, 3 for one you are still learning, more during a combo). XP raises your rank from 新手 Newcomer to 大师 Master. Three or more right answers in a row show a 连 combo counter on the card.</dd>
@@ -1133,7 +1179,7 @@ label.btn { cursor: pointer; }
   var EXPECTED_LEVELS = __EXPECTED_LEVELS__;
   var MODE_NAMES = { all: 'All cards', due: 'Due for review', learning: 'Learning only', unmarked: 'Unmarked only', hard: 'Hardest words' };
   var STATUS_NAMES = { known: 'Known', learning: 'Learning', unmarked: 'Unmarked' };
-  var REQUIRED_IDS = ['wotd', 'wotdZh', 'wotdPy', 'wotdEn', 'wotdHint', 'btnWotdStudy', 'btnWotdClose', 'extra-data', 'btnTopic', 'topicBtnZh', 'topicBtnName', 'topicView', 'btnCloseTopic', 'topicGrid', 'cardRank', 'comboTag', 'gradeRow', 'legendTones', 'optChoicePinyin', 'progressTitle', 'optFadePinyin', 'wordPop', 'wordPopZh', 'wordPopLv', 'wordPopPy', 'wordPopEn', 'wordPopHu', 'btnWordPopSpeak', 'btnWordPopClose', 'app', 'errorBanner', 'errorList', 'modeAll', 'modeLearning', 'modeUnmarked', 'countAll', 'countLearningMode',
+  var REQUIRED_IDS = ['quizView', 'quizTitle', 'quizBody', 'btnCloseQuiz', 'wotd', 'wotdZh', 'wotdPy', 'wotdEn', 'wotdHint', 'btnWotdStudy', 'btnWotdClose', 'extra-data', 'btnTopic', 'topicBtnZh', 'topicBtnName', 'topicView', 'btnCloseTopic', 'topicGrid', 'cardRank', 'comboTag', 'gradeRow', 'legendTones', 'optChoicePinyin', 'progressTitle', 'optFadePinyin', 'wordPop', 'wordPopZh', 'wordPopLv', 'wordPopPy', 'wordPopEn', 'wordPopHu', 'btnWordPopSpeak', 'btnWordPopClose', 'app', 'errorBanner', 'errorList', 'modeAll', 'modeLearning', 'modeUnmarked', 'countAll', 'countLearningMode',
     'countUnmarkedMode', 'btnShuffle', 'btnUndo', 'btnReset', 'btnSelfCheck', 'btnList', 'cardCounter', 'knownCount', 'learningCount',
     'unmarkedCount', 'progressBar', 'progKnown', 'progLearning', 'progressLabel', 'stage', 'card', 'cardNumber', 'cardStatus', 'cardHanzi',
     'cardPinyin', 'btnSpeak', 'speakLabel', 'cardAnswer', 'cardEn', 'cardHu', 'cardExamples', 'revealHint', 'deckEnd', 'endEmoji', 'endTitle',
@@ -1142,7 +1188,7 @@ label.btn { cursor: pointer; }
     'confirmText', 'confirmCancel', 'confirmAlt', 'confirmOk', 'diagView', 'btnCloseDiag', 'diagSummary', 'diagResults', 'btnRunCheck', 'toast', 'vocab-data',
     'syncGroup', 'syncEmailRow', 'syncEmail', 'syncLinkRow', 'syncEmailNote', 'btnSignIn', 'syncAccountRow', 'syncAccount', 'btnSignOut',
     'syncDatesRow', 'syncDates', 'btnSyncNow', 'syncStatus'];
-  var CORE_BUTTONS = ['btnWotdStudy', 'btnWotdClose', 'btnTopic', 'btnCloseTopic', 'topicGrid', 'pvBody', 'gradeRow', 'optChoicePinyin', 'optFadePinyin', 'btnWordPopSpeak', 'btnWordPopClose', 'btnExport', 'btnImport', 'btnApplyImport', 'revealHint', 'btnHelp', 'btnTourNext', 'btnSettings', 'btnKnown', 'btnLearning', 'btnSkip', 'btnSpeak', 'cardExamples', 'modeDue', 'modeHard', 'optPractice', 'choiceBox', 'cardPrompt', 'btnProgress', 'levelAll', 'level1', 'level2', 'level3', 'card', 'btnShuffle', 'btnUndo', 'btnReset', 'btnSelfCheck',
+  var CORE_BUTTONS = ['btnCloseQuiz', 'quizBody', 'btnWotdStudy', 'btnWotdClose', 'btnTopic', 'btnCloseTopic', 'topicGrid', 'pvBody', 'gradeRow', 'optChoicePinyin', 'optFadePinyin', 'btnWordPopSpeak', 'btnWordPopClose', 'btnExport', 'btnImport', 'btnApplyImport', 'revealHint', 'btnHelp', 'btnTourNext', 'btnSettings', 'btnKnown', 'btnLearning', 'btnSkip', 'btnSpeak', 'cardExamples', 'modeDue', 'modeHard', 'optPractice', 'choiceBox', 'cardPrompt', 'btnProgress', 'levelAll', 'level1', 'level2', 'level3', 'card', 'btnShuffle', 'btnUndo', 'btnReset', 'btnSelfCheck',
     'btnList', 'btnCloseList', 'modeAll', 'modeLearning', 'modeUnmarked', 'searchInput', 'confirmOk', 'confirmCancel', 'confirmAlt', 'btnSignIn', 'btnSignOut', 'btnSyncNow'];
 
   var $ = function (id) { return document.getElementById(id); };
@@ -1150,7 +1196,7 @@ label.btn { cursor: pointer; }
   var bound = {};
   var cards = [], wordCards = [], sentCards = [];
   var state = { status: {}, mode: 'all', deck: [], pos: 0, shuffled: false, revealed: false, autoReveal: false, rate: 0.85, voice: '', badVoices: [], voicesTested: false, level: 'all', activity: {}, goal: 20, warmup: true, deckType: 'words',
-    srs: {}, misses: {}, skill: 'read', marks: {}, deckMemory: {}, topic: 'all', xp: 0, bestCombo: 0, learned: {}, wotdSeen: '', quests: null, freezes: 0, frozen: [], recapWeek: '', milestones: [], practice: 'zh', toneColors: true, fadePinyin: false, choicePinyin: true,
+    srs: {}, misses: {}, skill: 'read', marks: {}, deckMemory: {}, topic: 'all', xp: 0, bestCombo: 0, learned: {}, wotdSeen: '', quests: null, freezes: 0, frozen: [], recapWeek: '', seals: {}, questDays: 0, blitzBest: {}, exams: {}, milestones: [], practice: 'zh', toneColors: true, fadePinyin: false, choicePinyin: true,
     autoplay: false, vibrate: true, seenTour: false };
   var undoStack = [];
   var busy = false;
@@ -1934,6 +1980,10 @@ label.btn { cursor: pointer; }
       freezes: state.freezes,
       frozen: state.frozen,
       recapWeek: state.recapWeek,
+      seals: state.seals,
+      questDays: state.questDays,
+      blitzBest: state.blitzBest,
+      exams: state.exams,
       milestones: state.milestones,
       practice: state.practice,
       toneColors: state.toneColors,
@@ -2031,6 +2081,18 @@ label.btn { cursor: pointer; }
     state.wotdSeen = saved && isDay(saved.wotdSeen) ? saved.wotdSeen : '';
     state.recapWeek = saved && isDay(saved.recapWeek) ? saved.recapWeek : '';
     state.freezes = saved ? clampInt(saved.freezes, 0, MAX_FREEZES) : 0;
+    state.questDays = saved ? clampInt(saved.questDays, 0, 100000) : 0;
+    var numMap = function (src, keys, max) {
+      var out = {};
+      if (src && typeof src === 'object') keys.forEach(function (k) { if (typeof src[k] === 'number') out[k] = clampInt(src[k], 0, max); });
+      return out;
+    };
+    state.blitzBest = numMap(saved && saved.blitzBest, ['all', '1', '2', '3'], 1000);
+    state.exams = numMap(saved && saved.exams, ['1', '2', '3'], 100);
+    state.seals = {};
+    if (saved && saved.seals && typeof saved.seals === 'object') {
+      Object.keys(saved.seals).forEach(function (k) { if (SEAL_BY_ID[k] && isDay(saved.seals[k])) state.seals[k] = saved.seals[k]; });
+    }
     state.frozen = saved && Array.isArray(saved.frozen) ? saved.frozen.filter(isDay).slice(-60) : [];
     state.quests = null;
     var q = saved && saved.quests;
@@ -2375,6 +2437,8 @@ label.btn { cursor: pointer; }
     body.insertBefore(questSection(), hero);
     body.appendChild(readingSection());
     body.appendChild(statsSection());
+    body.appendChild(challengeSection());
+    body.appendChild(sealSection());
     if (EXTRA.topics.length) body.appendChild(topicSection());
 
     // Daily goal
@@ -3276,6 +3340,7 @@ label.btn { cursor: pointer; }
     });
     if (!qs.rewarded && qs.list.every(function (q) { return q.n >= q.goal; })) {
       qs.rewarded = true;
+      state.questDays++;
       var got = state.freezes < MAX_FREEZES;
       if (got) state.freezes++;
       gainXp(50);
@@ -3361,6 +3426,320 @@ label.btn { cursor: pointer; }
     return sec;
   }
 
+  /* ---------- seals (印章): achievements ---------- */
+  function knownWords(skill) {
+    var st = marksOf(skill || 'read').status, n = 0;
+    wordCards.forEach(function (w) { if (st[w.zh] === 'known') n++; });
+    return n;
+  }
+  function levelDone(lv) {
+    var st = marksOf('read').status, list = wordCards.filter(function (w) { return String(w.lv) === lv; });
+    return list.length > 0 && list.every(function (w) { return st[w.zh] === 'known'; });
+  }
+  function anyTopicDone() {
+    var st = marksOf('read').status;
+    return EXTRA.topics.some(function (t) { var l = wordsIn(t.id); return l.length && l.every(function (w) { return st[w.zh] === 'known'; }); });
+  }
+  var SEALS = [
+    { id: 'first', zh: '初', en: 'First word', how: 'Know your first word' },
+    { id: 'k50', zh: '五十', en: 'Fifty', how: 'Know 50 words' },
+    { id: 'k100', zh: '百', en: 'One hundred', how: 'Know 100 words' },
+    { id: 'k300', zh: '三百', en: 'Three hundred', how: 'Know 300 words' },
+    { id: 'kall', zh: '全', en: 'Every word', how: 'Know all 598 words' },
+    { id: 'hsk1', zh: '一级', en: 'HSK 1', how: 'Know every HSK 1 word' },
+    { id: 'hsk2', zh: '二级', en: 'HSK 2', how: 'Know every HSK 2 word' },
+    { id: 'hsk3', zh: '三级', en: 'HSK 3', how: 'Know every HSK 3 word' },
+    { id: 'topic', zh: '题', en: 'Topic master', how: 'Know every word of one topic' },
+    { id: 'read50', zh: '读', en: 'Reader', how: 'Be able to read 50 example sentences' },
+    { id: 'read300', zh: '书', en: 'Bookworm', how: 'Be able to read 300 example sentences' },
+    { id: 'ear', zh: '耳', en: 'Good ear', how: 'Know 100 words in listening practice' },
+    { id: 'mouth', zh: '口', en: 'Fluent', how: 'Know 100 words in meaning → Chinese' },
+    { id: 's7', zh: '周', en: 'One week', how: 'Keep a 7-day streak' },
+    { id: 's30', zh: '月', en: 'One month', how: 'Keep a 30-day streak' },
+    { id: 'combo', zh: '连', en: 'On a roll', how: 'Get 25 right in a row' },
+    { id: 'quests', zh: '勤', en: 'Diligent', how: 'Finish all daily quests on 7 days' },
+    { id: 'blitz', zh: '快', en: 'Lightning', how: 'Score 20 in a 60-second blitz' },
+    { id: 'exam', zh: '考', en: 'Exam passed', how: 'Pass an HSK level exam' },
+    { id: 'scholar', zh: '学者', en: 'Scholar', how: 'Reach the Scholar rank' }
+  ];
+  var SEAL_BY_ID = {};
+  SEALS.forEach(function (x) { SEAL_BY_ID[x.id] = x; });
+  function sealEarned(id) {
+    var bestBlitz = Math.max.apply(null, [0].concat(Object.keys(state.blitzBest).map(function (k) { return state.blitzBest[k]; })));
+    switch (id) {
+      case 'first': return knownWords() >= 1;
+      case 'k50': return knownWords() >= 50;
+      case 'k100': return knownWords() >= 100;
+      case 'k300': return knownWords() >= 300;
+      case 'kall': return knownWords() >= wordCards.length;
+      case 'hsk1': return levelDone('1');
+      case 'hsk2': return levelDone('2');
+      case 'hsk3': return levelDone('3');
+      case 'topic': return anyTopicDone();
+      case 'read50': return readability().n >= 50;
+      case 'read300': return readability().n >= 300;
+      case 'ear': return knownWords('listen') >= 100;
+      case 'mouth': return knownWords('recall') >= 100;
+      case 's7': return longestStreak() >= 7;
+      case 's30': return longestStreak() >= 30;
+      case 'combo': return state.bestCombo >= 25;
+      case 'quests': return state.questDays >= 7;
+      case 'blitz': return bestBlitz >= 20;
+      case 'exam': return Object.keys(state.exams).some(function (k) { return state.exams[k] >= EXAM_PASS; });
+      case 'scholar': return rankOf(state.xp) >= 3;
+    }
+    return false;
+  }
+  // Awards every seal whose condition now holds; returns the new ones.
+  function checkSeals() {
+    var fresh = [];
+    SEALS.forEach(function (x) {
+      if (state.seals[x.id] || !sealEarned(x.id)) return;
+      state.seals[x.id] = dayKey();
+      fresh.push(x);
+    });
+    fresh.forEach(function (x) {
+      state.xp += 50;
+      if (!testing) { stampSeal(x); buzz([20, 40, 20]); }
+    });
+    return fresh;
+  }
+  // A seal pressed onto the screen for a moment.
+  function stampSeal(x) {
+    var n = el('div', 'seal-stamp');
+    n.setAttribute('role', 'status');
+    var mark = el('span', 'seal-stamp-mark', x.zh);
+    mark.setAttribute('lang', 'zh-CN');
+    n.appendChild(mark);
+    n.appendChild(el('span', 'seal-stamp-text', 'New seal: ' + x.en + ' (+50 XP)'));
+    document.body.appendChild(n);
+    confetti();
+    setTimeout(function () { n.classList.add('out'); }, 2600);
+    setTimeout(function () { if (n.parentNode) n.parentNode.removeChild(n); }, 3200);
+  }
+  function sealSection() {
+    var got = SEALS.filter(function (x) { return state.seals[x.id]; }).length;
+    var sec = section('Seals', got + ' of ' + SEALS.length + ' collected. Each one is worth 50 XP.');
+    var grid = el('ul', 'seal-grid');
+    SEALS.forEach(function (x) {
+      var on = !!state.seals[x.id];
+      var li = el('li', 'seal-item' + (on ? ' on' : ''));
+      var mark = el('span', 'seal-mark', x.zh);
+      mark.setAttribute('lang', 'zh-CN');
+      mark.setAttribute('aria-hidden', 'true');
+      li.appendChild(mark);
+      li.appendChild(el('span', 'seal-name', x.en));
+      li.appendChild(el('span', 'seal-how', on ? 'Earned ' + state.seals[x.id] : x.how));
+      li.setAttribute('aria-label', x.en + (on ? ', earned on ' + state.seals[x.id] : ', not yet earned: ' + x.how));
+      grid.appendChild(li);
+    });
+    sec.appendChild(grid);
+    return sec;
+  }
+
+  /* ---------- challenges: 60-second blitz and level exams ---------- */
+  var EXAM_PASS = 80, EXAM_SIZE = 20, BLITZ_SECONDS = 60;
+  var quiz = null;
+  function quizPool(lv) { return wordCards.filter(function (w) { return lv === 'all' || String(w.lv) === lv; }); }
+  function pickOthers(c, pool, n, key) {
+    var k = key(c), out = [], cand = shuffled(pool);
+    for (var i = 0; i < cand.length && out.length < n; i++) {
+      var x = cand[i];
+      if (x !== c && key(x) !== k && !out.some(function (o) { return key(o) === key(x); })) out.push(x);
+    }
+    return out;
+  }
+  // One question: meaning (word → meaning), word (meaning → word), listen (sound → word) or gap (sentence → word).
+  function makeQuestion(type, c, pool) {
+    if (type === 'gap') {
+      var g = clozeTarget(c);
+      if (!g) type = 'meaning';
+      else return { type: type, c: c, ex: g.ex, opts: g.options };
+    }
+    var key = type === 'meaning' ? function (x) { return shortText(x.en).toLowerCase(); } : function (x) { return x.zh; };
+    return { type: type, c: c, opts: shuffled([c].concat(pickOthers(c, pool, 3, key))) };
+  }
+  function startQuiz(kind, lv) {
+    var pool = quizPool(lv);
+    if (pool.length < 8) return;
+    quiz = { kind: kind, lv: lv, pool: pool, i: 0, right: 0, wrong: [], q: null, done: false, end: Date.now() + BLITZ_SECONDS * 1000, timer: null };
+    if (kind === 'exam') {
+      var picks = shuffled(pool).slice(0, EXAM_SIZE);
+      var types = ['meaning', 'meaning', 'meaning', 'meaning', 'meaning', 'meaning', 'meaning', 'meaning', 'word', 'word', 'word', 'word',
+        speechSupported ? 'listen' : 'meaning', speechSupported ? 'listen' : 'meaning', speechSupported ? 'listen' : 'word', speechSupported ? 'listen' : 'word',
+        'gap', 'gap', 'gap', 'gap'];
+      types = shuffled(types);
+      quiz.list = picks.map(function (c, k) { return makeQuestion(types[k], c, pool); });
+    } else if (!testing) {
+      quiz.timer = setInterval(function () { if (Date.now() >= quiz.end) finishQuiz(); else drawQuizTop(); }, 250);
+    }
+    els.quizTitle.textContent = kind === 'exam' ? 'HSK ' + lv + ' exam' : '60-second blitz' + (lv === 'all' ? '' : ' · HSK ' + lv);
+    nextQuestion();
+    if (els.quizView.hidden) openOverlay(els.quizView, els.btnCloseQuiz);
+  }
+  function stopQuiz() {
+    if (quiz && quiz.timer) clearInterval(quiz.timer);
+    if (quiz) quiz.timer = null;
+  }
+  function nextQuestion() {
+    if (quiz.kind === 'exam') {
+      if (quiz.i >= quiz.list.length) { finishQuiz(); return; }
+      quiz.q = quiz.list[quiz.i];
+    } else {
+      quiz.q = makeQuestion('meaning', quiz.pool[Math.floor(Math.random() * quiz.pool.length)], quiz.pool);
+    }
+    quiz.answered = false;
+    drawQuestion();
+  }
+  function drawQuizTop() {
+    var top = els.quizBody.querySelector('.qz-top');
+    if (!top || !quiz) return;
+    var left = Math.max(0, Math.ceil((quiz.end - Date.now()) / 1000));
+    top.textContent = '';
+    top.appendChild(el('span', 'qz-count', quiz.kind === 'exam' ? 'Question ' + (quiz.i + 1) + ' / ' + quiz.list.length : '⏱ ' + left + ' s'));
+    top.appendChild(el('span', 'qz-score', quiz.right + ' right'));
+    if (quiz.kind !== 'exam') {
+      var bar = el('span', 'qz-time');
+      var fill = el('span', 'qz-time-fill');
+      fill.style.width = (left / BLITZ_SECONDS * 100) + '%';
+      bar.appendChild(fill);
+      top.appendChild(bar);
+    }
+  }
+  function drawQuestion() {
+    var q = quiz.q, b = els.quizBody;
+    b.textContent = '';
+    b.appendChild(el('div', 'qz-top'));
+    drawQuizTop();
+    var box = el('div', 'qz-q');
+    if (q.type === 'meaning') {
+      var zh = el('p', 'qz-zh', q.c.zh);
+      zh.setAttribute('lang', 'zh-CN');
+      box.appendChild(zh);
+      var py = el('p', 'qz-py');
+      renderPinyin(py, q.c.py);
+      box.appendChild(py);
+    } else if (q.type === 'word') {
+      box.appendChild(el('p', 'qz-ask', 'Which word means'));
+      box.appendChild(el('p', 'qz-en', shortText(q.c.en)));
+    } else if (q.type === 'listen') {
+      box.appendChild(el('p', 'qz-ask', 'Which word do you hear?'));
+      var lb = el('button', 'listen-btn qz-play', '🔊 Play');
+      lb.type = 'button';
+      box.appendChild(lb);
+    } else {
+      box.appendChild(el('p', 'qz-ask', 'Which word fills the gap?'));
+      var at = q.ex.zh.indexOf(q.c.zh), gap = el('p', 'prompt-zh');
+      gap.setAttribute('lang', 'zh-CN');
+      gap.appendChild(document.createTextNode(q.ex.zh.slice(0, at)));
+      var hole = el('span', 'gap');
+      hole.style.width = (charLen(q.c.zh) * 1.1) + 'em';
+      gap.appendChild(hole);
+      gap.appendChild(document.createTextNode(q.ex.zh.slice(at + q.c.zh.length)));
+      box.appendChild(gap);
+      box.appendChild(el('p', 'prompt-sub', q.ex.en));
+    }
+    b.appendChild(box);
+    var list = el('div', 'choices qz-choices');
+    q.opts.forEach(function (o, k) {
+      var btn = el('button', 'choice');
+      btn.type = 'button';
+      btn.setAttribute('data-ok', o === q.c ? '1' : '0');
+      btn.setAttribute('data-k', String(k));
+      btn.appendChild(el('span', 'choice-num', String(k + 1)));
+      var tx = el('span', 'choice-text');
+      if (q.type === 'meaning') {
+        tx.appendChild(el('span', 'choice-en', shortText(o.en)));
+      } else {
+        var oz = el('span', 'choice-zh', o.zh);
+        oz.setAttribute('lang', 'zh-CN');
+        tx.appendChild(oz);
+        if (q.type !== 'listen') tx.appendChild(el('span', 'choice-pyl', o.py));
+      }
+      btn.appendChild(tx);
+      list.appendChild(btn);
+    });
+    b.appendChild(list);
+    if (q.type === 'listen' && !testing) setTimeout(function () { if (quiz && quiz.q === q) speakParts([q.c.zh], null); }, 250);
+  }
+  function quizPick(k) {
+    if (!quiz || quiz.done || quiz.answered) return;
+    var btns = els.quizBody.querySelectorAll('.qz-choices .choice'), b = btns[k];
+    if (!b) return;
+    quiz.answered = true;
+    var ok = b.getAttribute('data-ok') === '1';
+    Array.prototype.forEach.call(btns, function (x) { if (x.getAttribute('data-ok') === '1') x.classList.add('right'); x.disabled = true; });
+    if (!ok) b.classList.add('wrong');
+    if (ok) { quiz.right++; gainXp(quiz.kind === 'exam' ? 5 : 2); } else quiz.wrong.push(quiz.q.c);
+    buzz(ok ? 10 : [25, 40, 25]);
+    var go = function () { if (!quiz || quiz.done) return; quiz.i++; nextQuestion(); };
+    if (testing) go(); else setTimeout(go, ok ? 350 : 1100);
+  }
+  function finishQuiz() {
+    if (!quiz || quiz.done) return;
+    stopQuiz();
+    quiz.done = true;
+    var b = els.quizBody, msg, pass = false;
+    b.textContent = '';
+    if (quiz.kind === 'exam') {
+      var score = Math.round(quiz.right / quiz.list.length * 100);
+      pass = score >= EXAM_PASS;
+      var prev = state.exams[quiz.lv] || 0;
+      state.exams[quiz.lv] = Math.max(prev, score);
+      if (pass) gainXp(100);
+      b.appendChild(el('p', 'qz-result' + (pass ? ' pass' : ''), score + '%'));
+      msg = pass ? 'Passed! HSK ' + quiz.lv + ' exam: ' + quiz.right + ' of ' + quiz.list.length + ' right (+100 XP).'
+        : quiz.right + ' of ' + quiz.list.length + ' right. You need ' + EXAM_PASS + '% to pass; review the words below and try again.';
+    } else {
+      var best = state.blitzBest[quiz.lv] || 0, record = quiz.right > best;
+      if (record) state.blitzBest[quiz.lv] = quiz.right;
+      b.appendChild(el('p', 'qz-result' + (record ? ' pass' : ''), String(quiz.right)));
+      msg = record ? 'New personal best (was ' + best + ')!' : 'Personal best: ' + best + '.';
+    }
+    b.appendChild(el('p', 'qz-msg', msg));
+    if (quiz.wrong.length) {
+      b.appendChild(el('p', 'qz-ask', 'Missed:'));
+      var w = el('div', 'rp-words');
+      quiz.wrong.slice(0, 12).forEach(function (c) {
+        var x = el('button', 'btn small rp-word', c.zh + ' ' + shortText(c.en));
+        x.type = 'button';
+        x.setAttribute('data-study', c.zh);
+        w.appendChild(x);
+      });
+      b.appendChild(w);
+    }
+    var again = el('button', 'btn primary qz-again', 'Play again');
+    again.type = 'button';
+    b.appendChild(again);
+    checkSeals();
+    save();
+    if (pass && !testing) confetti();
+  }
+  function challengeSection() {
+    var sec = section('Challenges', 'Quick games that do not change your review schedule. They earn XP and seals.');
+    var row = el('div', 'ch-row');
+    var lv = state.level;
+    var blitz = el('button', 'ch-btn', '');
+    blitz.type = 'button';
+    blitz.setAttribute('data-quiz', 'blitz');
+    blitz.appendChild(el('span', 'ch-zh', '快'));
+    blitz.appendChild(el('span', 'ch-name', '60-second blitz'));
+    blitz.appendChild(el('span', 'ch-sub', (lv === 'all' ? 'All levels' : 'HSK ' + lv) + ' · best ' + (state.blitzBest[lv] || 0)));
+    row.appendChild(blitz);
+    LEVELS.forEach(function (l) {
+      var ex = el('button', 'ch-btn' + ((state.exams[l] || 0) >= EXAM_PASS ? ' passed' : ''), '');
+      ex.type = 'button';
+      ex.setAttribute('data-quiz', 'exam');
+      ex.setAttribute('data-lv', l);
+      ex.appendChild(el('span', 'ch-zh', '考'));
+      ex.appendChild(el('span', 'ch-name', 'HSK ' + l + ' exam'));
+      ex.appendChild(el('span', 'ch-sub', state.exams[l] != null ? 'best ' + state.exams[l] + '%' + (state.exams[l] >= EXAM_PASS ? ' · passed' : '') : EXAM_SIZE + ' questions, pass at ' + EXAM_PASS + '%'));
+      row.appendChild(ex);
+    });
+    sec.appendChild(row);
+    return sec;
+  }
+
   /* ---------- feedback: vibration, confetti, milestones, session summary ---------- */
   function buzz(pattern) {
     if (!state.vibrate || testing || !navigator.vibrate) return;
@@ -3422,6 +3801,7 @@ label.btn { cursor: pointer; }
   var session = { n: 0, k: 0, l: 0, xp: 0, t0: Date.now() };
   function afterAnswer(kind) {
     if (testing || kind === 'skip') return;
+    checkSeals();
     session.n++;
     if (kind === 'known') session.k++; else session.l++;
     checkMilestones();
@@ -4071,7 +4451,7 @@ label.btn { cursor: pointer; }
   }
 
   /* ---------- overlays ---------- */
-  var OVERLAYS = ['topicView', 'listView', 'progressView', 'settingsView', 'helpView', 'transferView', 'summaryView', 'tourView', 'diagView', 'confirmDialog'];
+  var OVERLAYS = ['quizView', 'topicView', 'listView', 'progressView', 'settingsView', 'helpView', 'transferView', 'summaryView', 'tourView', 'diagView', 'confirmDialog'];
   var overlayStack = [];
   function anyOverlayOpen() {
     return OVERLAYS.some(function (id) { return !els[id].hidden; });
@@ -4093,6 +4473,7 @@ label.btn { cursor: pointer; }
   }
   function closeOverlay(node) {
     if (node.hidden) return;
+    if (node === els.quizView) stopQuiz();
     node.hidden = true;
     overlayStack = overlayStack.filter(function (n) { return n !== node; });
     syncOverlayState();
@@ -4285,6 +4666,7 @@ label.btn { cursor: pointer; }
       return;
     }
     if (anyOverlayOpen()) {
+      if (topOverlay() === els.quizView && /^[1-4]$/.test(e.key)) { e.preventDefault(); quizPick(Number(e.key) - 1); return; }
       if (e.key === 'Escape' || e.key === 'Esc') {
         e.preventDefault();
         var top = topOverlay();
@@ -4516,7 +4898,8 @@ label.btn { cursor: pointer; }
       status: JSON.parse(JSON.stringify(state.status)), mode: state.mode, deck: state.deck.slice(), pos: state.pos,
       shuffled: state.shuffled, revealed: state.revealed, autoReveal: state.autoReveal, level: state.level,
       srs: JSON.parse(JSON.stringify(state.srs)), misses: JSON.parse(JSON.stringify(state.misses)), practice: state.practice, toneColors: state.toneColors, fadePinyin: state.fadePinyin,
-      deckType: state.deckType, quests: JSON.parse(JSON.stringify(state.quests)), freezes: state.freezes, frozen: state.frozen.slice(), wotdSeen: state.wotdSeen, topic: state.topic, xp: state.xp, bestCombo: state.bestCombo, learned: JSON.parse(JSON.stringify(state.learned)),
+      deckType: state.deckType, seals: JSON.parse(JSON.stringify(state.seals)), questDays: state.questDays,
+      blitzBest: JSON.parse(JSON.stringify(state.blitzBest)), exams: JSON.parse(JSON.stringify(state.exams)), quests: JSON.parse(JSON.stringify(state.quests)), freezes: state.freezes, frozen: state.frozen.slice(), wotdSeen: state.wotdSeen, topic: state.topic, xp: state.xp, bestCombo: state.bestCombo, learned: JSON.parse(JSON.stringify(state.learned)),
       activity: JSON.parse(JSON.stringify(state.activity)), milestones: state.milestones.slice(), seenTour: state.seenTour
     };
     var undoSnap = undoStack.slice();
@@ -4874,6 +5257,40 @@ label.btn { cursor: pointer; }
       })();
       add('Word of the day, daily quests, streak freeze, weekly recap', dailyRes.ok, dailyRes.d);
 
+      var gameRes = (function () {
+        state.seals = {};
+        state.marks.read.status[wordCards[0].zh] = 'known';
+        stashSkill();
+        var fresh = checkSeals();
+        var first = !!state.seals.first && fresh.some(function (x) { return x.id === 'first'; }) && !state.seals.k100;
+        var again = checkSeals().length === 0;
+        delete state.marks.read.status[wordCards[0].zh];
+        startQuiz('blitz', '1');
+        var bopen = !els.quizView.hidden && els.quizBody.querySelectorAll('.qz-choices .choice').length === 4;
+        for (var i = 0; i < 20; i++) els.quizBody.querySelector('.qz-choices [data-ok="1"]').click();
+        var scored = quiz.right === 20;
+        finishQuiz();
+        var best = state.blitzBest['1'] === 20 && !!state.seals.blitz;
+        startQuiz('exam', '1');
+        var types = {};
+        quiz.list.forEach(function (q) { types[q.type] = (types[q.type] || 0) + 1; });
+        var mixed = quiz.list.length === EXAM_SIZE && types.meaning >= 8 && (types.gap || 0) >= 1;
+        for (var j = 0; j < EXAM_SIZE; j++) {
+          var b = els.quizBody.querySelector('.qz-choices [data-ok="' + (j < 3 ? '0' : '1') + '"]');
+          if (b) b.click();
+        }
+        var passed = quiz.done && state.exams['1'] === 85 && !!state.seals.exam && !!els.quizBody.querySelector('.qz-result.pass');
+        key('3');
+        closeOverlay(els.quizView);
+        openProgress();
+        var drawn = els.pvBody.querySelectorAll('.seal-item').length === SEALS.length && els.pvBody.querySelectorAll('.ch-btn').length === 4;
+        closeOverlay(els.progressView);
+        return { ok: first && again && bopen && scored && best && mixed && passed && drawn,
+          d: 'first seal awarded once: ' + (first && again) + ', blitz shows 4 choices: ' + bopen + ', 20 right scored: ' + scored + ', best and seal kept: ' + best +
+            ', exam mixes ' + JSON.stringify(types) + ': ' + mixed + ', 17 of 20 passes at 85%: ' + passed + ', seals and challenges drawn: ' + drawn };
+      })();
+      add('Seals, blitz and level exams', gameRes.ok, gameRes.d);
+
       var newer = parseImport(JSON.stringify({ version: 1, format: FORMAT + 1, status: {} }));
       var current = parseImport(JSON.stringify({ version: 1, format: FORMAT, status: {} }));
       add('Progress from a newer app version is refused', !!newer.error && !current.error && progressSnapshot().format === FORMAT,
@@ -5196,6 +5613,7 @@ label.btn { cursor: pointer; }
       state.practice = snap.practice;
       state.toneColors = snap.toneColors;
       state.fadePinyin = snap.fadePinyin;
+      state.seals = snap.seals; state.questDays = snap.questDays; state.blitzBest = snap.blitzBest; state.exams = snap.exams; stopQuiz(); quiz = null;
       state.quests = snap.quests; state.freezes = snap.freezes; state.frozen = snap.frozen; state.wotdSeen = snap.wotdSeen; renderWotd();
       state.topic = snap.topic; state.xp = snap.xp; state.bestCombo = snap.bestCombo; state.learned = snap.learned;
       combo = 0; renderCombo(); updateTopicBtn();
@@ -5379,7 +5797,18 @@ label.btn { cursor: pointer; }
       var t = e.target.closest ? e.target.closest('[data-topic]') : null;
       if (t) { closeOverlay(els.progressView); setTopic(t.getAttribute('data-topic')); return; }
       var w = e.target.closest ? e.target.closest('[data-study]') : null;
-      if (w) studyWord(w.getAttribute('data-study'));
+      if (w) { studyWord(w.getAttribute('data-study')); return; }
+      var qz = e.target.closest ? e.target.closest('[data-quiz]') : null;
+      if (qz) { closeOverlay(els.progressView); startQuiz(qz.getAttribute('data-quiz'), qz.getAttribute('data-lv') || state.level); }
+    });
+    on('btnCloseQuiz', 'click', function () { closeOverlay(els.quizView); });
+    on('quizBody', 'click', function (e) {
+      var c = e.target.closest ? e.target.closest('.qz-choices .choice') : null;
+      if (c) { quizPick(Number(c.getAttribute('data-k'))); return; }
+      if (e.target.closest && e.target.closest('.qz-play') && quiz) { speakParts([quiz.q.c.zh], null); return; }
+      if (e.target.closest && e.target.closest('.qz-again') && quiz) { startQuiz(quiz.kind, quiz.lv); return; }
+      var w = e.target.closest ? e.target.closest('[data-study]') : null;
+      if (w) { closeOverlay(els.quizView); studyWord(w.getAttribute('data-study')); }
     });
     on('btnCloseProgress', 'click', function () { closeOverlay(els.progressView); });
     on('pvBody', 'click', function (e) {
