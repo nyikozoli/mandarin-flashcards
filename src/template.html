@@ -514,6 +514,13 @@ button.w[aria-expanded="true"] { background: rgba(224, 74, 47, .24); border-bott
 .wp-close { position: absolute; top: 8px; right: 8px; }
 .wp-speak { justify-self: start; margin-top: 4px; }
 .ex-practice { align-self: flex-start; }
+/* Hard / Good / Easy: shown on the revealed answer in the self-graded styles; each says when the card comes back. */
+.grade-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 14px; }
+.grade-q { flex: 1 1 100%; color: var(--muted); font-size: 13px; }
+.grade { flex: 1 1 0; min-width: 0; min-height: 44px; padding: 6px 8px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface2); color: var(--text); font-weight: 700; font-size: 15px; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; }
+.grade small { font-weight: 500; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.grade.hard { border-color: var(--learn); }
+.grade.easy { border-color: var(--known); }
 .ex-caption { margin: 0 0 -2px; font-size: 12.5px; font-weight: 700; color: var(--muted); }
 .deck-sentences .word-row { grid-template-columns: 34px minmax(0, 1.2fr) minmax(0, 1fr) auto; }
 .deck-sentences .wr-zh { white-space: normal; font-family: var(--zh-font); font-size: 18px; }
@@ -673,6 +680,12 @@ label.btn { cursor: pointer; }
       </div>
       <div id="choiceBox" class="choices" hidden></div>
       <div id="cardAnswer" class="answer">
+        <div id="gradeRow" class="grade-row" role="group" aria-label="How well did you know it?" hidden>
+          <span class="grade-q">How well did you know it?</span>
+          <button type="button" class="grade hard" data-grade="hard">Hard <small></small></button>
+          <button type="button" class="grade good" data-grade="good">Good <small></small></button>
+          <button type="button" class="grade easy" data-grade="easy">Easy <small></small></button>
+        </div>
         <div class="meaning"><span class="tag en">EN</span><p id="cardEn"></p></div>
         <div class="meaning"><span class="tag hu">HU</span><p id="cardHu" lang="hu"></p></div>
         <div id="cardExamples" class="examples"></div>
@@ -698,7 +711,7 @@ label.btn { cursor: pointer; }
     <button type="button" class="act skip" id="btnSkip" aria-label="Skip to the next card (Space)">Skip</button>
     <button type="button" class="act know" id="btnKnown" aria-label="I know it (Right arrow)">I know it →</button>
   </nav>
-  <p class="kbd-hint"><kbd>←</kbd> learning&ensp;<kbd>→</kbd> know&ensp;<kbd>Space</kbd> skip&ensp;<kbd>S</kbd> speak&ensp;<kbd>↑</kbd><kbd>↓</kbd> show or hide&ensp;<kbd>1</kbd>–<kbd>4</kbd> pick an answer in multiple choice</p>
+  <p class="kbd-hint"><kbd>←</kbd> learning&ensp;<kbd>→</kbd> know&ensp;<kbd>Space</kbd> skip&ensp;<kbd>S</kbd> speak&ensp;<kbd>↑</kbd><kbd>↓</kbd> show or hide&ensp;<kbd>1</kbd>–<kbd>4</kbd> pick an answer in multiple choice&ensp;<kbd>H</kbd>/<kbd>E</kbd> hard / easy</p>
 
   <footer>
     <p class="footnote" id="footnote">Works offline. Progress is saved in this browser.</p>
@@ -866,7 +879,8 @@ label.btn { cursor: pointer; }
         <h3>Choose what to study</h3>
         <dl class="help-defs">
           <dt>All cards</dt><dd>Every word in the chosen level, in order. Use the shuffle icon to mix them.</dd>
-          <dt>Due</dt><dd>Words that are ready for review today. A word you know comes back after 1, 3, 7, 14 and then 30 days; a word you miss comes back the same day.</dd>
+          <dt>Due</dt><dd>Words that are ready for review today. A word you know comes back after 1, 3, 7, 14, 30, 60 and then 120 days; a word you miss comes back the same day.</dd>
+          <dt>Hard, Good, Easy</dt><dd>When the answer is showing, three buttons say how well you knew it, each with when the card comes back. Good is the same as “I know it”. Easy skips a step, Hard keeps the same wait. Keys: <kbd>H</kbd> Hard, <kbd>→</kbd> Good, <kbd>E</kbd> Easy.</dd>
           <dt>Learning</dt><dd>Words you marked “Still learning”.</dd>
           <dt>Unmarked</dt><dd>Words you have not answered yet.</dd>
           <dt>Hardest</dt><dd>The 20 words you have missed most often.</dd>
@@ -918,7 +932,7 @@ label.btn { cursor: pointer; }
       <section class="help-sec">
         <h3>Keyboard</h3>
         <p>In the mode and level buttons, the arrow keys move the selection instead.</p>
-        <p class="help-keys"><kbd>→</kbd> I know it <kbd>←</kbd> Still learning <kbd>Space</kbd> Skip <kbd>S</kbd> Read aloud <kbd>↑</kbd> <kbd>↓</kbd> Show or hide <kbd>1</kbd>–<kbd>4</kbd> Choose an answer <kbd>Esc</kbd> Close a panel</p>
+        <p class="help-keys"><kbd>→</kbd> I know it <kbd>←</kbd> Still learning <kbd>Space</kbd> Skip <kbd>S</kbd> Read aloud <kbd>↑</kbd> <kbd>↓</kbd> Show or hide <kbd>1</kbd>–<kbd>4</kbd> Choose an answer <kbd>H</kbd> Hard <kbd>E</kbd> Easy <kbd>Esc</kbd> Close a panel</p>
       </section>
 
       <section class="help-sec">
@@ -1008,7 +1022,7 @@ label.btn { cursor: pointer; }
   var EXPECTED_LEVELS = __EXPECTED_LEVELS__;
   var MODE_NAMES = { all: 'All cards', due: 'Due for review', learning: 'Learning only', unmarked: 'Unmarked only', hard: 'Hardest words' };
   var STATUS_NAMES = { known: 'Known', learning: 'Learning', unmarked: 'Unmarked' };
-  var REQUIRED_IDS = ['legendTones', 'optChoicePinyin', 'progressTitle', 'optFadePinyin', 'wordPop', 'wordPopZh', 'wordPopLv', 'wordPopPy', 'wordPopEn', 'wordPopHu', 'btnWordPopSpeak', 'btnWordPopClose', 'app', 'errorBanner', 'errorList', 'modeAll', 'modeLearning', 'modeUnmarked', 'countAll', 'countLearningMode',
+  var REQUIRED_IDS = ['gradeRow', 'legendTones', 'optChoicePinyin', 'progressTitle', 'optFadePinyin', 'wordPop', 'wordPopZh', 'wordPopLv', 'wordPopPy', 'wordPopEn', 'wordPopHu', 'btnWordPopSpeak', 'btnWordPopClose', 'app', 'errorBanner', 'errorList', 'modeAll', 'modeLearning', 'modeUnmarked', 'countAll', 'countLearningMode',
     'countUnmarkedMode', 'btnShuffle', 'btnUndo', 'btnReset', 'btnSelfCheck', 'btnList', 'cardCounter', 'knownCount', 'learningCount',
     'unmarkedCount', 'progressBar', 'progKnown', 'progLearning', 'progressLabel', 'stage', 'card', 'cardNumber', 'cardStatus', 'cardHanzi',
     'cardPinyin', 'btnSpeak', 'speakLabel', 'cardAnswer', 'cardEn', 'cardHu', 'cardExamples', 'revealHint', 'deckEnd', 'endEmoji', 'endTitle',
@@ -1017,7 +1031,7 @@ label.btn { cursor: pointer; }
     'confirmText', 'confirmCancel', 'confirmAlt', 'confirmOk', 'diagView', 'btnCloseDiag', 'diagSummary', 'diagResults', 'btnRunCheck', 'toast', 'vocab-data',
     'syncGroup', 'syncEmailRow', 'syncEmail', 'syncLinkRow', 'syncEmailNote', 'btnSignIn', 'syncAccountRow', 'syncAccount', 'btnSignOut',
     'syncDatesRow', 'syncDates', 'btnSyncNow', 'syncStatus'];
-  var CORE_BUTTONS = ['optChoicePinyin', 'optFadePinyin', 'btnWordPopSpeak', 'btnWordPopClose', 'btnExport', 'btnImport', 'btnApplyImport', 'revealHint', 'btnHelp', 'btnTourNext', 'btnSettings', 'btnKnown', 'btnLearning', 'btnSkip', 'btnSpeak', 'cardExamples', 'modeDue', 'modeHard', 'optPractice', 'choiceBox', 'cardPrompt', 'btnProgress', 'levelAll', 'level1', 'level2', 'level3', 'card', 'btnShuffle', 'btnUndo', 'btnReset', 'btnSelfCheck',
+  var CORE_BUTTONS = ['gradeRow', 'optChoicePinyin', 'optFadePinyin', 'btnWordPopSpeak', 'btnWordPopClose', 'btnExport', 'btnImport', 'btnApplyImport', 'revealHint', 'btnHelp', 'btnTourNext', 'btnSettings', 'btnKnown', 'btnLearning', 'btnSkip', 'btnSpeak', 'cardExamples', 'modeDue', 'modeHard', 'optPractice', 'choiceBox', 'cardPrompt', 'btnProgress', 'levelAll', 'level1', 'level2', 'level3', 'card', 'btnShuffle', 'btnUndo', 'btnReset', 'btnSelfCheck',
     'btnList', 'btnCloseList', 'modeAll', 'modeLearning', 'modeUnmarked', 'searchInput', 'confirmOk', 'confirmCancel', 'confirmAlt', 'btnSignIn', 'btnSignOut', 'btnSyncNow'];
 
   var $ = function (id) { return document.getElementById(id); };
@@ -1835,7 +1849,7 @@ label.btn { cursor: pointer; }
       if (src.srs && typeof src.srs === 'object') {
         Object.keys(src.srs).forEach(function (k) {
           var r = src.srs[k];
-          if (hasAny(k) && r && typeof r.d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(r.d)) m.srs[k] = { b: clampInt(r.b, 0, 5), d: r.d };
+          if (hasAny(k) && r && typeof r.d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(r.d)) m.srs[k] = { b: clampInt(r.b, 0, SRS_DAYS.length - 1), d: r.d };
         });
       }
       if (src.misses && typeof src.misses === 'object') {
@@ -2216,9 +2230,10 @@ label.btn { cursor: pointer; }
   }
 
   /* ---------- spaced repetition, hardest words ---------- */
-  // Leitner boxes: a word answered “I know it” moves up a box and comes back after 1, 3, 7, 14, then 30 days.
+  // Leitner boxes: a word answered “I know it” (Good) moves up a box and comes back after 1, 3, 7, 14, 30, 60, then 120 days.
+  // Easy moves up two boxes; Hard keeps the box (at least box 1), so the word comes back after the same wait.
   // “Still learning” sends it back to box 0, due again today.
-  var SRS_DAYS = [0, 1, 3, 7, 14, 30];
+  var SRS_DAYS = [0, 1, 3, 7, 14, 30, 60, 120];
   function addDays(n) { var d = new Date(); d.setDate(d.getDate() + n); return dayKey(d); }
   function isDue(c, today) { var r = state.srs[c.zh]; return !!r && r.d <= (today || dayKey()); }
   function dueCount(lv) {
@@ -2231,10 +2246,16 @@ label.btn { cursor: pointer; }
       .sort(function (a, b) { return (state.misses[cards[b].zh] || 0) - (state.misses[cards[a].zh] || 0) || a - b; })
       .slice(0, 20);
   }
-  function applySrs(c, kind) {
+  function nextBox(c, grade) {
+    var r = state.srs[c.zh], cur = r ? r.b : 0;
+    if (grade === 'hard') return Math.max(1, cur);
+    return Math.min(SRS_DAYS.length - 1, cur + (grade === 'easy' ? 2 : 1));
+  }
+  function fmtWait(days) { return days < 1 ? 'today' : days < 30 ? days + ' d' : Math.round(days / 30) + ' mo'; }
+  function applySrs(c, kind, grade) {
     var r = state.srs[c.zh];
     if (kind === 'known') {
-      var b = Math.min(SRS_DAYS.length - 1, (r ? r.b : 0) + 1);
+      var b = nextBox(c, grade);
       state.srs[c.zh] = { b: b, d: addDays(SRS_DAYS[b]) };
     } else if (kind === 'learning') {
       state.srs[c.zh] = { b: 0, d: dayKey() };
@@ -2718,7 +2739,7 @@ label.btn { cursor: pointer; }
     { art: 'seal', title: 'Welcome to Mandarin HSK', text: '598 words from HSK 1 to 3, with pinyin, English, Hungarian and example sentences. Here is how to use it in four quick steps.' },
     { art: 'swipe', title: 'Know it? Swipe right', text: 'Swipe right or press “I know it” when you know a word. Swipe left or press “Still learning” when you don’t. Tap the card to see the meaning and examples.' },
     { art: 'speak', title: 'Listen to every word', text: 'Read aloud speaks the word and its example sentences. Colours show the tones: 1st red, 2nd orange, 3rd green, 4th blue.' },
-    { art: 'due', title: 'Review at the right time', text: '“Due” brings back the words you know after 1, 3, 7, 14 and 30 days, and the ones you missed the same day. The practice menu also has Listening, Multiple choice, Which tone? and the 777 example sentences as cards of their own.' },
+    { art: 'due', title: 'Review at the right time', text: '“Due” brings back the words you know after 1, 3, 7, 14, 30, 60 and 120 days, and the ones you missed the same day. The practice menu also has Listening, Multiple choice, Which tone? and the 777 example sentences as cards of their own.' },
     { art: 'goal', title: 'Keep a streak', text: 'Answer your daily goal of cards to grow your streak. The chart button shows your progress per level. The ? button brings back this help any time.' }
   ];
   var tourStep = 0;
@@ -2763,7 +2784,7 @@ label.btn { cursor: pointer; }
   }
 
   /* ---------- answering ---------- */
-  function act(kind) {
+  function act(kind, grade) {
     if (busy) return false;
     var i = currentIndex();
     if (i === null) return false;
@@ -2774,7 +2795,7 @@ label.btn { cursor: pointer; }
     if (undoStack.length > 200) undoStack.shift();
     if (kind === 'known' || kind === 'learning') {
       state.status[c.zh] = kind;
-      applySrs(c, kind);
+      applySrs(c, kind, grade);
       if (!testing) recordAnswer(kind); else entry.kind = 'skip';
     }
     // In the review deck a missed word comes back at the end of the session.
@@ -2827,9 +2848,23 @@ label.btn { cursor: pointer; }
     render(true);
     save();
   }
+  // Styles where you judge yourself; the quiz styles grade the answer for you.
+  function selfGraded() { return ['zh', 'reverse', 'listen', 'hanzi'].indexOf(state.practice) !== -1 && !toneQ; }
+  function updateGrades() {
+    var i = currentIndex();
+    els.gradeRow.hidden = !state.revealed || i === null || !selfGraded();
+    if (els.gradeRow.hidden) return;
+    var c = cards[i];
+    Array.prototype.forEach.call(els.gradeRow.querySelectorAll('.grade'), function (b) {
+      var wait = fmtWait(SRS_DAYS[nextBox(c, b.getAttribute('data-grade'))]);
+      b.querySelector('small').textContent = wait;
+      b.setAttribute('aria-label', b.firstChild.textContent.trim() + ': next review in ' + (wait === 'today' ? 'today' : wait.replace(' d', ' days').replace(' mo', ' months')));
+    });
+  }
   function setRevealed(v) {
     state.revealed = !!v;
     els.card.classList.toggle('revealed', state.revealed);
+    updateGrades();
     els.revealHint.setAttribute('aria-expanded', state.revealed ? 'true' : 'false');
     els.revealHint.setAttribute('aria-label', state.revealed ? 'Hide the answer' : 'Show the answer');
     var p = state.practice;
@@ -3483,6 +3518,9 @@ label.btn { cursor: pointer; }
       case 'ArrowLeft': e.preventDefault(); act('learning'); break;
       case ' ': case 'Spacebar': e.preventDefault(); act('skip'); break;
       case 's': case 'S': e.preventDefault(); speakCurrent(); break;
+      case 'h': case 'H': case 'e': case 'E':
+        if (!els.gradeRow.hidden) { e.preventDefault(); act('known', /h/i.test(e.key) ? 'hard' : 'easy'); }
+        break;
       case 'ArrowUp': case 'ArrowDown': e.preventDefault(); toggleReveal(); break;
       case '1': case '2': case '3': case '4':
         if (state.practice === 'choice' || state.practice === 'tone') { e.preventDefault(); pickChoice(Number(e.key) - 1); }
@@ -3836,6 +3874,37 @@ label.btn { cursor: pointer; }
       var keyOff = els.legendTones.hidden;
       state.toneColors = true; render(false);
       add('Tone colour key next to the progress bar', keyOn && keyOff, 'shown with tone colours on: ' + keyOn + ', hidden when off: ' + keyOff);
+      var gradeRes = (function () {
+        var deckSnap = state.deck, posSnap = state.pos, w = wordCards[0];
+        var only = function () { state.deck = [0]; state.pos = 0; state.revealed = true; render(false); };
+        state.practice = 'zh';
+        delete state.srs[w.zh];
+        only();
+        var shown = !els.gradeRow.hidden && els.gradeRow.querySelector('.easy small').textContent === fmtWait(SRS_DAYS[2]);
+        els.gradeRow.querySelector('.easy').click();
+        var easy = state.srs[w.zh] && state.srs[w.zh].b === 2 && state.status[w.zh] === 'known';
+        only();
+        els.gradeRow.querySelector('.hard').click();
+        var hard = state.srs[w.zh].b === 2 && state.srs[w.zh].d === addDays(SRS_DAYS[2]);
+        only();
+        key('ArrowRight');
+        var good = state.srs[w.zh].b === 3;
+        state.srs[w.zh] = { b: SRS_DAYS.length - 2, d: dayKey() };
+        only();
+        els.gradeRow.querySelector('.easy').click();
+        var capped = state.srs[w.zh].b === SRS_DAYS.length - 1 && SRS_DAYS[SRS_DAYS.length - 1] === 120;
+        state.practice = 'choice';
+        only();
+        var hiddenInQuiz = els.gradeRow.hidden;
+        state.practice = 'zh';
+        delete state.srs[w.zh]; delete state.status[w.zh];
+        state.deck = deckSnap; state.pos = posSnap; state.revealed = false; render(false);
+        return { ok: shown && easy && hard && good && capped && hiddenInQuiz,
+          d: 'buttons show the next wait: ' + shown + ', Easy skips a box: ' + easy + ', Hard keeps it: ' + hard + ', Good (→) adds one: ' + good +
+            ', longest wait 120 days: ' + capped + ', hidden in multiple choice: ' + hiddenInQuiz };
+      })();
+      add('Hard, Good and Easy set the next review', gradeRes.ok, gradeRes.d);
+
       var newer = parseImport(JSON.stringify({ version: 1, format: FORMAT + 1, status: {} }));
       var current = parseImport(JSON.stringify({ version: 1, format: FORMAT, status: {} }));
       add('Progress from a newer app version is refused', !!newer.error && !current.error && progressSnapshot().format === FORMAT,
@@ -4185,6 +4254,10 @@ label.btn { cursor: pointer; }
     on('btnKnown', 'click', function () { act('known'); });
     on('btnLearning', 'click', function () { act('learning'); });
     on('btnSkip', 'click', function () { act('skip'); });
+    on('gradeRow', 'click', function (e) {
+      var b = e.target.closest ? e.target.closest('.grade') : null;
+      if (b) act('known', b.getAttribute('data-grade'));
+    });
     on('btnSpeak', 'click', function (e) { e.stopPropagation(); speakCurrent(); });
     on('cardExamples', 'click', function (e) {
       var p = e.target.closest ? e.target.closest('.ex-practice') : null;
