@@ -96,6 +96,22 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .choice-hu { font-size: 13.5px; color: var(--muted); }
 .choice.right { border-color: var(--known); background: rgba(61, 220, 151, .16); }
 .choice.wrong { border-color: #ff7a7a; background: rgba(255, 107, 107, .16); }
+.choices.tone-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.choice.tone { justify-content: center; gap: 8px; padding: 10px 6px; min-height: 62px; }
+.choice.tone .choice-text { align-items: center; text-align: center; }
+.choice-py { font-family: var(--zh-font); font-size: clamp(21px, 6vw, 27px); font-weight: 600; line-height: 1.2; }
+.choice-contour { font-size: 12.5px; color: var(--soft); }
+/* The tone drill keeps its four answers on screen: the chips sit between the question and the character,
+   and the hidden reading takes no space until the reveal. */
+.card.tone-mode #choiceBox { order: 2; }
+.card.tone-mode .card-head { order: 3; }
+.card.tone-mode .answer { order: 4; }
+.card.tone-mode .hint { order: 5; }
+.card.tone-mode.hide-reading:not(.revealed) .pinyin, .card.tone-mode.hide-reading:not(.revealed) .speak-btn { display: none; }
+/* The drill keeps its question compact so the four answers stay above the answer buttons on small phones. */
+.card.tone-mode .prompt { padding: 12px 4px 6px; }
+.card.tone-mode .prompt-q { margin-bottom: 8px; }
+.card.tone-mode .listen-btn { min-height: 50px; padding: 8px 22px; font-size: 17px; }
 .summary .sum-big { font-size: 20px; font-weight: 800; margin: 0 0 12px; }
 .sum-tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px; }
 .sum-line { color: var(--soft); }
@@ -583,6 +599,7 @@ label.btn { cursor: pointer; }
             <option value="listen">Listening</option>
             <option value="choice">Multiple choice</option>
             <option value="hanzi">汉字 only (pinyin hidden)</option>
+            <option value="tone">Which tone? (listen)</option>
           </optgroup>
           <optgroup label="Sentences">
             <option value="s-zh">Sentences → meaning</option>
@@ -845,6 +862,7 @@ label.btn { cursor: pointer; }
           <dt>Listening</dt><dd>Hear the word, guess it, then tap to see it.</dd>
           <dt>Multiple choice</dt><dd>Pick the right meaning from four. A right answer counts as Known.</dd>
           <dt>汉字 only</dt><dd>Only the characters show; pinyin, tone colours and audio appear when you tap the card. Use it for words you can say but cannot read yet. A word card's back also has <b>Practice these sentences</b>, which opens just that word's example sentences in the current style.</dd>
+          <dt>Which tone?</dt><dd>Hear the word, then pick the tone of its first syllable from the four written forms; keys 1–4 pick tones 1–4. Words only. The 21 words whose first syllable is neutral, or changes tone when it is spoken (你好, 可以), come up as normal cards.</dd>
           <dt>Sentences</dt><dd>The same four styles for the 777 example sentences, in the lower half of the practice menu. Each sentence is a card of its own with its own progress, and its back shows the word it comes from.</dd>
         </dl>
       </section>
@@ -1095,7 +1113,8 @@ label.btn { cursor: pointer; }
   function isSent() { return state.deckType === 'sentences'; }
   var DECKS = {
     words: { noun: ['word', 'words'], listTitle: 'All words', mapTitle: 'Every word', number: '#', milestone: '',
-      sayIt: 'What is this in Chinese?', listenQ: 'Listen. Which word is it?', play: '🔊 Play the word' },
+      sayIt: 'What is this in Chinese?', listenQ: 'Listen. Which word is it?', play: '🔊 Play the word',
+      toneQ: 'Listen. Which tone is the first syllable?', tonePlay: '🔊 Play the word again' },
     sentences: { noun: ['sentence', 'sentences'], listTitle: 'All sentences', mapTitle: 'Every sentence', number: 'sentence ', milestone: 'sentence-',
       sayIt: 'Say this in Chinese:', listenQ: 'Listen. What does it say?', play: '🔊 Play the sentence' }
   };
@@ -1103,10 +1122,13 @@ label.btn { cursor: pointer; }
   function noun(n) { return deck().noun[n === 1 ? 0 : 1]; }
   function useDeckType(t) {
     state.deckType = t === 'sentences' ? 'sentences' : 'words';
+    dropToneQuiz();
     cards = isSent() ? sentCards : wordCards;
     document.body.classList.toggle('deck-sentences', isSent());
     if (els.card) els.card.classList.toggle('sentence', isSent());
   }
+  // The tone quiz asks about one word's first syllable, so it exists for the words deck only.
+  function dropToneQuiz() { if (isSent() && state.practice === 'tone') state.practice = 'listen'; }
   // Opens a short sentence deck with just this word's example sentences, in the current practice
   // style (so “汉字 only” gives character-reading practice). Picking a study mode goes back to the full deck.
   function practiceSentencesOf(word) {
@@ -1755,6 +1777,7 @@ label.btn { cursor: pointer; }
     if (saved && typeof saved.warmup === 'boolean') state.warmup = saved.warmup;
     ['toneColors', 'autoplay', 'vibrate', 'seenTour'].forEach(function (k) { if (saved && typeof saved[k] === 'boolean') state[k] = saved[k]; });
     if (saved && PRACTICE[saved.practice]) state.practice = saved.practice;
+    dropToneQuiz();
     if (saved && Array.isArray(saved.milestones)) state.milestones = saved.milestones.filter(function (m) { return typeof m === 'string'; }).slice(-500);
     if (saved && saved.srs && typeof saved.srs === 'object') {
       Object.keys(saved.srs).forEach(function (k) {
@@ -2207,10 +2230,47 @@ label.btn { cursor: pointer; }
       node.appendChild(el('span', 'cell' + (useTones ? ' t' + p[1] : ''), p[0]));
     });
   }
+  // The four marks each vowel can take; PLAIN_VOWEL reverses it, so a tone can be moved or taken off.
+  var TONE_MARK = { a: 'āáǎà', e: 'ēéěè', i: 'īíǐì', o: 'ōóǒò', u: 'ūúǔù', ü: 'ǖǘǚǜ' };
+  var PLAIN_VOWEL = {};
+  Object.keys(TONE_MARK).forEach(function (v) { TONE_MARK[v].split('').forEach(function (m) { PLAIN_VOWEL[m] = v; }); });
+  function stripTone(s) {
+    var out = '';
+    for (var i = 0; i < s.length; i++) out += PLAIN_VOWEL[s.charAt(i)] || s.charAt(i);
+    return out;
+  }
+  // Rewrites a syllable in another tone. The mark goes on a, e or o when there is one, on the u of iu and the i of ui,
+  // and otherwise on the last vowel.
+  function retone(syl, tone) {
+    if (tone === 5) return stripTone(syl);
+    var base = stripTone(syl), lower = base.toLowerCase(), at = -1, i;
+    for (i = 0; i < lower.length && at === -1; i++) if ('aeo'.indexOf(lower.charAt(i)) !== -1) at = i;
+    if (at === -1) {
+      if (lower.indexOf('iu') !== -1) at = lower.indexOf('iu') + 1;
+      else if (lower.indexOf('ui') !== -1) at = lower.indexOf('ui') + 1;
+      else for (i = lower.length - 1; i >= 0; i--) if ('aeiouü'.indexOf(lower.charAt(i)) !== -1) { at = i; break; }
+    }
+    var ch = base.charAt(at), marks = TONE_MARK[ch] || TONE_MARK[ch.toLowerCase()];
+    if (!marks) return base;
+    var mark = marks.charAt(tone - 1);
+    return base.slice(0, at) + (ch === ch.toUpperCase() ? mark.toUpperCase() : mark) + base.slice(at + 1);
+  }
+  // The syllable a tone quiz can ask about, or null. A neutral first syllable has no tone to hear, and speech turns the
+  // first of a 3-3 pair into tone 2, so the written citation tone would not be what is said.
+  function toneQuizTarget(c) {
+    if (isSent() || c.sentence) return null;
+    var syls = pinyinTokens(c.py).filter(function (t) { return t.tone; });
+    if (!syls.length || syls[0].tone === 5) return null;
+    if (syls.length > 1 && syls[0].tone === 3 && syls[1].tone === 3) return null;
+    return syls[0];
+  }
 
   /* ---------- practice modes ---------- */
-  var PRACTICE = { zh: 'Chinese → meaning', reverse: 'Meaning → Chinese', listen: 'Listening', choice: 'Multiple choice', hanzi: 'Characters only' };
+  var PRACTICE = { zh: 'Chinese → meaning', reverse: 'Meaning → Chinese', listen: 'Listening', choice: 'Multiple choice', hanzi: 'Characters only', tone: 'Which tone?' };
   var choiceDone = false;
+  // The syllable the tone quiz is asking about on the current card; null when the card has no quiz.
+  var toneQ = null;
+  var TONE_CONTOUR = { 1: 'Level', 2: 'Rising', 3: 'Dipping', 4: 'Falling' };
   function shortText(s) {
     var t = String(s).split(';')[0].replace(/\s*\([^)]*\)/g, '').trim() || String(s);
     return t.length > 60 ? t.slice(0, 57) + '…' : t;
@@ -2238,8 +2298,26 @@ label.btn { cursor: pointer; }
     });
     choiceDone = false;
   }
+  // Four chips for one syllable: the same syllable written in tones 1 to 4, so the keys 1–4 pick a tone.
+  function buildToneChoices(t) {
+    els.choiceBox.textContent = '';
+    [1, 2, 3, 4].forEach(function (n) {
+      var b = el('button', 'choice tone');
+      b.type = 'button';
+      b.setAttribute('data-ok', n === t.tone ? '1' : '0');
+      b.appendChild(el('span', 'choice-num', String(n)));
+      var tx = el('span', 'choice-text');
+      var py = el('span', 'choice-py' + (state.toneColors ? ' t' + n : ''), retone(t.text, n));
+      py.setAttribute('lang', 'zh-Latn-pinyin');
+      tx.appendChild(py);
+      tx.appendChild(el('span', 'choice-contour', TONE_CONTOUR[n]));
+      b.appendChild(tx);
+      els.choiceBox.appendChild(b);
+    });
+    choiceDone = false;
+  }
   function pickChoice(k) {
-    if (choiceDone || state.practice !== 'choice' || currentIndex() === null) return;
+    if (choiceDone || (state.practice !== 'choice' && state.practice !== 'tone') || currentIndex() === null) return;
     var btns = els.choiceBox.querySelectorAll('.choice');
     var b = btns[k];
     if (!b) return;
@@ -2253,17 +2331,22 @@ label.btn { cursor: pointer; }
     buzz(ok ? 12 : [30, 60, 30]);
     if (!ok) setRevealed(true);
     var right = cards[currentIndex()];
-    announce(ok ? 'Correct.' : 'Not quite. The answer is: ' + shortText(right.en) + '.');
+    announce(ok ? 'Correct.' : state.practice === 'tone'
+      ? 'Not quite. ' + right.zh + ' starts with ' + toneQ.text + ', tone ' + toneQ.tone + '.'
+      : 'Not quite. The answer is: ' + shortText(right.en) + '.');
     if (testing) { act(ok ? 'known' : 'learning'); return; }
     var pos = state.pos;
     setTimeout(function () { if (state.pos === pos && !busy) act(ok ? 'known' : 'learning'); }, ok ? 650 : 1800);
   }
   function applyPractice(c) {
     var p = state.practice;
+    toneQ = p === 'tone' ? toneQuizTarget(c) : null;
     els.card.classList.toggle('hide-face', p === 'reverse' || p === 'listen');
-    // Characters only: the reading is the answer, so pinyin, tone colours and audio wait for the reveal.
-    els.card.classList.toggle('hide-reading', p === 'hanzi');
+    // Characters only, and the tone quiz: the reading is the answer, so pinyin, tone colours and audio wait for the reveal.
+    els.card.classList.toggle('hide-reading', p === 'hanzi' || !!toneQ);
+    els.card.classList.toggle('tone-mode', !!toneQ);
     els.cardPrompt.textContent = '';
+    els.choiceBox.classList.toggle('tone-grid', !!toneQ);
     if (p === 'reverse') {
       var en = el('p', 'prompt-en', c.en);
       var hu = el('p', 'prompt-hu', c.hu);
@@ -2271,15 +2354,17 @@ label.btn { cursor: pointer; }
       els.cardPrompt.appendChild(el('p', 'prompt-q', deck().sayIt));
       els.cardPrompt.appendChild(en);
       els.cardPrompt.appendChild(hu);
-    } else if (p === 'listen') {
-      var lb = el('button', 'listen-btn', deck().play);
+    } else if (p === 'listen' || toneQ) {
+      var lb = el('button', 'listen-btn', toneQ ? deck().tonePlay : deck().play);
       lb.type = 'button';
       lb.id = 'btnListen';
-      els.cardPrompt.appendChild(el('p', 'prompt-q', deck().listenQ));
+      els.cardPrompt.appendChild(el('p', 'prompt-q', toneQ ? deck().toneQ : deck().listenQ));
       els.cardPrompt.appendChild(lb);
     }
-    els.choiceBox.hidden = p !== 'choice';
-    if (p === 'choice') buildChoices(c); else els.choiceBox.textContent = '';
+    els.choiceBox.hidden = !(p === 'choice' || toneQ);
+    if (p === 'choice') buildChoices(c);
+    else if (toneQ) buildToneChoices(toneQ);
+    else els.choiceBox.textContent = '';
   }
 
   /* ---------- feedback: vibration, confetti, milestones, session summary ---------- */
@@ -2375,7 +2460,7 @@ label.btn { cursor: pointer; }
     { art: 'seal', title: 'Welcome to Mandarin HSK', text: '598 words from HSK 1 to 3, with pinyin, English, Hungarian and example sentences. Here is how to use it in four quick steps.' },
     { art: 'swipe', title: 'Know it? Swipe right', text: 'Swipe right or press “I know it” when you know a word. Swipe left or press “Still learning” when you don’t. Tap the card to see the meaning and examples.' },
     { art: 'speak', title: 'Listen to every word', text: 'Read aloud speaks the word and its example sentences. Colours show the tones: 1st red, 2nd orange, 3rd green, 4th blue.' },
-    { art: 'due', title: 'Review at the right time', text: '“Due” brings back the words you know after 1, 3, 7, 14 and 30 days, and the ones you missed the same day. The practice menu also has Listening, Multiple choice and the 777 example sentences as cards of their own.' },
+    { art: 'due', title: 'Review at the right time', text: '“Due” brings back the words you know after 1, 3, 7, 14 and 30 days, and the ones you missed the same day. The practice menu also has Listening, Multiple choice, Which tone? and the 777 example sentences as cards of their own.' },
     { art: 'goal', title: 'Keep a streak', text: 'Answer your daily goal of cards to grow your streak. The chart button shows your progress per level. The ? button brings back this help any time.' }
   ];
   var tourStep = 0;
@@ -2490,12 +2575,14 @@ label.btn { cursor: pointer; }
     els.revealHint.setAttribute('aria-expanded', state.revealed ? 'true' : 'false');
     els.revealHint.setAttribute('aria-label', state.revealed ? 'Hide the answer' : 'Show the answer');
     var p = state.practice;
-    els.cardPrompt.hidden = state.revealed || (p !== 'reverse' && p !== 'listen');
+    els.cardPrompt.hidden = state.revealed || !(p === 'reverse' || p === 'listen' || toneQ);
     els.revealHint.textContent = state.revealed
       ? 'Tap the card to hide the meaning · swipe → know · ← learning'
-      : { zh: 'Tap the card to show the meaning', reverse: 'Say the Chinese word, then tap the card to check',
-          listen: 'Listen, then tap the card to see the word', choice: 'Pick the meaning (keys 1–4), or tap the card to reveal',
-          hanzi: 'Read the characters aloud, then tap the card to check the pinyin and meaning' }[p];
+      : p === 'tone'
+        ? (toneQ ? 'Listen, then pick the tone of the first syllable (keys 1–4)' : 'Tap the card to show the meaning')
+        : { zh: 'Tap the card to show the meaning', reverse: 'Say the Chinese word, then tap the card to check',
+            listen: 'Listen, then tap the card to see the word', choice: 'Pick the meaning (keys 1–4), or tap the card to reveal',
+            hanzi: 'Read the characters aloud, then tap the card to check the pinyin and meaning' }[p];
   }
   function toggleReveal() {
     if (currentIndex() === null) return;
@@ -2552,10 +2639,11 @@ label.btn { cursor: pointer; }
     var s = statusOf(c);
     els.cardStatus.textContent = s === 'unmarked' ? 'New' : STATUS_NAMES[s];
     els.cardStatus.className = 'status-tag' + (s === 'unmarked' ? '' : ' ' + s);
-    var hidesFace = state.practice === 'reverse' || state.practice === 'listen';
-    var reading = state.practice === 'hanzi' ? '' : ', ' + c.py;
-    els.card.setAttribute('aria-label', 'Flashcard ' + (state.pos + 1) + (hidesFace ? '' : ': ' + c.zh + reading));
     applyPractice(c);
+    var hidesFace = state.practice === 'reverse' || state.practice === 'listen';
+    // In these styles the reading is the answer, so a screen reader must not hear it either.
+    var reading = (state.practice === 'hanzi' || toneQ) ? '' : ', ' + c.py;
+    els.card.setAttribute('aria-label', 'Flashcard ' + (state.pos + 1) + (hidesFace ? '' : ': ' + c.zh + reading));
     setRevealed(state.revealed);
     els.cardCounter.textContent = 'Card ' + (state.pos + 1) + ' / ' + state.deck.length;
     setActionsEnabled(true);
@@ -2566,9 +2654,12 @@ label.btn { cursor: pointer; }
     }
     if (animate && !testing) {
       announce('Card ' + (state.pos + 1) + ' of ' + state.deck.length + '. ' + (state.practice === 'reverse' ? 'Meaning: ' + c.en + '.' :
-        state.practice === 'listen' ? 'Listen to the ' + noun(1) + '.' : c.zh + (state.practice === 'hanzi' ? '.' : ', ' + c.py + '.')));
+        state.practice === 'listen' ? 'Listen to the ' + noun(1) + '.' :
+        toneQ ? 'Listen to ' + c.zh + ', then pick the tone of the first syllable.' :
+        c.zh + (state.practice === 'hanzi' ? '.' : ', ' + c.py + '.')));
     }
-    if (animate && !testing && ((state.autoplay && state.practice !== 'hanzi') || state.practice === 'listen') && userHasInteracted) {
+    // The tone quiz always speaks: hearing the word is the question.
+    if (animate && !testing && ((state.autoplay && state.practice !== 'hanzi') || state.practice === 'listen' || state.practice === 'tone') && userHasInteracted) {
       var pos = state.pos;
       setTimeout(function () { if (state.pos === pos && currentIndex() !== null) speakParts([c.zh], null); }, 280);
     }
@@ -3126,7 +3217,7 @@ label.btn { cursor: pointer; }
       case 's': case 'S': e.preventDefault(); speakCurrent(); break;
       case 'ArrowUp': case 'ArrowDown': e.preventDefault(); toggleReveal(); break;
       case '1': case '2': case '3': case '4':
-        if (state.practice === 'choice') { e.preventDefault(); pickChoice(Number(e.key) - 1); }
+        if (state.practice === 'choice' || state.practice === 'tone') { e.preventDefault(); pickChoice(Number(e.key) - 1); }
         break;
       case 'Enter':
         if (t === els.card) { e.preventDefault(); toggleReveal(); }
@@ -3469,6 +3560,41 @@ label.btn { cursor: pointer; }
       add('Practice modes: meaning → Chinese, listening, multiple choice, characters only', rev && revShown && listen && choice && hanzi,
         'reverse hides the word: ' + rev + ', reveal shows it: ' + revShown + ', listening: ' + listen + ', multiple choice (4 options, right answer marks Known): ' + choice +
         ', characters only hides pinyin and audio until the reveal: ' + hanzi);
+
+      var toneRes = (function () {
+        var quiz = -1, skip = -1;
+        wordCards.forEach(function (w, i) {
+          if (quiz === -1 && toneQuizTarget(w)) quiz = i;
+          if (skip === -1 && !toneQuizTarget(w)) skip = i;
+        });
+        if (quiz === -1 || skip === -1) return { ok: false, d: 'no word with a tone quiz (' + quiz + ') or without one (' + skip + ')' };
+        var deckSnap = state.deck, posSnap = state.pos;
+        var only = function (i) { state.deck = [i]; state.pos = 0; render(false); };
+        state.practice = 'tone';
+        only(quiz);
+        var w = wordCards[quiz], t = toneQuizTarget(w);
+        var chips = els.choiceBox.querySelectorAll('.choice');
+        var right = -1;
+        for (var ci = 0; ci < chips.length; ci++) if (chips[ci].getAttribute('data-ok') === '1') right = ci;
+        var hiddenPy = getComputedStyle(els.cardPinyin).visibility === 'hidden' && getComputedStyle(head).display !== 'none' && !els.choiceBox.hidden;
+        var marks = chips.length === 4 && right + 1 === t.tone && chips[right].textContent.indexOf(retone(t.text, right + 1)) !== -1;
+        var plays = !!els.cardPrompt.querySelector('.listen-btn');
+        if (right >= 0) chips[right].click();
+        var graded = state.status[w.zh] === 'known' && state.pos === 1;
+        only(quiz);
+        els.card.click();
+        var reveals = getComputedStyle(els.cardPinyin).visibility === 'visible';
+        els.card.click();
+        only(skip);
+        var skipped = els.choiceBox.hidden && els.choiceBox.children.length === 0 && getComputedStyle(els.cardPinyin).visibility === 'visible';
+        state.deck = deckSnap; state.pos = posSnap;
+        state.practice = 'zh'; render(false);
+        return { ok: hiddenPy && marks && plays && graded && reveals && skipped,
+          d: w.zh + ' ' + w.py + ': pinyin and tone colours hidden: ' + hiddenPy + ', four tone chips with tone ' + t.tone + ' marked right: ' + marks +
+            ', play button: ' + plays + ', right answer marks Known: ' + graded + ', reveal shows the pinyin: ' + reveals +
+            ' | ' + wordCards[skip].zh + ' ' + wordCards[skip].py + ' is shown as a normal card: ' + skipped };
+      })();
+      add('Tone quiz: hear the word, pick the tone of the first syllable', toneRes.ok, toneRes.d);
 
       var wordCard = cards[currentIndex()];
       els.card.click();

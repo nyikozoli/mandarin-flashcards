@@ -1,6 +1,6 @@
 # Mandarin HSK flashcards
 
-Offline flashcards for 598 HSK 1–3 words and their 777 example sentences, with pinyin, English and Hungarian, read-aloud, spaced repetition, progress tracking and optional cloud sync.
+Offline flashcards for 598 HSK 1–3 words and their 777 example sentences, with pinyin, English and Hungarian, read-aloud, six practice styles (including a listen-and-pick-the-tone quiz), spaced repetition, progress tracking and optional cloud sync.
 
 **Use it:** https://nyikozoli.github.io/mandarin-flashcards/ (add it to your phone's home screen; it works offline), or build the single-file version below and double-click it.
 
