@@ -227,6 +227,7 @@
   }
   function renderSyncUI() {
     if (!els.syncGroup) return;
+    if (els.footnote) updateFootnote();
     if (!syncEnabled()) { els.syncGroup.hidden = true; return; }
     els.syncGroup.hidden = false;
     var inSession = !!sync.session;

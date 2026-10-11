@@ -82,4 +82,4 @@ This repository is **public** (`nyikozoli/mandarin-flashcards`). Never commit se
 
 - Windows. When writing files from Python, use `newline='\n'`; CRLF output broke a build step once.
 - Port 8765 may be taken by an unrelated local server; use another port for test servers.
-- `.local/` (git-ignored) holds a Python runtime that used to sit in the old `site/` folder.
+- Python for the optional tools (`scripts/validate.py`, `scripts/freq.py`) is the system install; put throwaway virtual environments under the git-ignored `.validation/`.

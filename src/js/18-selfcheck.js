@@ -730,6 +730,16 @@
 
       var newer = parseImport(JSON.stringify({ version: 1, format: FORMAT + 1, status: {} }));
       var current = parseImport(JSON.stringify({ version: 1, format: FORMAT, status: {} }));
+      var footRes = (function () {
+        var sess = sync.session;
+        sync.session = null; updateFootnote();
+        var local = els.footnote.textContent.indexOf('synced to your account') === -1;
+        sync.session = { access_token: 'x.e30.x', email: 'test@example.com' }; updateFootnote();
+        var cloud = els.footnote.textContent.indexOf('synced to your account') !== -1;
+        sync.session = sess; updateFootnote();
+        return { ok: local && (syncEnabled() ? cloud : !cloud), d: 'signed out says this browser only: ' + local + ', signed in ' + (syncEnabled() ? 'mentions the account: ' + cloud : '(sync is off in this build) stays unchanged: ' + !cloud) };
+      })();
+      add('Footer says where progress is saved', footRes.ok, footRes.d);
       add('Progress from a newer app version is refused', !!newer.error && !current.error && progressSnapshot().format === FORMAT,
         'newer format refused: ' + !!newer.error + ', current format accepted: ' + !current.error + ', snapshots say format ' + FORMAT);
       var ver = document.querySelector('.app-version');

@@ -294,7 +294,10 @@
     var ok = v.count === EXPECTED_COUNT && !v.missing.length && !v.dups.length;
     els.footnote.textContent = '';
     els.footnote.appendChild(el('span', ok ? 'ok' : 'bad', ok ? '✓ ' + v.count + ' cards loaded' : '⚠ ' + v.count + ' cards loaded (expected ' + EXPECTED_COUNT + ')'));
-    els.footnote.appendChild(document.createTextNode(' · works offline · ' + (storageOK ? 'progress is saved in this browser' : 'progress cannot be saved (storage blocked)')));
+    // Signed in to cloud sync (the website only), progress also lives in the account.
+    var synced = syncEnabled() && !!sync.session;
+    els.footnote.appendChild(document.createTextNode(' · works offline · ' + (!storageOK ? 'progress cannot be saved (storage blocked)'
+      : synced ? 'progress is saved in this browser and synced to your account' : 'progress is saved in this browser')));
   }
 
   /* ---------- swipe ---------- */
