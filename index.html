@@ -254,7 +254,6 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .ex-speak:hover { background: var(--surface3); }
 .ex-speak.speaking { background: var(--accent); border-color: var(--accent); }
 .ex-line { display: flex; gap: 8px; align-items: baseline; font-size: 15px; color: var(--soft); margin-top: 3px !important; }
-.hint { margin-top: auto; padding-top: 14px; text-align: center; color: var(--muted); font-size: 13px; }
 .end-card { cursor: default; text-align: center; justify-content: center; align-items: center; gap: 12px; touch-action: auto; user-select: auto; -webkit-user-select: auto; }
 .end-card h2 { margin: 0; font-size: 24px; }
 .end-card p { margin: 0; color: var(--soft); max-width: 420px; }
@@ -967,6 +966,11 @@ label.btn { cursor: pointer; }
     return s.toLowerCase();
   }
   function compact(s) { return s.replace(/[\s'’\-.,;:()]/g, ''); }
+  // Search text for the word list: Chinese, pinyin and both meanings, with tone marks and accents removed.
+  function indexCard(c) {
+    c.search = fold([c.zh, c.py, c.en, c.hu].join(' | '));
+    c.searchCompact = compact(c.search);
+  }
   function charLen(s) { return Array.from ? Array.from(s).length : s.length; }
   function clampInt(v, lo, hi) { v = parseInt(v, 10); if (isNaN(v)) v = lo; return Math.max(lo, Math.min(hi, v)); }
   function el(tag, cls, text) {
@@ -1002,8 +1006,7 @@ label.btn { cursor: pointer; }
         zh: str(d.zh), py: str(d.py), en: str(d.en), hu: str(d.hu), lv: parseInt(d.lv, 10) || 0,
         ex: Array.isArray(d.ex) ? d.ex.map(function (e) { e = e || {}; return { zh: str(e.zh), py: str(e.py), en: str(e.en), hu: str(e.hu) }; }) : []
       };
-      c.search = fold([c.zh, c.py, c.en, c.hu].join(' | '));
-      c.searchCompact = compact(c.search);
+      indexCard(c);
       return c;
     });
   }
@@ -1049,13 +1052,19 @@ label.btn { cursor: pointer; }
     });
     list.forEach(function (s, i) {
       s.n = i + 1;
-      s.search = fold([s.zh, s.py, s.en, s.hu].join(' | '));
-      s.searchCompact = compact(s.search);
+      indexCard(s);
     });
     return list;
   }
   function isSent() { return state.deckType === 'sentences'; }
-  function noun(n) { return isSent() ? (n === 1 ? 'sentence' : 'sentences') : (n === 1 ? 'word' : 'words'); }
+  var DECKS = {
+    words: { noun: ['word', 'words'], listTitle: 'All words', mapTitle: 'Every word', number: '#', milestone: '',
+      sayIt: 'What is this in Chinese?', listenQ: 'Listen. Which word is it?', play: '🔊 Play the word' },
+    sentences: { noun: ['sentence', 'sentences'], listTitle: 'All sentences', mapTitle: 'Every sentence', number: 'sentence ', milestone: 'sentence-',
+      sayIt: 'Say this in Chinese:', listenQ: 'Listen. What does it say?', play: '🔊 Play the sentence' }
+  };
+  function deck() { return DECKS[state.deckType]; }
+  function noun(n) { return deck().noun[n === 1 ? 0 : 1]; }
   function useDeckType(t) {
     state.deckType = t === 'sentences' ? 'sentences' : 'words';
     cards = isSent() ? sentCards : wordCards;
@@ -1097,10 +1106,9 @@ label.btn { cursor: pointer; }
     if (!p || typeof p !== 'object' || !p.status || typeof p.status !== 'object') {
       return { error: 'This code does not contain Mandarin HSK progress.' };
     }
-    var k = 0, l = 0;
-    Object.keys(p.status).forEach(function (z) { if (p.status[z] === 'known') k++; else if (p.status[z] === 'learning') l++; });
+    var m = markCounts(p.status);
     var days = Object.keys(p.activity || {}).sort();
-    return { progress: p, known: k, learning: l, last: days[days.length - 1] || null };
+    return { progress: p, known: m.known, learning: m.learning, last: days[days.length - 1] || null };
   }
   function applyImport(p) {
     stopSpeech();
@@ -1131,7 +1139,7 @@ label.btn { cursor: pointer; }
     els.transferExportActions.hidden = !exp;
     // Embedded viewers (such as the claude.ai link) block downloads, so only offer copying there.
     var embedded = true;
-    try { embedded = window.self !== window.top; } catch (e) { embedded = true; }
+    try { embedded = window.self !== window.top; } catch (e) { /* cross-origin parent: embedded */ }
     els.btnDownloadProgress.hidden = embedded;
     els.transferImportActions.hidden = exp;
     els.transferStatus.textContent = '';
@@ -1160,11 +1168,6 @@ label.btn { cursor: pointer; }
     var next = radios[(radios.indexOf(radio) + dir + radios.length) % radios.length];
     next.click();
     next.focus();
-  }
-  function syncRovingTabs() {
-    document.querySelectorAll('[role="radiogroup"]').forEach(function (g) {
-      g.querySelectorAll('[role="radio"]').forEach(function (r) { r.tabIndex = r.getAttribute('aria-checked') === 'true' ? 0 : -1; });
-    });
   }
   function accessibleName(n) {
     if (n.getAttribute('aria-label')) return n.getAttribute('aria-label');
@@ -1293,10 +1296,10 @@ label.btn { cursor: pointer; }
   function statusOf(c) { return state.status[c.zh] || 'unmarked'; }
   function buildDeck(mode) {
     if (mode === 'hard') return hardList();
-    var idx = [];
+    var idx = [], today = dayKey();
     cards.forEach(function (c, i) {
       if (!inLevel(c)) return;
-      if (mode === 'due') { if (isDue(c)) idx.push(i); return; }
+      if (mode === 'due') { if (isDue(c, today)) idx.push(i); return; }
       var s = statusOf(c);
       if (mode === 'all' || s === mode) idx.push(i);
     });
@@ -1571,7 +1574,7 @@ label.btn { cursor: pointer; }
     body.appendChild(actSec);
 
     // Word map
-    var mapSec = section(isSent() ? 'Every sentence' : 'Every word', 'Each square is one ' + noun(1) + '. Hover or tap to see it, tap again to study it.');
+    var mapSec = section(deck().mapTitle, 'Each square is one ' + noun(1) + '. Hover or tap to see it, tap again to study it.');
     var info = el('p', 'pv-info', 'Pick a square to see the word.');
     LEVELS.forEach(function (lv) {
       var n = countsFor(lv);
@@ -1624,8 +1627,11 @@ label.btn { cursor: pointer; }
   // “Still learning” sends it back to box 0, due again today.
   var SRS_DAYS = [0, 1, 3, 7, 14, 30];
   function addDays(n) { var d = new Date(); d.setDate(d.getDate() + n); return dayKey(d); }
-  function isDue(c) { var r = state.srs[c.zh]; return !!r && r.d <= dayKey(); }
-  function dueCount(lv) { return cards.filter(function (c) { return (lv === 'all' || String(c.lv) === lv) && isDue(c); }).length; }
+  function isDue(c, today) { var r = state.srs[c.zh]; return !!r && r.d <= (today || dayKey()); }
+  function dueCount(lv) {
+    var today = dayKey();
+    return cards.filter(function (c) { return (lv === 'all' || String(c.lv) === lv) && isDue(c, today); }).length;
+  }
   function hardList() {
     return cards.map(function (c, i) { return i; })
       .filter(function (i) { return inLevel(cards[i]) && (state.misses[cards[i].zh] || 0) > 0; })
@@ -1760,14 +1766,14 @@ label.btn { cursor: pointer; }
       var en = el('p', 'prompt-en', c.en);
       var hu = el('p', 'prompt-hu', c.hu);
       hu.setAttribute('lang', 'hu');
-      els.cardPrompt.appendChild(el('p', 'prompt-q', isSent() ? 'Say this in Chinese:' : 'What is this in Chinese?'));
+      els.cardPrompt.appendChild(el('p', 'prompt-q', deck().sayIt));
       els.cardPrompt.appendChild(en);
       els.cardPrompt.appendChild(hu);
     } else if (p === 'listen') {
-      var lb = el('button', 'listen-btn', isSent() ? '🔊 Play the sentence' : '🔊 Play the word');
+      var lb = el('button', 'listen-btn', deck().play);
       lb.type = 'button';
       lb.id = 'btnListen';
-      els.cardPrompt.appendChild(el('p', 'prompt-q', isSent() ? 'Listen. What does it say?' : 'Listen. Which word is it?'));
+      els.cardPrompt.appendChild(el('p', 'prompt-q', deck().listenQ));
       els.cardPrompt.appendChild(lb);
     }
     els.choiceBox.hidden = p !== 'choice';
@@ -1824,10 +1830,10 @@ label.btn { cursor: pointer; }
     var st = streak();
     STREAK_STEPS.forEach(function (n) { if (st >= n) celebrate('streak-' + n + '-' + addDays(1 - st), '🔥 ' + n + '-day streak! Keep it going.'); });
     var known = countsFor('all').known;
-    KNOWN_STEPS.forEach(function (n) { if (known >= n) celebrate((isSent() ? 'sentence-known-' : 'known-') + n, '🏆 ' + n + ' ' + noun(n) + ' known!'); });
+    KNOWN_STEPS.forEach(function (n) { if (known >= n) celebrate(deck().milestone + 'known-' + n, '🏆 ' + n + ' ' + noun(n) + ' known!'); });
     LEVELS.forEach(function (lv) {
       var c = countsFor(lv);
-      if (c.total && c.known === c.total) celebrate((isSent() ? 'sentence-level-' : 'level-') + lv, '🎓 HSK ' + lv + ' complete: you know all ' + c.total + ' ' + noun(c.total) + '!');
+      if (c.total && c.known === c.total) celebrate(deck().milestone + 'level-' + lv, '🎓 HSK ' + lv + ' complete: you know all ' + c.total + ' ' + noun(c.total) + '!');
     });
   }
   var session = { n: 0, k: 0, l: 0, t0: Date.now() };
@@ -2005,7 +2011,7 @@ label.btn { cursor: pointer; }
   function showCard(c, animate) {
     els.deckEnd.hidden = true;
     els.card.hidden = false;
-    els.cardNumber.textContent = 'HSK ' + c.lv + ' · ' + (c.sentence ? 'sentence ' : '#') + c.n;
+    els.cardNumber.textContent = 'HSK ' + c.lv + ' · ' + deck().number + c.n;
     renderHanzi(els.cardHanzi, c.zh, c.py);
     els.cardHanzi.setAttribute('data-len', String(Math.min(6, charLen(c.zh))));
     renderPinyin(els.cardPinyin, c.py);
@@ -2121,13 +2127,16 @@ label.btn { cursor: pointer; }
     els.countHardMode.textContent = String(hardList().length);
     ['modeAll', 'modeDue', 'modeLearning', 'modeUnmarked', 'modeHard'].forEach(function (id) {
       var b = els[id];
-      b.setAttribute('aria-checked', b.getAttribute('data-mode') === state.mode ? 'true' : 'false');
+      var on = b.getAttribute('data-mode') === state.mode;
+      b.setAttribute('aria-checked', on ? 'true' : 'false');
+      b.tabIndex = on ? 0 : -1;
     });
     ['levelAll', 'level1', 'level2', 'level3'].forEach(function (id) {
       var b = els[id];
-      b.setAttribute('aria-checked', b.getAttribute('data-level') === state.level ? 'true' : 'false');
+      var on = b.getAttribute('data-level') === state.level;
+      b.setAttribute('aria-checked', on ? 'true' : 'false');
+      b.tabIndex = on ? 0 : -1;
     });
-    syncRovingTabs();
     els.countLvAll.textContent = String(cards.length);
     LEVELS.forEach(function (lv) { var n = countsFor(lv); els['countLv' + lv].textContent = n.known + '/' + n.total; });
     updateToday();
@@ -2438,27 +2447,44 @@ label.btn { cursor: pointer; }
   }
 
   /* ---------- overlays ---------- */
+  var OVERLAYS = ['listView', 'progressView', 'settingsView', 'helpView', 'transferView', 'summaryView', 'tourView', 'diagView', 'confirmDialog'];
+  var overlayStack = [];
   function anyOverlayOpen() {
-    return !els.listView.hidden || !els.diagView.hidden || !els.confirmDialog.hidden || !els.progressView.hidden || !els.summaryView.hidden || !els.settingsView.hidden || !els.helpView.hidden || !els.tourView.hidden || !els.transferView.hidden;
+    return OVERLAYS.some(function (id) { return !els[id].hidden; });
+  }
+  // While any panel is open the page behind it is locked for pointer, keyboard and screen readers.
+  function syncOverlayState() {
+    var open = anyOverlayOpen();
+    document.body.classList.toggle('modal-open', open);
+    els.app.inert = open;
   }
   function openOverlay(node, focusEl) {
-    if (anyOverlayOpen() === false) lastFocus = document.activeElement;
+    if (!anyOverlayOpen()) lastFocus = document.activeElement;
     stopSpeech();
     node.hidden = false;
-    document.body.classList.add('modal-open');
-    els.app.inert = true;
+    overlayStack = overlayStack.filter(function (n) { return n !== node; }).concat(node);
+    syncOverlayState();
     if (focusEl && !testing) { try { focusEl.focus({ preventScroll: true }); } catch (e) { focusEl.focus(); } }
   }
   function closeOverlay(node) {
     if (node.hidden) return;
     node.hidden = true;
-    if (!anyOverlayOpen()) {
-      document.body.classList.remove('modal-open');
-      els.app.inert = false;
-      if (lastFocus && lastFocus.focus && !testing && document.contains(lastFocus)) {
-        try { lastFocus.focus({ preventScroll: true }); } catch (e) { /* ignore */ }
-      }
+    overlayStack = overlayStack.filter(function (n) { return n !== node; });
+    syncOverlayState();
+    if (!anyOverlayOpen() && lastFocus && lastFocus.focus && !testing && document.contains(lastFocus)) {
+      try { lastFocus.focus({ preventScroll: true }); } catch (e) { /* ignore */ }
     }
+  }
+  // Closing a panel by Esc or a backdrop click; the confirm dialog drops its pending action, the tour is marked as seen.
+  function dismissOverlay(node) {
+    if (node === els.confirmDialog) confirmCallback = null;
+    if (node === els.tourView) closeTour(); else closeOverlay(node);
+  }
+  function topOverlay() {
+    var open = overlayStack.filter(function (n) { return !n.hidden; });
+    if (open.length) return open[open.length - 1];
+    var ids = OVERLAYS.filter(function (id) { return !els[id].hidden; });
+    return ids.length ? els[ids[ids.length - 1]] : null;
   }
   function askConfirm(title, text, okLabel, cb) {
     els.confirmTitle.textContent = title;
@@ -2470,7 +2496,7 @@ label.btn { cursor: pointer; }
 
   /* ---------- list view ---------- */
   function openList() {
-    els.listTitle.textContent = isSent() ? 'All sentences' : 'All words';
+    els.listTitle.textContent = deck().listTitle;
     openOverlay(els.listView, els.searchInput);
     renderList();
     var cur = els.wordList.querySelector('.word-row.current');
@@ -2563,23 +2589,18 @@ label.btn { cursor: pointer; }
     if (anyOverlayOpen()) {
       if (e.key === 'Escape' || e.key === 'Esc') {
         e.preventDefault();
-        if (!els.confirmDialog.hidden) { confirmCallback = null; closeOverlay(els.confirmDialog); }
-        else if (!els.diagView.hidden) closeOverlay(els.diagView);
-        else if (!els.summaryView.hidden) closeOverlay(els.summaryView);
-        else if (!els.transferView.hidden) closeOverlay(els.transferView);
-        else if (!els.tourView.hidden) closeTour();
-        else if (!els.helpView.hidden) closeOverlay(els.helpView);
-        else if (!els.settingsView.hidden) closeOverlay(els.settingsView);
-        else if (!els.progressView.hidden) closeOverlay(els.progressView);
-        else closeOverlay(els.listView);
+        var top = topOverlay();
+        if (top) dismissOverlay(top);
       }
       return;
     }
     if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (t && t.isContentEditable)) return;
+    // A control reached with the keyboard keeps Space and the arrow keys; after a mouse or touch click they stay shortcuts.
     var control = t && t.closest ? t.closest('button, a, summary, [role="radio"]') : null;
     if (control) {
-      if (e.key === ' ' || e.key === 'Spacebar' || e.key === 'Enter') return;
-      if (control.getAttribute('role') === 'radio' && /^Arrow/.test(e.key)) {
+      var keyboard = focusedByKeyboard(control);
+      if (e.key === 'Enter' || (keyboard && (e.key === ' ' || e.key === 'Spacebar'))) return;
+      if (keyboard && control.getAttribute('role') === 'radio' && /^Arrow/.test(e.key)) {
         e.preventDefault();
         moveRadio(control, e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : -1);
         return;
@@ -2600,26 +2621,19 @@ label.btn { cursor: pointer; }
       default: break;
     }
   }
-  function onKeyUp() {
-    // Space and Enter now work normally on focused buttons; a mouse click blurs the button, so Space still skips.
+  // The control the last mouse or touch press landed on; Tab clears it, so it only covers pointer focus.
+  var pointerFocus = null;
+  function focusedByKeyboard(node) {
+    return node === document.activeElement && node !== pointerFocus;
+  }
+  function onKeyUp(e) {
+    // Buttons act on Space key-up; after a mouse or touch click, Space was already used as “skip”.
+    var b = e.target && e.target.closest ? e.target.closest('button') : null;
+    if ((e.key === ' ' || e.key === 'Spacebar') && b && !focusedByKeyboard(b) && !anyOverlayOpen()) e.preventDefault();
   }
 
   /* ---------- self-check ---------- */
   function runSelfCheck() {
-    // The checks run on the word deck; a sentence session is put back afterwards.
-    var outer = { type: state.deckType, deck: state.deck.slice(), pos: state.pos, mode: state.mode, shuffled: state.shuffled };
-    if (outer.type !== 'words') { useDeckType('words'); state.deck = buildDeck(state.mode); state.pos = 0; }
-    var result = runSelfCheckWords();
-    if (outer.type !== 'words') {
-      useDeckType(outer.type);
-      state.deck = outer.deck; state.pos = outer.pos; state.mode = outer.mode; state.shuffled = outer.shuffled;
-      syncPracticeSelect();
-      render(false);
-      save();
-    }
-    return result;
-  }
-  function runSelfCheckWords() {
     var results = [];
     var add = function (name, ok, detail, info) { results.push({ name: name, ok: ok, detail: detail || '', info: !!info }); };
 
@@ -2627,14 +2641,14 @@ label.btn { cursor: pointer; }
     add('Exactly ' + EXPECTED_COUNT + ' cards exist', v.count === EXPECTED_COUNT, 'Found ' + v.count + ' cards.');
     add('Every card has Chinese, pinyin, English, Hungarian and complete example sentences with pinyin', v.missing.length === 0,
       v.missing.length ? v.missing.slice(0, 12).join('\n') + (v.missing.length > 12 ? '\n… and ' + (v.missing.length - 12) + ' more' : '') :
-      'All cards have every field; ' + cards.reduce(function (a, c) { return a + c.ex.length; }, 0) + ' example sentences, each with pinyin, English and Hungarian.');
+      'All cards have every field; ' + wordCards.reduce(function (a, c) { return a + c.ex.length; }, 0) + ' example sentences, each with pinyin, English and Hungarian.');
     var lvBad = [];
     var lvDetail = LEVELS.map(function (lv) {
-      var got = cards.filter(function (c) { return String(c.lv) === lv; }).length;
+      var got = wordCards.filter(function (c) { return String(c.lv) === lv; }).length;
       if (got !== EXPECTED_LEVELS[lv]) lvBad.push(lv);
       return 'HSK ' + lv + ': ' + got + (got !== EXPECTED_LEVELS[lv] ? ' (expected ' + EXPECTED_LEVELS[lv] + ')' : '');
     }).join(' · ');
-    add('Every card has an HSK level and the level counts are right', lvBad.length === 0 && cards.every(function (c) { return c.lv >= 1 && c.lv <= 3; }), lvDetail);
+    add('Every card has an HSK level and the level counts are right', lvBad.length === 0 && wordCards.every(function (c) { return c.lv >= 1 && c.lv <= 3; }), lvDetail);
     add('No duplicate Chinese headwords', v.dups.length === 0, v.dups.length ? 'Duplicates: ' + v.dups.join(', ') : 'All ' + v.count + ' headwords are unique.');
     var missingIds = REQUIRED_IDS.filter(function (id) { return !$(id); });
     add('All page elements used by the app exist', missingIds.length === 0, missingIds.length ? 'Missing: #' + missingIds.join(', #') : REQUIRED_IDS.length + ' elements found.');
@@ -2678,13 +2692,12 @@ label.btn { cursor: pointer; }
     var snap = {
       status: JSON.parse(JSON.stringify(state.status)), mode: state.mode, deck: state.deck.slice(), pos: state.pos,
       shuffled: state.shuffled, revealed: state.revealed, autoReveal: state.autoReveal, level: state.level,
-      srs: JSON.parse(JSON.stringify(state.srs)), misses: JSON.parse(JSON.stringify(state.misses)), practice: state.practice, toneColors: state.toneColors
+      srs: JSON.parse(JSON.stringify(state.srs)), misses: JSON.parse(JSON.stringify(state.misses)), practice: state.practice, toneColors: state.toneColors,
+      deckType: state.deckType, activity: JSON.parse(JSON.stringify(state.activity)), milestones: state.milestones.slice(), seenTour: state.seenTour
     };
     var undoSnap = undoStack.slice();
     var diagWasOpen = !els.diagView.hidden;
-    var tourWasOpen = !els.tourView.hidden, seenTourSnap = state.seenTour;
-    var activitySnap = JSON.parse(JSON.stringify(state.activity)), milestoneSnap = state.milestones.slice();
-    els.app.inert = false;
+    var tourWasOpen = !els.tourView.hidden;
     els.tourView.hidden = true;
     els.helpView.hidden = true;
     var searchSnap = els.searchInput.value;
@@ -2694,6 +2707,8 @@ label.btn { cursor: pointer; }
     stopSpeech();
     testing = true;
     els.diagView.hidden = true;
+    syncOverlayState();
+    useDeckType('words');
     try {
       if (cards.length < 6) throw new Error('Not enough cards to test the controls.');
       state.status = {};
@@ -2876,8 +2891,11 @@ label.btn { cursor: pointer; }
         var open = els.revealHint.getAttribute('aria-expanded') === 'true' && state.revealed;
         els.revealHint.click();
         var shut = els.revealHint.getAttribute('aria-expanded') === 'false' && !state.revealed;
+        pointerFocus = null;
+        els.modeAll.focus();
         els.modeAll.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }));
         var arrows = state.mode === 'due' && els.modeDue.tabIndex === 0 && els.modeAll.tabIndex === -1;
+        els.modeDue.blur();
         els.modeAll.click();
         els.btnHelp.click();
         var locked = els.app.inert === true;
@@ -2950,17 +2968,12 @@ label.btn { cursor: pointer; }
     } catch (err) {
       add('Interactive control test', false, 'The test stopped with an error: ' + (err && err.message ? err.message : err));
     } finally {
-      closeOverlay(els.listView);
-      closeOverlay(els.confirmDialog);
-      closeOverlay(els.progressView);
-      closeOverlay(els.summaryView);
-      closeOverlay(els.settingsView);
-      closeOverlay(els.helpView);
-      closeOverlay(els.transferView);
-      useDeckType('words');
-      els.tourView.hidden = !tourWasOpen;
-      state.seenTour = seenTourSnap;
+      OVERLAYS.forEach(function (id) { closeOverlay(els[id]); });
       confirmCallback = null;
+      useDeckType(snap.deckType);
+      state.seenTour = snap.seenTour;
+      state.activity = snap.activity;
+      state.milestones = snap.milestones;
       els.searchInput.value = searchSnap;
       listFilter = filterSnap;
       state.status = snap.status;
@@ -2976,12 +2989,13 @@ label.btn { cursor: pointer; }
       state.autoReveal = snap.autoReveal;
       state.revealed = snap.revealed;
       undoStack = undoSnap;
+      syncPracticeSelect();
       testing = false;
       render(false);
       save();
-      state.activity = activitySnap;
-      state.milestones = milestoneSnap;
-      if (diagWasOpen) { els.diagView.hidden = false; document.body.classList.add('modal-open'); els.app.inert = true; }
+      els.tourView.hidden = !tourWasOpen;
+      els.diagView.hidden = !diagWasOpen;
+      syncOverlayState();
     }
   }
 
@@ -3068,12 +3082,6 @@ label.btn { cursor: pointer; }
       els.importFile.value = '';
     });
     on('btnApplyImport', 'click', startImport);
-    els.app.addEventListener('click', function (e) {
-      // After a mouse or touch click, give focus back to the page so Space keeps meaning “skip”.
-      if (!e.detail) return;
-      var b = e.target.closest ? e.target.closest('button') : null;
-      if (b) setTimeout(function () { if (document.activeElement === b) b.blur(); }, 0);
-    });
     on('btnSettings', 'click', function () { openOverlay(els.settingsView, els.btnCloseSettings); });
     on('btnHelp', 'click', function () { openOverlay(els.helpView, els.btnCloseHelp); els.helpView.querySelector('.help-body').scrollTop = 0; });
     on('btnCloseHelp', 'click', function () { closeOverlay(els.helpView); });
@@ -3085,7 +3093,6 @@ label.btn { cursor: pointer; }
     });
     on('btnTourBack', 'click', function () { if (tourStep > 0) { tourStep--; showTourStep(); } });
     on('btnTourSkip', 'click', closeTour);
-    on('tourView', 'click', function (e) { if (e.target === els.tourView) closeTour(); });
     on('btnCloseSettings', 'click', function () { closeOverlay(els.settingsView); });
     on('btnProgress', 'click', openProgress);
     on('todayPill', 'click', openProgress);
@@ -3124,12 +3131,8 @@ label.btn { cursor: pointer; }
     });
     on('btnRunCheck', 'click', runSelfCheck);
     on('btnCloseDiag', 'click', function () { closeOverlay(els.diagView); });
-    ['listView', 'diagView', 'confirmDialog', 'progressView', 'summaryView', 'settingsView', 'helpView', 'transferView'].forEach(function (id) {
-      on(id, 'click', function (e) {
-        if (e.target !== els[id]) return;
-        if (id === 'confirmDialog') confirmCallback = null;
-        closeOverlay(els[id]);
-      });
+    OVERLAYS.forEach(function (id) {
+      on(id, 'click', function (e) { if (e.target === els[id]) dismissOverlay(els[id]); });
     });
     on('optAutoReveal', 'change', function () {
       state.autoReveal = els.optAutoReveal.checked;
@@ -3183,6 +3186,10 @@ label.btn { cursor: pointer; }
     });
     document.addEventListener('keydown', onKeyDown);
     document.addEventListener('keyup', onKeyUp);
+    document.addEventListener('pointerdown', function (e) {
+      pointerFocus = e.target.closest ? e.target.closest('button, a, summary, [role="radio"]') : null;
+    }, true);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Tab') pointerFocus = null; }, true);
     initSwipe();
     if (speechSupported && 'onvoiceschanged' in synth) {
       synth.addEventListener ? synth.addEventListener('voiceschanged', pickVoice) : (synth.onvoiceschanged = pickVoice);
