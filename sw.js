@@ -1,5 +1,5 @@
 // Offline support for the GitHub Pages version. The cache name changes with every build.
-const CACHE = 'mandarin-hsk-09aacd27a6';
+const CACHE = 'mandarin-hsk-6c9172cae8';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', (event) => {

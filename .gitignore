@@ -1,0 +1,11 @@
+# A Python 3.15 runtime install landed here (site/Python/) and is untracked.
+# This repo is the GitHub Pages web root -- everything committed is published.
+# Keep the runtime and any local secrets out of it.
+Python/
+
+# Supabase CLI local state
+.supabase/
+*-db-password
+*-service-key
+.env
+.env.*

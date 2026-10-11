@@ -420,8 +420,14 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
 .switch { display: flex; align-items: center; gap: 12px; min-height: 50px; border-bottom: 1px solid #27303b; cursor: pointer; }
 .switch input { flex: none; width: 20px; height: 20px; accent-color: var(--known); }
 .set-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 12px; min-height: 54px; padding: 6px 0; border-bottom: 1px solid #27303b; }
-.set-row select { min-height: 40px; max-width: 100%; border-radius: 10px; border: 1px solid var(--line); background: var(--surface2); color: var(--text); padding: 4px 8px; }
+.set-row select, .set-row input[type="email"] { min-height: 40px; max-width: 100%; border-radius: 10px; border: 1px solid var(--line); background: var(--surface2); color: var(--text); padding: 4px 8px; }
+.set-row input[type="email"] { flex: 1 1 180px; }
 .set-note { color: var(--soft); font-size: 14px; }
+.sync-dates { flex: 1 1 100%; list-style: none; margin: 0; padding: 0; font-size: 14px; color: var(--soft); }
+.sync-dates li { display: flex; gap: 10px; justify-content: space-between; padding: 2px 0; }
+.sync-dates b { font-weight: 600; }
+.sync-dates .when { color: var(--text); text-align: right; }
+.sync-dates .newer .when { color: var(--known); }
 .tone-key { margin-left: 8px; font-weight: 700; }
 .footnote { margin: 4px 0 18px; }
 .kbd-hint { margin: 2px 0 0; font-size: 14.5px; line-height: 2.1; color: var(--soft); }
@@ -487,6 +493,7 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
 #transferText { width: 100%; min-height: 150px; resize: vertical; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--text); font: 12.5px/1.45 ui-monospace, Consolas, "Courier New", monospace; }
 .transfer-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .transfer-status { min-height: 1.4em; font-size: 14px; }
+.transfer-status.bad { color: #ff9aa2; }
 #importFile:focus-visible + label { outline: 3px solid var(--focus); outline-offset: 2px; }
 label.btn { cursor: pointer; }
 .set-btns { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -698,10 +705,30 @@ label.btn { cursor: pointer; }
         </div>
         <label class="switch" title="Plays a near-silent sound first so speakers or headphones are awake. Adds about a second of delay."><input type="checkbox" id="optWarmup"><span>Fix cut-off audio start</span></label>
       </section>
+      <section class="set-group" id="syncGroup">
+        <h3>Sync across devices</h3>
+        <div class="set-row" id="syncEmailRow">
+          <label for="syncEmail">Email</label>
+          <input type="email" id="syncEmail" autocomplete="email" inputmode="email" spellcheck="false" placeholder="you@example.com" aria-describedby="syncEmailNote">
+        </div>
+        <div class="set-row" id="syncLinkRow">
+          <span class="set-note" id="syncEmailNote">We send a sign-in link. No password to remember.</span>
+          <button type="button" class="btn small" id="btnSignIn">Email me a link</button>
+        </div>
+        <div class="set-row" id="syncAccountRow" hidden>
+          <span class="set-note" id="syncAccount"></span>
+          <button type="button" class="btn small danger-ghost" id="btnSignOut">Sign out</button>
+        </div>
+        <div class="set-row" id="syncDatesRow" hidden>
+          <ul class="sync-dates" id="syncDates"></ul>
+          <button type="button" class="btn small" id="btnSyncNow">Sync now</button>
+        </div>
+        <p id="syncStatus" class="transfer-status" role="status"></p>
+      </section>
       <section class="set-group">
         <h3>Progress and checks</h3>
         <div class="set-row">
-          <span class="set-note">Continue on another phone or computer.</span>
+          <span class="set-note">Move progress without an account.</span>
           <span class="set-btns">
             <button type="button" class="btn small" id="btnExport">Export progress</button>
             <button type="button" class="btn small" id="btnImport">Import progress</button>
@@ -921,6 +948,10 @@ label.btn { cursor: pointer; }
   'use strict';
 
   var STORAGE_KEY = 'mandarin300.progress.v1';
+  var SYNC_KEY = 'mandarin300.sync.v1';
+  // Replaced at build time. null in the single-file and claude.ai artifact builds: neither has
+  // a stable https origin for a magic link to return to (file:// and a cross-origin iframe).
+  var SYNC_CONFIG = {"url":"https://cxmuuxennxfdhavtvrbw.supabase.co","anonKey":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4bXV1eGVubnhmZGhhdnR2cmJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE3MzA4MjIsImV4cCI6MjEwNzMwNjgyMn0.T3ArSkyRVU1WxaK1tJpvEWtQRD8jfNAqGglCDtU-pok","siteUrl":"https://nyikozoli.github.io/mandarin-flashcards/"};
   var EXPECTED_COUNT = 598;
   var EXPECTED_LEVELS = {"1":153,"2":147,"3":298};
   var MODE_NAMES = { all: 'All cards', due: 'Due for review', learning: 'Learning only', unmarked: 'Unmarked only', hard: 'Hardest words' };
@@ -931,9 +962,11 @@ label.btn { cursor: pointer; }
     'cardPinyin', 'btnSpeak', 'speakLabel', 'cardAnswer', 'cardEn', 'cardHu', 'cardExamples', 'revealHint', 'deckEnd', 'endEmoji', 'endTitle',
     'endText', 'btnEndRestart', 'btnEndLearning', 'btnEndUnmarked', 'btnEndAll', 'btnLearning', 'btnSkip', 'btnKnown', 'optAutoReveal',
     'optRate', 'optVoice', 'optWarmup', 'btnTestVoices', 'footnote', 'btnSettings', 'settingsView', 'btnCloseSettings', 'btnHelp', 'helpView', 'btnCloseHelp', 'srLive', 'transferView', 'transferTitle', 'transferIntro', 'transferText', 'btnCloseTransfer', 'btnCopyProgress', 'btnDownloadProgress', 'transferExportActions', 'transferImportActions', 'importFile', 'btnApplyImport', 'transferStatus', 'btnExport', 'btnImport', 'listTitle', 'btnShowTour', 'tourView', 'tourArt', 'tourTitle', 'tourText', 'tourDots', 'btnTourSkip', 'btnTourBack', 'btnTourNext', 'modeDue', 'modeHard', 'countDueMode', 'countHardMode', 'optPractice', 'cardPrompt', 'choiceBox', 'optTones', 'optAutoplay', 'optVibrate', 'summaryView', 'summaryBody', 'btnSummaryClose', 'btnSummaryProgress', 'btnProgress', 'progressView', 'btnCloseProgress', 'pvBody', 'todayPill', 'levelAll', 'level1', 'level2', 'level3', 'countLvAll', 'countLv1', 'countLv2', 'countLv3', 'lvChips', 'listView', 'btnCloseList', 'searchInput', 'listSummary', 'wordList', 'confirmDialog', 'confirmTitle',
-    'confirmText', 'confirmCancel', 'confirmOk', 'diagView', 'btnCloseDiag', 'diagSummary', 'diagResults', 'btnRunCheck', 'toast', 'vocab-data'];
+    'confirmText', 'confirmCancel', 'confirmOk', 'diagView', 'btnCloseDiag', 'diagSummary', 'diagResults', 'btnRunCheck', 'toast', 'vocab-data',
+    'syncGroup', 'syncEmailRow', 'syncEmail', 'syncLinkRow', 'syncEmailNote', 'btnSignIn', 'syncAccountRow', 'syncAccount', 'btnSignOut',
+    'syncDatesRow', 'syncDates', 'btnSyncNow', 'syncStatus'];
   var CORE_BUTTONS = ['btnExport', 'btnImport', 'btnApplyImport', 'revealHint', 'btnHelp', 'btnTourNext', 'btnSettings', 'btnKnown', 'btnLearning', 'btnSkip', 'btnSpeak', 'cardExamples', 'modeDue', 'modeHard', 'optPractice', 'choiceBox', 'cardPrompt', 'btnProgress', 'levelAll', 'level1', 'level2', 'level3', 'card', 'btnShuffle', 'btnUndo', 'btnReset', 'btnSelfCheck',
-    'btnList', 'btnCloseList', 'modeAll', 'modeLearning', 'modeUnmarked', 'searchInput', 'confirmOk', 'confirmCancel'];
+    'btnList', 'btnCloseList', 'modeAll', 'modeLearning', 'modeUnmarked', 'searchInput', 'confirmOk', 'confirmCancel', 'btnSignIn', 'btnSignOut', 'btnSyncNow'];
 
   var $ = function (id) { return document.getElementById(id); };
   var els = {};
@@ -1159,6 +1192,412 @@ label.btn { cursor: pointer; }
       });
   }
 
+  /* ---------- cloud sync ---------- */
+  // Last-write-wins against one Supabase row per user. The unit of sync is the whole
+  // transferable snapshot -- progressSnapshot() minus DEVICE_ONLY -- which is exactly
+  // what exportText() already produces, so applyImport()/restore() apply a remote copy
+  // without needing a second validation path.
+  var SYNC_PUSH_DELAY = 1200;
+  var syncTimer = null;
+  var sync = {
+    session: null,         // { access_token, refresh_token, expires_at, email }
+    dirty: false,          // local edits not yet pushed
+    busy: false,           // a request is in flight
+    conflict: false,       // cloud and device diverged; auto-push paused until resolved
+    applyingRemote: false, // suppress the push that applyImport() -> save() would trigger
+    lastSyncedAt: null,    // cloud updated_at this device last saw
+    localAt: null,         // when local state last changed
+    remoteAt: null,        // cloud updated_at from the last pull
+    remoteData: null,      // cloud snapshot from the last pull, for the counts shown in settings
+    signature: null        // JSON of the last snapshot that matched the cloud, see markLocalChange
+  };
+
+  function syncEnabled() {
+    return !!(SYNC_CONFIG && SYNC_CONFIG.url && SYNC_CONFIG.anonKey && window.fetch && window.Promise);
+  }
+  function syncApi(path, opts) {
+    opts = opts || {};
+    var headers = { 'apikey': SYNC_CONFIG.anonKey, 'Content-Type': 'application/json' };
+    // GoTrue and PostgREST both want a Bearer token; before sign-in that is the anon key.
+    headers['Authorization'] = 'Bearer ' + (sync.session ? sync.session.access_token : SYNC_CONFIG.anonKey);
+    if (opts.prefer) headers['Prefer'] = opts.prefer;
+    var init = { method: opts.method || 'GET', headers: headers };
+    if (opts.body) init.body = JSON.stringify(opts.body);
+    return window.fetch(SYNC_CONFIG.url + path, init).then(function (res) {
+      return res.text().then(function (text) {
+        var data = null;
+        try { data = text ? JSON.parse(text) : null; } catch (e) { data = null; }
+        if (!res.ok) {
+          var err = new Error((data && (data.message || data.error_description || data.msg || data.error)) || ('request failed (HTTP ' + res.status + ')'));
+          err.status = res.status;
+          throw err;
+        }
+        return data;
+      });
+    });
+  }
+  // The user id lives in the JWT `sub` claim. Decoding it locally keeps user_id out of
+  // the client's hands for RLS purposes -- the policies still compare against auth.uid(),
+  // which the token was issued from, so a forged user_id cannot match another user.
+  function userId() {
+    if (!sync.session || !sync.session.access_token) return null;
+    try {
+      var part = sync.session.access_token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      while (part.length % 4) part += '=';
+      return JSON.parse(atob(part)).sub || null;
+    } catch (e) { return null; }
+  }
+  function loadSyncState() {
+    try {
+      var o = JSON.parse(window.localStorage.getItem(SYNC_KEY) || 'null');
+      if (!o || typeof o !== 'object') return;
+      if (o.session && o.session.access_token) sync.session = o.session;
+      if (typeof o.lastSyncedAt === 'string') sync.lastSyncedAt = o.lastSyncedAt;
+      if (typeof o.localAt === 'string') sync.localAt = o.localAt;
+      if (o.dirty === true) sync.dirty = true;
+    } catch (e) { /* a corrupt sync record must never stop the app from starting */ }
+  }
+  function saveSyncState() {
+    try {
+      window.localStorage.setItem(SYNC_KEY, JSON.stringify({
+        session: sync.session, lastSyncedAt: sync.lastSyncedAt, localAt: sync.localAt, dirty: sync.dirty
+      }));
+    } catch (e) { /* storage blocked: sync simply will not survive a reload */ }
+  }
+  function tokenFresh() {
+    return !!(sync.session && sync.session.access_token && sync.session.expires_at && Date.now() < sync.session.expires_at - 30000);
+  }
+  function adoptSession(d) {
+    if (!d || !d.access_token) return null;
+    var u = d.user || {};
+    sync.session = {
+      access_token: d.access_token,
+      refresh_token: d.refresh_token || (sync.session && sync.session.refresh_token) || '',
+      expires_at: Date.now() + ((parseInt(d.expires_in, 10) || 3600) * 1000),
+      email: u.email || (sync.session && sync.session.email) || ''
+    };
+    saveSyncState();
+    return sync.session;
+  }
+  function ensureSession() {
+    if (!sync.session) return Promise.resolve(null);
+    if (tokenFresh()) return Promise.resolve(sync.session);
+    if (!sync.session.refresh_token) { signOut(true); return Promise.resolve(null); }
+    return syncApi('/auth/v1/token?grant_type=refresh_token', { method: 'POST', body: { refresh_token: sync.session.refresh_token } })
+      .then(adoptSession)
+      .catch(function () { signOut(true); return null; });
+  }
+  function requestMagicLink(email) {
+    var redirect = SYNC_CONFIG.siteUrl || (location.origin + location.pathname);
+    return syncApi('/auth/v1/magiclink?redirect_to=' + encodeURIComponent(redirect), {
+      method: 'POST', body: { email: email, shouldCreateUser: true }
+    });
+  }
+  // GoTrue returns the session in the URL fragment: #access_token=…&refresh_token=…&expires_in=3600
+  function consumeRedirect() {
+    var hash = location.hash || '';
+    if (hash.indexOf('access_token=') === -1 && hash.indexOf('error_description=') === -1) return false;
+    var p = {};
+    hash.replace(/^#/, '').split('&').forEach(function (kv) {
+      var i = kv.indexOf('=');
+      if (i > 0) p[decodeURIComponent(kv.slice(0, i))] = decodeURIComponent(kv.slice(i + 1).replace(/\+/g, ' '));
+    });
+    // Drop the fragment before anything else can read it, so a reload cannot replay the token.
+    if (history.replaceState) history.replaceState(null, '', location.pathname + location.search);
+    if (p.error || p.error_description) {
+      setSyncStatus('Sign-in failed: ' + (p.error_description || p.error), true);
+      return true;
+    }
+    if (!p.access_token) return false;
+    sync.session = {
+      access_token: p.access_token,
+      refresh_token: p.refresh_token || '',
+      expires_at: Date.now() + ((parseInt(p.expires_in, 10) || 3600) * 1000),
+      email: ''
+    };
+    saveSyncState();
+    return true;
+  }
+  function signOut(quiet) {
+    if (sync.session) { try { syncApi('/auth/v1/logout', { method: 'POST' }).catch(function () {}); } catch (e) { /* best effort */ } }
+    sync.session = null; sync.remoteAt = null; sync.remoteData = null;
+    sync.lastSyncedAt = null; sync.dirty = false; sync.conflict = false;
+    clearTimeout(syncTimer);
+    saveSyncState();
+    renderSyncUI();
+    if (!quiet) setSyncStatus('Signed out. Your progress is unchanged on this device.');
+  }
+
+  function transferable() {
+    var p = progressSnapshot();
+    DEVICE_ONLY.forEach(function (k) { delete p[k]; });
+    return p;
+  }
+  // progressSnapshot() builds its keys in a fixed order, so this is stable between calls.
+  function syncSignature() {
+    return JSON.stringify(transferable());
+  }
+  function pullProgress() {
+    return syncApi('/rest/v1/progress?select=version,data,updated_at&limit=1').then(function (rows) {
+      var row = (rows && rows[0]) || null;
+      sync.remoteAt = row ? row.updated_at : null;
+      sync.remoteData = row ? row.data : null;
+      return row;
+    });
+  }
+  // Writes go through the conditional-upsert RPC, not a plain PostgREST upsert: passing the
+  // timestamp this device last saw means a background save cannot overwrite another device
+  // that wrote in the meantime. user_id is never sent -- the function reads auth.uid().
+  function pushProgress(expected, data) {
+    if (!userId()) return Promise.reject(new Error('not signed in'));
+    return syncApi('/rest/v1/rpc/upsert_progress', {
+      method: 'POST',
+      body: { p_app: APP_ID, p_version: 1, p_data: data || transferable(), p_expected: expected || null }
+    }).then(function (res) { return (Array.isArray(res) ? res[0] : res) || null; });
+  }
+
+  var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  // Seconds are always shown: two devices can write inside the same minute, and the point of
+  // the conflict dialog is to make the difference readable instead of leaving it to a guess.
+  function fmtWhen(iso) {
+    if (!iso) return 'never';
+    var t = Date.parse(iso);
+    if (isNaN(t)) return 'unknown';
+    var d = new Date(t), now = new Date();
+    var hms = pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':' + pad2(d.getSeconds());
+    var same = function (a, b) { return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); };
+    var mins = Math.floor((now.getTime() - t) / 60000);
+    var ago = mins < 1 ? ' · just now' : (mins < 60 ? ' · ' + mins + ' min ago' : '');
+    if (same(d, now)) return 'today at ' + hms + ago;
+    if (same(d, new Date(now.getTime() - 86400000))) return 'yesterday at ' + hms + ago;
+    return d.getDate() + ' ' + MONTHS[d.getMonth()] + ' ' + d.getFullYear() + ', ' + hms;
+  }
+  // Progress made before sync existed has no localAt, so fall back to the most recent
+  // study day. Without this a long-time user would be told the cloud copy is "newer"
+  // than years of local progress.
+  function localStamp() {
+    if (sync.localAt) return sync.localAt;
+    var days = Object.keys(state.activity || {}).sort();
+    if (!days.length) return null;
+    var p = days[days.length - 1].split('-');
+    return new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10), 23, 59, 59).toISOString();
+  }
+  function setSyncStatus(msg, bad) {
+    if (!els.syncStatus) return;
+    els.syncStatus.textContent = msg || '';
+    els.syncStatus.className = 'transfer-status' + (bad ? ' bad' : '');
+  }
+  function renderSyncUI() {
+    if (!els.syncGroup) return;
+    if (!syncEnabled()) { els.syncGroup.hidden = true; return; }
+    els.syncGroup.hidden = false;
+    var inSession = !!sync.session;
+    els.syncEmailRow.hidden = inSession;
+    els.syncLinkRow.hidden = inSession;
+    els.syncAccountRow.hidden = !inSession;
+    els.syncDatesRow.hidden = !inSession;
+    els.btnSyncNow.disabled = sync.busy || !inSession;
+    els.syncAccount.textContent = inSession ? 'Signed in as ' + (sync.session.email || 'your account') : '';
+    if (!inSession) return;
+    var lc = markCounts(state.status);
+    var ls = localStamp();
+    var rc = sync.remoteData ? markCounts(sync.remoteData.status || {}) : null;
+    var lm = sync.remoteAt ? Date.parse(sync.remoteAt) : 0;
+    var dm = ls ? Date.parse(ls) : 0;
+    var rows = [
+      { label: 'This device', when: ls, text: lc.known + ' known, ' + lc.learning + ' learning', newer: dm > lm },
+      { label: 'In the cloud', when: sync.remoteAt, text: rc ? rc.known + ' known, ' + rc.learning + ' learning' : 'no copy yet', newer: lm > dm }
+    ];
+    els.syncDates.textContent = '';
+    rows.forEach(function (r) {
+      var li = el('li', r.newer ? 'newer' : '');
+      li.appendChild(el('span', null, r.label));
+      li.appendChild(el('b', 'when', fmtWhen(r.when) + (r.when ? ' · ' + r.text : '')));
+      els.syncDates.appendChild(li);
+    });
+    if (sync.conflict) {
+      var li = el('li');
+      li.appendChild(el('span', null, 'The two differ'));
+      li.appendChild(el('b', 'when', 'choose below'));
+      els.syncDates.appendChild(li);
+    }
+  }
+  function onSyncError(e) {
+    sync.busy = false;
+    renderSyncUI();
+    // fetch rejects with a TypeError when the network is unreachable; treat that as offline.
+    var offline = (e instanceof TypeError) || (typeof navigator !== 'undefined' && navigator.onLine === false);
+    if (offline) {
+      setSyncStatus('No connection. Changes stay on this device and upload automatically when it returns.');
+      return;
+    }
+    if (e && (e.status === 401 || e.status === 403)) {
+      setSyncStatus('Your sign-in expired. Sign in again to resume syncing.', true);
+      signOut(true);
+      return;
+    }
+    setSyncStatus('Sync failed: ' + (e && e.message ? e.message : e), true);
+  }
+  function doPush(note, expected) {
+    sync.busy = true;
+    renderSyncUI();
+    setSyncStatus('Uploading…');
+    var sending = transferable();
+    var sentSig = JSON.stringify(sending);
+    return pushProgress(expected === undefined ? sync.lastSyncedAt : expected, sending).then(function (r) {
+      sync.busy = false;
+      if (!r) throw new Error('unexpected reply from the server');
+      if (!r.applied) {
+        // The cloud moved since this device last synced. Refuse to guess a winner: pull the
+        // current row and put both last-modified dates in front of the user.
+        return pullProgress().then(function (remote) { offerConflict(remote); });
+      }
+      sync.remoteAt = r.server_updated_at;
+      sync.lastSyncedAt = r.server_updated_at;
+      sync.remoteData = sending;
+      sync.conflict = false;
+      // An edit can land while the request is in flight. Only drop the dirty flag when the
+      // snapshot that came back is still the one this device holds, or that edit never uploads.
+      var raced = sync.signature !== sentSig;
+      sync.signature = sentSig;
+      sync.dirty = raced;
+      sync.localAt = new Date().toISOString();
+      saveSyncState();
+      renderSyncUI();
+      setSyncStatus('Uploaded' + (note ? ' · ' + note : '') + ' · ' + fmtWhen(sync.remoteAt));
+      if (raced) schedulePush();
+    }).catch(onSyncError);
+  }
+  function applyRemote(row) {
+    if (!row || !row.data) return;
+    // applyImport() ends in save(), which would push the cloud copy straight back.
+    sync.applyingRemote = true;
+    try { applyImport(row.data); } finally { sync.applyingRemote = false; }
+    sync.remoteAt = row.updated_at;
+    sync.remoteData = row.data;
+    sync.lastSyncedAt = row.updated_at;
+    sync.localAt = new Date().toISOString();
+    sync.dirty = false;
+    sync.conflict = false;
+    // Taken after applyImport() so it reflects the state this device now holds.
+    sync.signature = syncSignature();
+    saveSyncState();
+    renderSyncUI();
+    setSyncStatus('Restored the cloud copy from ' + fmtWhen(row.updated_at) + '.');
+    toast('Cloud progress restored.');
+  }
+  // Both copies are shown with their last-modified date and their known/learning counts,
+  // because only one of them survives. sync.conflict pauses auto-push until the user picks,
+  // so a debounced save cannot resolve the race silently in the background.
+  function offerConflict(remote) {
+    if (!remote) {
+      renderSyncUI();
+      setSyncStatus('The cloud copy changed. Sync again to see which one to keep.', true);
+      return;
+    }
+    sync.conflict = true;
+    renderSyncUI();
+    setSyncStatus('Another device changed the cloud copy. Choose which one to keep.', true);
+    var ls = localStamp();
+    var cloudNewer = Date.parse(remote.updated_at) > (ls ? Date.parse(ls) : 0);
+    var rc = markCounts((remote.data && remote.data.status) || {});
+    var lc = markCounts(state.status);
+    askConfirm(
+      cloudNewer ? 'The cloud copy is newer' : 'This device is newer',
+      'In the cloud: ' + fmtWhen(remote.updated_at) + ' (' + rc.known + ' known, ' + rc.learning + ' learning). ' +
+      'On this device: ' + fmtWhen(ls) + ' (' + lc.known + ' known, ' + lc.learning + ' learning). ' +
+      'Only one copy can be kept — the other is overwritten and cannot be undone.',
+      cloudNewer ? 'Use the cloud copy' : 'Upload this device',
+      function () {
+        if (cloudNewer) { applyRemote(remote); return; }
+        // Passing the freshly pulled timestamp is what turns the user's explicit choice into
+        // a write the conditional upsert will accept.
+        doPush('replaced the cloud copy', remote.updated_at);
+      });
+  }
+  // Decide between pulling, pushing and asking. Only asks when the cloud copy changed
+  // since this device last saw it, or when this device has never synced.
+  function reconcile(note) {
+    if (!syncEnabled() || sync.busy || !sync.session) return Promise.resolve();
+    sync.busy = true;
+    renderSyncUI();
+    return ensureSession().then(function (sess) {
+      if (!sess) { sync.busy = false; renderSyncUI(); return null; }
+      return pullProgress().then(function (remote) {
+        sync.busy = false;
+        var seen = sync.lastSyncedAt ? Date.parse(sync.lastSyncedAt) : 0;
+
+        if (!remote) {
+          renderSyncUI();
+          var lc0 = markCounts(state.status);
+          if (lc0.known || lc0.learning) return doPush('first upload');
+          setSyncStatus('Signed in. Nothing to upload yet — your progress will sync as you study.');
+          return null;
+        }
+
+        // Cloud unchanged since this device last saw it: nothing to lose by pushing.
+        if (Date.parse(remote.updated_at) === seen) {
+          renderSyncUI();
+          if (sync.dirty) return doPush();
+          setSyncStatus('Up to date · ' + fmtWhen(remote.updated_at));
+          return null;
+        }
+
+        offerConflict(remote);
+        return null;
+      });
+    }).catch(onSyncError);
+  }
+  function markLocalChange() {
+    if (!syncEnabled() || !sync.session || sync.applyingRemote || testing) return;
+    // save() runs for plenty of reasons that change nothing the cloud holds: picking a voice,
+    // toggling warmup, redrawing a panel. Counting those as edits would push a byte-identical
+    // blob, move updated_at, and make this device look newer than it is in the conflict dialog.
+    var sig = syncSignature();
+    if (sig === sync.signature) return;
+    sync.signature = sig;
+    sync.dirty = true;
+    sync.localAt = new Date().toISOString();
+    saveSyncState();
+    if (!sync.conflict) schedulePush();
+  }
+  function schedulePush() {
+    if (!syncEnabled() || !sync.session || !sync.dirty || sync.conflict || sync.busy) return;
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(flushPush, SYNC_PUSH_DELAY);
+  }
+  function flushPush() {
+    if (!syncEnabled() || !sync.session || !sync.dirty || sync.conflict) return;
+    if (sync.busy) { schedulePush(); return; }
+    doPush();
+  }
+  function initSync() {
+    if (!syncEnabled()) { renderSyncUI(); return; }
+    loadSyncState();
+    // Seeded from the state restore() just loaded, so the first save() that changes nothing
+    // syncable is not mistaken for an edit. A persisted dirty flag is left alone.
+    sync.signature = syncSignature();
+    var fromLink = consumeRedirect();
+    renderSyncUI();
+    window.addEventListener('online', function () { if (sync.dirty) flushPush(); });
+    document.addEventListener('visibilitychange', function () { if (document.hidden && sync.dirty) flushPush(); });
+    window.addEventListener('pagehide', function () { if (sync.dirty) flushPush(); });
+    if (!sync.session) {
+      if (fromLink) setSyncStatus('Signed in.');
+      return;
+    }
+    setSyncStatus(fromLink ? 'Signed in. Checking the cloud copy…' : 'Checking the cloud copy…');
+    ensureSession().then(function (s) {
+      if (!s) { renderSyncUI(); return null; }
+      if (s.email) return reconcile(fromLink ? 'after sign-in' : '');
+      return syncApi('/auth/v1/user').then(function (u) {
+        if (u && u.email && sync.session) { sync.session.email = u.email; saveSyncState(); }
+        renderSyncUI();
+      }).catch(function () { /* the email is cosmetic; a failed lookup must not block syncing */ })
+        .then(function () { return reconcile(fromLink ? 'after sign-in' : ''); });
+    }).catch(onSyncError);
+  }
+
   /* ---------- keyboard helpers ---------- */
   // Arrow keys move the selection inside a group of radio buttons (study mode, HSK level).
   function moveRadio(radio, dir) {
@@ -1231,6 +1670,9 @@ label.btn { cursor: pointer; }
       }
     }
     updateFootnote();
+    // Single hook for all callers: marks the snapshot dirty and debounces a push.
+    // markLocalChange() no-ops when signed out or when sync is disabled for this build.
+    markLocalChange();
   }
   function restore(saved) {
     var byZh = {};
@@ -3042,6 +3484,36 @@ label.btn { cursor: pointer; }
     on('revealHint', 'click', function (e) { e.stopPropagation(); toggleReveal(); });
     on('btnExport', 'click', function () { openTransfer('export'); });
     on('btnImport', 'click', function () { openTransfer('import'); });
+    // Bound unconditionally so the self-check's CORE_BUTTONS assertion holds in all three
+    // builds; the handlers no-op and the whole section is hidden when sync is disabled.
+    on('btnSignIn', 'click', function () {
+      if (!syncEnabled()) return;
+      var email = str(els.syncEmail.value);
+      if (email.indexOf('@') < 1 || email.indexOf('.') < 0) {
+        setSyncStatus('Enter your email address first.', true);
+        if (!testing) els.syncEmail.focus();
+        return;
+      }
+      els.btnSignIn.disabled = true;
+      setSyncStatus('Sending the sign-in link…');
+      requestMagicLink(email).then(function () {
+        setSyncStatus('Check ' + email + ' for the sign-in link. It expires in about an hour.');
+        toast('Sign-in link sent to ' + email);
+      }).catch(onSyncError).then(function () { els.btnSignIn.disabled = false; });
+    });
+    on('syncEmail', 'keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); els.btnSignIn.click(); }
+    });
+    on('btnSignOut', 'click', function () { if (syncEnabled()) signOut(false); });
+    on('btnSyncNow', 'click', function () {
+      if (!syncEnabled() || !sync.session || sync.busy) return;
+      // An explicit "Sync now" offers the local copy, and re-offers the choice if the conflict
+      // dialog was cancelled earlier. It must not touch localAt: that stamp is what decides
+      // the "which one is newer" wording, and clicking a button is not editing your progress.
+      sync.dirty = true;
+      saveSyncState();
+      reconcile('manual sync');
+    });
     on('btnCloseTransfer', 'click', function () { closeOverlay(els.transferView); });
     on('btnCopyProgress', 'click', function () {
       var text = els.transferText.value;
@@ -3221,8 +3693,9 @@ label.btn { cursor: pointer; }
     updateFootnote();
     if (!storageOK) toast('This browser is blocking local storage, so your progress will not be kept after the page is closed.', 7000);
     window.__appStarted = true;
+    initSync();
     if (!state.seenTour) setTimeout(function () { if (!anyOverlayOpen()) openTour(); }, 350);
-    window.__mandarinApp = { runSelfCheck: runSelfCheck, state: state, cards: function () { return cards; }, words: function () { return wordCards; }, sentences: function () { return sentCards; } };
+    window.__mandarinApp = { runSelfCheck: runSelfCheck, state: state, sync: sync, cards: function () { return cards; }, words: function () { return wordCards; }, sentences: function () { return sentCards; } };
   }
 
   try {
