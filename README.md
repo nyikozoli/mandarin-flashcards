@@ -80,9 +80,14 @@ Row-level security is what makes the anon key safe to publish:
 
 **Not production-ready yet:** magic-link email uses Supabase's built-in mail server, which allows only a few emails per hour. Configure `[auth.email.smtp]` in `supabase/config.toml` with your own SMTP provider before others depend on signing in.
 
+## Progress per skill
+
+Reading (Chinese → meaning, 汉字 only, multiple choice), recall (meaning → Chinese) and listening (listening, which tone) each keep their own Known/Learning marks, review schedule and Due list. Words and sentences each remember their own place in the deck. In the saved progress, reading stays in the top-level `status`, `srs` and `misses`, and the other skills sit under `skills`, so an older copy of the app still reads the reading skill.
+
 ## Reading help
 
 - **Tap a word:** in example sentences and on sentence cards, every HSK 1–3 word is tappable and shows its pinyin, meaning and level. Sentences are split by longest match against the app's own word list, which covers about 95% of the characters in the sentences.
+- **Multiple choice without pinyin** (Settings, on by default): turn off "Show pinyin in multiple choice" to see only the characters until you answer.
 - **Fading pinyin** (Settings, off by default): in Chinese → meaning, a card whose next review is a week or more away hides its pinyin until you tap it. `docs/prd.txt` asks for pinyin to stay visible, so this is opt-in.
 
 ## Pinyin conventions

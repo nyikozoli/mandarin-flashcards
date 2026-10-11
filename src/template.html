@@ -434,6 +434,7 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
 .set-row select, .set-row input[type="email"] { min-height: 40px; max-width: 100%; border-radius: 10px; border: 1px solid var(--line); background: var(--surface2); color: var(--text); padding: 4px 8px; }
 .set-row input[type="email"] { flex: 1 1 180px; }
 .set-note { color: var(--soft); font-size: 14px; }
+.pv-skills { margin: 0 0 12px; color: var(--soft); font-size: 14px; }
 .app-version { margin: 14px 0 0; font-size: 13px; font-variant-numeric: tabular-nums; }
 .sync-dates { flex: 1 1 100%; list-style: none; margin: 0; padding: 0; font-size: 14px; color: var(--soft); }
 .sync-dates li { display: flex; gap: 10px; justify-content: space-between; padding: 2px 0; }
@@ -714,6 +715,7 @@ label.btn { cursor: pointer; }
         <label class="switch"><input type="checkbox" id="optTones"><span>Tone colours <span class="tone-key" aria-hidden="true"><span class="t1">mā</span> <span class="t2">má</span> <span class="t3">mǎ</span> <span class="t4">mà</span> <span class="t5">ma</span></span></span></label>
         <label class="switch"><input type="checkbox" id="optAutoplay"><span>Read each new card aloud</span></label>
         <label class="switch"><input type="checkbox" id="optFadePinyin"><span>Hide pinyin on cards I know well (until I tap)</span></label>
+        <label class="switch"><input type="checkbox" id="optChoicePinyin"><span>Show pinyin in multiple choice</span></label>
         <label class="switch"><input type="checkbox" id="optVibrate"><span>Vibrate on answers</span></label>
       </section>
       <section class="set-group">
@@ -879,6 +881,7 @@ label.btn { cursor: pointer; }
           <dt>汉字 only</dt><dd>Only the characters show; pinyin, tone colours and audio appear when you tap the card. Use it for words you can say but cannot read yet. A word card's back also has <b>Practice these sentences</b>, which opens just that word's example sentences in the current style.</dd>
           <dt>Which tone?</dt><dd>Hear the word, then pick the tone of its first syllable from the four written forms; keys 1–4 pick tones 1–4. Words only. The 21 words whose first syllable is neutral, or changes tone when it is spoken (你好, 可以), come up as normal cards.</dd>
           <dt>Tap a word</dt><dd>In any example sentence, and on sentence cards, the words from HSK 1–3 have a dotted underline. Tap one to see its pinyin and meaning; tap elsewhere or press Esc to close it. On a word card the word itself is highlighted instead.</dd>
+          <dt>Progress per skill</dt><dd>Reading (Chinese → meaning, 汉字 only, multiple choice), recall (meaning → Chinese) and listening (listening, which tone) each keep their own Known and Learning marks and their own Due list, so a word you can read is not marked as one you can say or hear. Words and sentences also keep their own place in the deck.</dd>
           <dt>Fading pinyin</dt><dd>Settings → <b>Hide pinyin on cards I know well</b>. In Chinese → meaning, a card whose next review is a week or more away shows only its characters until you tap it, so the pinyin fades as you learn. Off by default.</dd>
           <dt>Sentences</dt><dd>The same four styles for the 777 example sentences, in the lower half of the practice menu. Each sentence is a card of its own with its own progress, and its back shows the word it comes from.</dd>
         </dl>
@@ -1002,7 +1005,7 @@ label.btn { cursor: pointer; }
   var EXPECTED_LEVELS = __EXPECTED_LEVELS__;
   var MODE_NAMES = { all: 'All cards', due: 'Due for review', learning: 'Learning only', unmarked: 'Unmarked only', hard: 'Hardest words' };
   var STATUS_NAMES = { known: 'Known', learning: 'Learning', unmarked: 'Unmarked' };
-  var REQUIRED_IDS = ['optFadePinyin', 'wordPop', 'wordPopZh', 'wordPopLv', 'wordPopPy', 'wordPopEn', 'wordPopHu', 'btnWordPopSpeak', 'btnWordPopClose', 'app', 'errorBanner', 'errorList', 'modeAll', 'modeLearning', 'modeUnmarked', 'countAll', 'countLearningMode',
+  var REQUIRED_IDS = ['optChoicePinyin', 'progressTitle', 'optFadePinyin', 'wordPop', 'wordPopZh', 'wordPopLv', 'wordPopPy', 'wordPopEn', 'wordPopHu', 'btnWordPopSpeak', 'btnWordPopClose', 'app', 'errorBanner', 'errorList', 'modeAll', 'modeLearning', 'modeUnmarked', 'countAll', 'countLearningMode',
     'countUnmarkedMode', 'btnShuffle', 'btnUndo', 'btnReset', 'btnSelfCheck', 'btnList', 'cardCounter', 'knownCount', 'learningCount',
     'unmarkedCount', 'progressBar', 'progKnown', 'progLearning', 'progressLabel', 'stage', 'card', 'cardNumber', 'cardStatus', 'cardHanzi',
     'cardPinyin', 'btnSpeak', 'speakLabel', 'cardAnswer', 'cardEn', 'cardHu', 'cardExamples', 'revealHint', 'deckEnd', 'endEmoji', 'endTitle',
@@ -1011,7 +1014,7 @@ label.btn { cursor: pointer; }
     'confirmText', 'confirmCancel', 'confirmAlt', 'confirmOk', 'diagView', 'btnCloseDiag', 'diagSummary', 'diagResults', 'btnRunCheck', 'toast', 'vocab-data',
     'syncGroup', 'syncEmailRow', 'syncEmail', 'syncLinkRow', 'syncEmailNote', 'btnSignIn', 'syncAccountRow', 'syncAccount', 'btnSignOut',
     'syncDatesRow', 'syncDates', 'btnSyncNow', 'syncStatus'];
-  var CORE_BUTTONS = ['optFadePinyin', 'btnWordPopSpeak', 'btnWordPopClose', 'btnExport', 'btnImport', 'btnApplyImport', 'revealHint', 'btnHelp', 'btnTourNext', 'btnSettings', 'btnKnown', 'btnLearning', 'btnSkip', 'btnSpeak', 'cardExamples', 'modeDue', 'modeHard', 'optPractice', 'choiceBox', 'cardPrompt', 'btnProgress', 'levelAll', 'level1', 'level2', 'level3', 'card', 'btnShuffle', 'btnUndo', 'btnReset', 'btnSelfCheck',
+  var CORE_BUTTONS = ['optChoicePinyin', 'optFadePinyin', 'btnWordPopSpeak', 'btnWordPopClose', 'btnExport', 'btnImport', 'btnApplyImport', 'revealHint', 'btnHelp', 'btnTourNext', 'btnSettings', 'btnKnown', 'btnLearning', 'btnSkip', 'btnSpeak', 'cardExamples', 'modeDue', 'modeHard', 'optPractice', 'choiceBox', 'cardPrompt', 'btnProgress', 'levelAll', 'level1', 'level2', 'level3', 'card', 'btnShuffle', 'btnUndo', 'btnReset', 'btnSelfCheck',
     'btnList', 'btnCloseList', 'modeAll', 'modeLearning', 'modeUnmarked', 'searchInput', 'confirmOk', 'confirmCancel', 'confirmAlt', 'btnSignIn', 'btnSignOut', 'btnSyncNow'];
 
   var $ = function (id) { return document.getElementById(id); };
@@ -1019,7 +1022,8 @@ label.btn { cursor: pointer; }
   var bound = {};
   var cards = [], wordCards = [], sentCards = [];
   var state = { status: {}, mode: 'all', deck: [], pos: 0, shuffled: false, revealed: false, autoReveal: false, rate: 0.85, voice: '', badVoices: [], voicesTested: false, level: 'all', activity: {}, goal: 20, warmup: true, deckType: 'words',
-    srs: {}, misses: {}, milestones: [], practice: 'zh', toneColors: true, fadePinyin: false, autoplay: false, vibrate: true, seenTour: false };
+    srs: {}, misses: {}, skill: 'read', marks: {}, deckMemory: {}, milestones: [], practice: 'zh', toneColors: true, fadePinyin: false, choicePinyin: true,
+    autoplay: false, vibrate: true, seenTour: false };
   var undoStack = [];
   var busy = false;
   var testing = false;
@@ -1164,6 +1168,7 @@ label.btn { cursor: pointer; }
     sentCards.forEach(function (s, i) { if (mine.indexOf(s.zh) !== -1) deckIdx.push(i); });
     if (!deckIdx.length) return;
     stopSpeech();
+    rememberDeck();
     useDeckType('sentences');
     state.mode = 'all';
     state.deck = deckIdx;
@@ -1182,6 +1187,7 @@ label.btn { cursor: pointer; }
     els.optTones.checked = state.toneColors;
     els.optAutoplay.checked = state.autoplay;
     els.optFadePinyin.checked = state.fadePinyin;
+    els.optChoicePinyin.checked = state.choicePinyin;
     els.optVibrate.checked = state.vibrate;
     els.optWarmup.checked = state.warmup;
     syncPracticeSelect();
@@ -1255,13 +1261,13 @@ label.btn { cursor: pointer; }
   function startImport() {
     var r = parseImport(els.transferText.value);
     if (r.error) { els.transferStatus.textContent = r.error; return; }
-    var cur = markCounts(state.status);
+    var cur = markCounts(marksOf('read').status);
     askConfirm('Replace progress on this device?',
       'The imported progress has ' + r.known + ' known and ' + r.learning + ' learning cards' + (r.last ? ', last studied on ' + r.last : '') +
       '. It replaces the progress on this device (' + cur.known + ' known, ' + cur.learning + ' learning).', 'Replace progress', function () {
         applyImport(r.progress);
         closeOverlay(els.transferView);
-        toast('Progress imported: ' + markCounts(state.status).known + ' known.');
+        toast('Progress imported: ' + markCounts(marksOf('read').status).known + ' known.');
       });
   }
 
@@ -1504,7 +1510,7 @@ label.btn { cursor: pointer; }
     els.btnSyncNow.disabled = sync.busy || !inSession;
     els.syncAccount.textContent = inSession ? 'Signed in as ' + (sync.session.email || 'your account') : '';
     if (!inSession) return;
-    var lc = markCounts(state.status);
+    var lc = markCounts(marksOf('read').status);
     var ls = localStamp();
     var rc = sync.remoteData ? markCounts(sync.remoteData.status || {}) : null;
     var lm = sync.remoteAt ? Date.parse(sync.remoteAt) : 0;
@@ -1603,7 +1609,7 @@ label.btn { cursor: pointer; }
     var ls = localStamp();
     var cloudNewer = Date.parse(remote.updated_at) > (ls ? Date.parse(ls) : 0);
     var rc = markCounts((remote.data && remote.data.status) || {});
-    var lc = markCounts(state.status);
+    var lc = markCounts(marksOf('read').status);
     var keepCloud = function () { applyRemote(remote); };
     // Passing the freshly pulled timestamp is what turns the user's explicit choice into
     // a write the conditional upsert will accept.
@@ -1632,8 +1638,8 @@ label.btn { cursor: pointer; }
 
         if (!remote) {
           renderSyncUI();
-          var lc0 = markCounts(state.status);
-          if (lc0.known || lc0.learning) return doPush('first upload');
+          var anyMarks = Object.keys(SKILLS).some(function (k) { return Object.keys(marksOf(k).status).length > 0; });
+          if (anyMarks) return doPush('first upload');
           setSyncStatus('Signed in. Nothing to upload yet — your progress will sync as you study.');
           return null;
         }
@@ -1734,10 +1740,15 @@ label.btn { cursor: pointer; }
       return null;
     }
   }
+  // The reading skill stays at the top level (status, srs, misses), so older copies of the app still read it;
+  // the other skills go under `skills`.
   function progressSnapshot() {
+    var read = marksOf('read');
+    var other = state.deckType === 'sentences' ? 'words' : 'sentences', mem = {};
+    if (state.deckMemory[other]) mem[other] = state.deckMemory[other];
     return {
       version: 1,
-      status: state.status,
+      status: read.status,
       mode: state.mode,
       deck: state.deck.map(function (i) { return cards[i].zh; }),
       pos: state.pos,
@@ -1751,12 +1762,15 @@ label.btn { cursor: pointer; }
       activity: state.activity,
       goal: state.goal,
       warmup: state.warmup,
-      srs: state.srs,
-      misses: state.misses,
+      srs: read.srs,
+      misses: read.misses,
+      skills: { recall: marksOf('recall'), listen: marksOf('listen') },
+      deckMemory: mem,
       milestones: state.milestones,
       practice: state.practice,
       toneColors: state.toneColors,
       fadePinyin: state.fadePinyin,
+      choicePinyin: state.choicePinyin,
       autoplay: state.autoplay,
       vibrate: state.vibrate,
       seenTour: state.seenTour,
@@ -1789,12 +1803,6 @@ label.btn { cursor: pointer; }
     var anyKey = {};
     wordCards.concat(sentCards).forEach(function (c) { anyKey[c.zh] = true; });
     var hasAny = function (k) { return Object.prototype.hasOwnProperty.call(anyKey, k); };
-    if (saved && saved.status && typeof saved.status === 'object') {
-      Object.keys(saved.status).forEach(function (k) {
-        var v = saved.status[k];
-        if (hasAny(k) && (v === 'known' || v === 'learning')) state.status[k] = v;
-      });
-    }
     if (saved && typeof saved.autoReveal === 'boolean') state.autoReveal = saved.autoReveal;
     if (saved && typeof saved.rate === 'number' && saved.rate >= 0.5 && saved.rate <= 1.5) state.rate = saved.rate;
     if (saved && typeof saved.voice === 'string') state.voice = saved.voice;
@@ -1803,18 +1811,38 @@ label.btn { cursor: pointer; }
     if (saved && (saved.level === 'all' || LEVELS.indexOf(saved.level) !== -1)) state.level = saved.level;
     if (saved && GOALS.indexOf(saved.goal) !== -1) state.goal = saved.goal;
     if (saved && typeof saved.warmup === 'boolean') state.warmup = saved.warmup;
-    ['toneColors', 'fadePinyin', 'autoplay', 'vibrate', 'seenTour'].forEach(function (k) { if (saved && typeof saved[k] === 'boolean') state[k] = saved[k]; });
+    ['toneColors', 'fadePinyin', 'choicePinyin', 'autoplay', 'vibrate', 'seenTour'].forEach(function (k) { if (saved && typeof saved[k] === 'boolean') state[k] = saved[k]; });
     if (saved && PRACTICE[saved.practice]) state.practice = saved.practice;
     dropToneQuiz();
     if (saved && Array.isArray(saved.milestones)) state.milestones = saved.milestones.filter(function (m) { return typeof m === 'string'; }).slice(-500);
-    if (saved && saved.srs && typeof saved.srs === 'object') {
-      Object.keys(saved.srs).forEach(function (k) {
-        var r = saved.srs[k];
-        if (hasAny(k) && r && typeof r.d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(r.d)) state.srs[k] = { b: clampInt(r.b, 0, 5), d: r.d };
+    var readMarks = function (src) {
+      var m = emptyMarks();
+      if (!src || typeof src !== 'object') return m;
+      if (src.status && typeof src.status === 'object') {
+        Object.keys(src.status).forEach(function (k) { var v = src.status[k]; if (hasAny(k) && (v === 'known' || v === 'learning')) m.status[k] = v; });
+      }
+      if (src.srs && typeof src.srs === 'object') {
+        Object.keys(src.srs).forEach(function (k) {
+          var r = src.srs[k];
+          if (hasAny(k) && r && typeof r.d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(r.d)) m.srs[k] = { b: clampInt(r.b, 0, 5), d: r.d };
+        });
+      }
+      if (src.misses && typeof src.misses === 'object') {
+        Object.keys(src.misses).forEach(function (k) { var n = parseInt(src.misses[k], 10); if (hasAny(k) && n > 0) m.misses[k] = n; });
+      }
+      return m;
+    };
+    var sk = saved && saved.skills && typeof saved.skills === 'object' ? saved.skills : {};
+    state.marks = { read: readMarks(saved), recall: readMarks(sk.recall), listen: readMarks(sk.listen) };
+    state.skill = skillOf(state.practice);
+    loadSkill();
+    state.deckMemory = {};
+    if (saved && saved.deckMemory && typeof saved.deckMemory === 'object') {
+      ['words', 'sentences'].forEach(function (t) {
+        var dm = saved.deckMemory[t];
+        if (!dm || typeof dm !== 'object' || !MODE_NAMES[dm.mode] || !Array.isArray(dm.deck)) return;
+        state.deckMemory[t] = { mode: dm.mode, deck: dm.deck.filter(function (z) { return typeof z === 'string' && hasAny(z); }), pos: clampInt(dm.pos, 0, 100000), shuffled: !!dm.shuffled };
       });
-    }
-    if (saved && saved.misses && typeof saved.misses === 'object') {
-      Object.keys(saved.misses).forEach(function (k) { var n = parseInt(saved.misses[k], 10); if (hasAny(k) && n > 0) state.misses[k] = n; });
     }
     if (saved && saved.activity && typeof saved.activity === 'object') {
       Object.keys(saved.activity).forEach(function (k) {
@@ -2035,6 +2063,9 @@ label.btn { cursor: pointer; }
       tiles.appendChild(tile);
     });
     hero.appendChild(tiles);
+    els.progressTitle.textContent = 'Your progress: ' + SKILLS[state.skill].toLowerCase();
+    body.appendChild(el('p', 'pv-skills', 'Known ' + noun(2) + ' per skill: reading ' + knownIn('read') + ', recall ' + knownIn('recall') +
+      ', listening ' + knownIn('listen') + '. The practice style you pick decides which one you are training.'));
     body.appendChild(hero);
     body.appendChild(legend());
 
@@ -2201,12 +2232,77 @@ label.btn { cursor: pointer; }
   }
   // Older progress has marks but no schedule: spread known words over the next days so they do not all fall due at once.
   function migrateSrs() {
-    var i = 0;
-    Object.keys(state.status).forEach(function (zh) {
-      if (state.srs[zh]) return;
-      if (state.status[zh] === 'known') state.srs[zh] = { b: 2, d: addDays(3 + (i++ % 5)) };
-      else state.srs[zh] = { b: 0, d: dayKey() };
+    var i = 0, m = marksOf('read');
+    Object.keys(m.status).forEach(function (zh) {
+      if (m.srs[zh]) return;
+      if (m.status[zh] === 'known') m.srs[zh] = { b: 2, d: addDays(3 + (i++ % 5)) };
+      else m.srs[zh] = { b: 0, d: dayKey() };
     });
+  }
+
+  /* ---------- skills: separate progress per kind of practice ---------- */
+  // Reading (Chinese → meaning, 汉字 only, multiple choice), recall (meaning → Chinese) and listening (listening, which
+  // tone) each keep their own marks, review schedule and miss counts. state.status / srs / misses always hold the
+  // active skill's maps, so the rest of the app needs no skill logic; state.marks holds every skill, and stashSkill()
+  // writes the active maps back before anything reads another skill.
+  var SKILLS = { read: 'Reading', recall: 'Recall', listen: 'Listening' };
+  var SKILL_OF = { zh: 'read', hanzi: 'read', choice: 'read', reverse: 'recall', listen: 'listen', tone: 'listen' };
+  function skillOf(p) { return SKILL_OF[p] || 'read'; }
+  function emptyMarks() { return { status: {}, srs: {}, misses: {} }; }
+  function stashSkill() { state.marks[state.skill] = { status: state.status, srs: state.srs, misses: state.misses }; }
+  function loadSkill() {
+    var m = state.marks[state.skill] || (state.marks[state.skill] = emptyMarks());
+    state.status = m.status;
+    state.srs = m.srs;
+    state.misses = m.misses;
+  }
+  function marksOf(k) { stashSkill(); return state.marks[k] || emptyMarks(); }
+  function resetMarks() { state.marks = { read: emptyMarks(), recall: emptyMarks(), listen: emptyMarks() }; loadSkill(); }
+  // Returns true when the skill changed. Undo entries belong to the skill they were made in, so they go.
+  function useSkill(k) {
+    if (!SKILLS[k]) k = 'read';
+    if (k === state.skill) return false;
+    stashSkill();
+    state.skill = k;
+    loadSkill();
+    undoStack = [];
+    return true;
+  }
+  function knownIn(k) {
+    var st = marksOf(k).status, n = 0;
+    cards.forEach(function (c) { if (st[c.zh] === 'known') n++; });
+    return n;
+  }
+
+  /* ---------- deck memory: words and sentences keep their own place ---------- */
+  function rememberDeck() {
+    state.deckMemory[state.deckType] = { mode: state.mode, deck: state.deck.map(function (i) { return cards[i].zh; }), pos: state.pos, shuffled: state.shuffled };
+  }
+  // Puts back the remembered deck of the active deck type; false when there is none or it no longer fits the level.
+  function recallDeck() {
+    var m = state.deckMemory[state.deckType];
+    if (!m || !MODE_NAMES[m.mode]) return false;
+    var byZh = {};
+    cards.forEach(function (c, i) { byZh[c.zh] = i; });
+    var deck = m.deck.map(function (z) { return byZh[z]; }).filter(function (i) { return i !== undefined; });
+    if (!deck.length || !deck.every(function (i) { return inLevel(cards[i]); })) return false;
+    if (m.mode === 'all' && deck.length !== buildDeck('all').length) return false;
+    stopSpeech();
+    state.mode = m.mode;
+    state.deck = deck;
+    state.pos = clampInt(m.pos, 0, deck.length);
+    state.shuffled = !!m.shuffled;
+    state.revealed = state.autoReveal && state.practice === 'zh';
+    undoStack = [];
+    return true;
+  }
+  // A remembered Due or Learning deck was built from another skill's marks, so after a skill change only "All cards" is reused.
+  function switchDeck(type, skillChanged) {
+    rememberDeck();
+    useDeckType(type);
+    var m = state.deckMemory[state.deckType];
+    if (m && (!skillChanged || m.mode === 'all') && recallDeck()) { render(true); save(); }
+    else setMode(m && MODE_NAMES[m.mode] ? m.mode : state.mode);
   }
 
   /* ---------- tone colours ---------- */
@@ -2488,7 +2584,7 @@ label.btn { cursor: pointer; }
     toneQ = p === 'tone' ? toneQuizTarget(c) : null;
     els.card.classList.toggle('hide-face', p === 'reverse' || p === 'listen');
     // Characters only, the tone quiz and faded pinyin: the reading is the answer, so pinyin, tone colours and audio wait for the reveal.
-    readingHidden = p === 'hanzi' || !!toneQ || (p === 'zh' && state.fadePinyin && wellKnown(c));
+    readingHidden = p === 'hanzi' || !!toneQ || (p === 'zh' && state.fadePinyin && wellKnown(c)) || (p === 'choice' && !state.choicePinyin);
     els.card.classList.toggle('hide-reading', readingHidden);
     els.card.classList.toggle('tone-mode', !!toneQ);
     els.cardPrompt.textContent = '';
@@ -2563,10 +2659,12 @@ label.btn { cursor: pointer; }
     var st = streak();
     STREAK_STEPS.forEach(function (n) { if (st >= n) celebrate('streak-' + n + '-' + addDays(1 - st), '🔥 ' + n + '-day streak! Keep it going.'); });
     var known = countsFor('all').known;
-    KNOWN_STEPS.forEach(function (n) { if (known >= n) celebrate(deck().milestone + 'known-' + n, '🏆 ' + n + ' ' + noun(n) + ' known!'); });
+    // Reading keeps the original milestone ids; the other skills get their own.
+    var sk = state.skill === 'read' ? '' : state.skill + '-', by = sk ? ' (' + SKILLS[state.skill].toLowerCase() + ')' : '';
+    KNOWN_STEPS.forEach(function (n) { if (known >= n) celebrate(deck().milestone + sk + 'known-' + n, '🏆 ' + n + ' ' + noun(n) + ' known' + by + '!'); });
     LEVELS.forEach(function (lv) {
       var c = countsFor(lv);
-      if (c.total && c.known === c.total) celebrate(deck().milestone + 'level-' + lv, '🎓 HSK ' + lv + ' complete: you know all ' + c.total + ' ' + noun(c.total) + '!');
+      if (c.total && c.known === c.total) celebrate(deck().milestone + sk + 'level-' + lv, '🎓 HSK ' + lv + ' complete' + by + ': you know all ' + c.total + ' ' + noun(c.total) + '!');
     });
   }
   var session = { n: 0, k: 0, l: 0, t0: Date.now() };
@@ -3564,6 +3662,9 @@ label.btn { cursor: pointer; }
   }
 
   function functionalTest(add) {
+    stashSkill();
+    var marksSnap = JSON.parse(JSON.stringify(state.marks)), skillSnap = state.skill;
+    var deckMemSnap = JSON.parse(JSON.stringify(state.deckMemory)), choicePySnap = state.choicePinyin;
     var snap = {
       status: JSON.parse(JSON.stringify(state.status)), mode: state.mode, deck: state.deck.slice(), pos: state.pos,
       shuffled: state.shuffled, revealed: state.revealed, autoReveal: state.autoReveal, level: state.level,
@@ -3592,6 +3693,10 @@ label.btn { cursor: pointer; }
       state.practice = 'zh';
       state.toneColors = true;
       state.fadePinyin = false;
+      state.choicePinyin = true;
+      state.skill = 'read';
+      resetMarks();
+      state.deckMemory = {};
       state.autoReveal = false;
       state.level = 'all';
       els.modeAll.click();
@@ -3804,6 +3909,65 @@ label.btn { cursor: pointer; }
       })();
       add('Tap a word in a sentence to see its meaning', lookRes.ok, lookRes.d);
 
+      var pick = function (v) { els.optPractice.value = v; els.optPractice.dispatchEvent(new Event('change')); };
+      var skillRes = (function () {
+        pick('zh');
+        els.modeAll.click();
+        var w = cards[currentIndex()], wi = cards.indexOf(w);
+        var goTo = function () { state.pos = state.deck.indexOf(wi); render(false); };
+        els.btnKnown.click();
+        var readKnown = statusOf(w) === 'known';
+        pick('listen');
+        var separate = state.skill === 'listen' && statusOf(w) === 'unmarked' && counts().known === 0;
+        goTo();
+        els.btnLearning.click();
+        var listenMark = statusOf(w) === 'learning';
+        pick('reverse');
+        var recallEmpty = state.skill === 'recall' && statusOf(w) === 'unmarked';
+        pick('zh');
+        var back = state.skill === 'read' && statusOf(w) === 'known';
+        var snapP = progressSnapshot();
+        var saved = snapP.status[w.zh] === 'known' && snapP.skills.listen.status[w.zh] === 'learning' && !snapP.skills.recall.status[w.zh];
+        restore(JSON.parse(JSON.stringify(snapP)));
+        var round = state.skill === 'read' && state.marks.listen.status[w.zh] === 'learning' && statusOf(w) === 'known';
+        render(false);
+        return { ok: readKnown && separate && listenMark && recallEmpty && back && saved && round,
+          d: w.zh + ' known in reading: ' + readKnown + ', unmarked in listening: ' + separate + ', listening keeps its own mark: ' + listenMark +
+            ', recall untouched: ' + recallEmpty + ', reading unchanged after switching back: ' + back + ', saved per skill: ' + saved + ', restored per skill: ' + round };
+      })();
+      add('Reading, recall and listening keep separate progress', skillRes.ok, skillRes.d);
+
+      var memRes = (function () {
+        pick('zh');
+        els.modeAll.click();
+        state.pos = 3; render(false);
+        pick('s-zh');
+        var sentStart = state.deckType === 'sentences' && state.pos === 0;
+        state.pos = 2; render(false);
+        pick('zh');
+        var wordsBack = state.deckType === 'words' && state.pos === 3 && state.deck.length === wordCards.length;
+        var mem = progressSnapshot().deckMemory.sentences;
+        pick('s-zh');
+        var sentBack = state.deckType === 'sentences' && state.pos === 2;
+        pick('zh');
+        return { ok: sentStart && wordsBack && sentBack && !!mem && mem.pos === 2,
+          d: 'sentences start fresh: ' + sentStart + ', words come back at card 4: ' + wordsBack + ', sentences come back at card 3: ' + sentBack +
+            ', saved: ' + (!!mem && mem.pos === 2) };
+      })();
+      add('Words and sentences each keep their place', memRes.ok, memRes.d);
+
+      var cpRes = (function () {
+        var py = function () { return getComputedStyle(els.cardPinyin).visibility; };
+        state.practice = 'choice'; state.revealed = false;
+        state.choicePinyin = false; render(false);
+        var hidden = py() === 'hidden' && !els.choiceBox.hidden;
+        state.choicePinyin = true; render(false);
+        var shown = py() === 'visible';
+        state.practice = 'zh'; render(false);
+        return { ok: hidden && shown, d: 'pinyin hidden when switched off: ' + hidden + ', shown by default: ' + shown };
+      })();
+      add('Multiple choice can hide the pinyin', cpRes.ok, cpRes.d);
+
       var wordCard = cards[currentIndex()];
       els.card.click();
       var practiceBtn = els.cardExamples.querySelector('.ex-practice');
@@ -3969,6 +4133,11 @@ label.btn { cursor: pointer; }
       state.practice = snap.practice;
       state.toneColors = snap.toneColors;
       state.fadePinyin = snap.fadePinyin;
+      state.marks = marksSnap;
+      state.skill = skillSnap;
+      loadSkill();
+      state.deckMemory = deckMemSnap;
+      state.choicePinyin = choicePySnap;
       closeWordPop(false);
       state.deck = snap.deck;
       state.pos = snap.pos;
@@ -4004,11 +4173,10 @@ label.btn { cursor: pointer; }
     on('btnUndo', 'click', undo);
     on('btnReset', 'click', function () {
       closeOverlay(els.settingsView);
-      askConfirm('Reset all progress?', 'This clears every “Known” and “Still learning” mark, the review schedule and the hardest-word counts for all ' + cards.length + ' words, and starts again from card 1. Your activity history and streak are kept. This cannot be undone.', 'Reset progress', function () {
+      askConfirm('Reset all progress?', 'This clears every “Known” and “Still learning” mark, the review schedule and the hardest-word counts in all three skills (reading, recall, listening) for words and sentences, and starts again from card 1. Your activity history and streak are kept. This cannot be undone.', 'Reset progress', function () {
         stopSpeech();
-        state.status = {};
-        state.srs = {};
-        state.misses = {};
+        resetMarks();
+        state.deckMemory = {};
         setMode('all');
         toast('Progress reset.');
       });
@@ -4189,11 +4357,18 @@ label.btn { cursor: pointer; }
       state.practice = PRACTICE[p] ? p : 'zh';
       state.revealed = state.autoReveal && state.practice === 'zh';
       stopSpeech();
-      if (type !== state.deckType) { useDeckType(type); setMode(state.mode); }
+      var skillChanged = useSkill(skillOf(state.practice));
+      if (type !== state.deckType) switchDeck(type, skillChanged);
+      // A Due, Learning or Hardest deck was built from the previous skill's marks.
+      else if (skillChanged && state.mode !== 'all') setMode(state.mode);
       else { render(true); save(); }
+      if (skillChanged && !testing) {
+        toast(SKILLS[state.skill] + ' has its own progress: ' + counts().known + ' known, ' + dueCount(state.level) + ' due.', 4500);
+      }
     });
     on('optTones', 'change', function () { state.toneColors = els.optTones.checked; render(false); save(); });
     on('optFadePinyin', 'change', function () { state.fadePinyin = els.optFadePinyin.checked; render(false); save(); });
+    on('optChoicePinyin', 'change', function () { state.choicePinyin = els.optChoicePinyin.checked; render(false); save(); });
     on('optAutoplay', 'change', function () { state.autoplay = els.optAutoplay.checked; save(); });
     on('optVibrate', 'change', function () { state.vibrate = els.optVibrate.checked; buzz(15); save(); });
     on('choiceBox', 'click', function (e) {
