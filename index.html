@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#12171d">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mandarin HSK">
+<script>if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) { window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); }); }</script>
 <title>Mandarin HSK Flashcards</title>
 <style>
 :root {
@@ -464,6 +472,25 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
   .icon-btn { width: 40px; }
   .h1-levels { display: none; }
 }
+
+/* Sentences, progress transfer, accessibility */
+.hint { display: block; width: 100%; margin-top: auto; padding: 14px 4px 2px; border: 0; border-radius: 10px; background: transparent; color: var(--muted); font: inherit; font-size: 13px; text-align: center; cursor: pointer; }
+.hint:hover { color: var(--text); }
+.card.sentence .hanzi { flex-wrap: wrap; gap: 0; padding: 10px 4px 0; font-family: var(--zh-font); font-size: clamp(28px, 7.4vw, 42px); line-height: 1.4; }
+.card.sentence .hanzi .cell { width: auto; height: auto; background: none; font-family: var(--zh-font); }
+.card.sentence .pinyin { font-size: clamp(17px, 4.4vw, 21px); }
+.ex-caption { margin: 0 0 -2px; font-size: 12.5px; font-weight: 700; color: var(--muted); }
+.deck-sentences .word-row { grid-template-columns: 34px minmax(0, 1.2fr) minmax(0, 1fr) auto; }
+.deck-sentences .wr-zh { white-space: normal; font-family: var(--zh-font); font-size: 18px; }
+#confirmDialog { z-index: 70; }
+.transfer-body { overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 12px; padding-bottom: 20px; }
+.transfer-body p { margin: 0; max-width: 62ch; color: var(--soft); }
+#transferText { width: 100%; min-height: 150px; resize: vertical; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--text); font: 12.5px/1.45 ui-monospace, Consolas, "Courier New", monospace; }
+.transfer-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.transfer-status { min-height: 1.4em; font-size: 14px; }
+#importFile:focus-visible + label { outline: 3px solid var(--focus); outline-offset: 2px; }
+label.btn { cursor: pointer; }
+.set-btns { display: flex; flex-wrap: wrap; gap: 8px; }
 </style>
 <script>
 /* Early error reporter: shows any JavaScript error visibly on the page, even if the main script fails to load. */
@@ -547,10 +574,18 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
       </div>
       <label class="practice" for="optPractice"><span class="visually-hidden">Practice mode</span>
         <select id="optPractice">
-          <option value="zh">汉字 → meaning</option>
-          <option value="reverse">Meaning → 汉字</option>
-          <option value="listen">Listening</option>
-          <option value="choice">Multiple choice</option>
+          <optgroup label="Words">
+            <option value="zh">汉字 → meaning</option>
+            <option value="reverse">Meaning → 汉字</option>
+            <option value="listen">Listening</option>
+            <option value="choice">Multiple choice</option>
+          </optgroup>
+          <optgroup label="Sentences">
+            <option value="s-zh">Sentences → meaning</option>
+            <option value="s-reverse">Meaning → sentence</option>
+            <option value="s-listen">Sentence listening</option>
+            <option value="s-choice">Sentence multiple choice</option>
+          </optgroup>
         </select>
       </label>
     </div>
@@ -558,7 +593,7 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
 
   <section class="stats" aria-label="Progress">
     <div class="stats-row">
-      <div class="counter" id="cardCounter" aria-live="polite">Card 0 / 0</div>
+      <div class="counter" id="cardCounter">Card 0 / 0</div>
       <div class="deck-tools">
         <button type="button" class="icon-btn small" id="btnShuffle" aria-label="Shuffle the current deck" title="Shuffle">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h3.5c2.5 0 4 1.5 5.5 5s3 5 5.5 5H21M3 17h3.5c1.4 0 2.5-.5 3.4-1.5M14.1 8.5C15 7.5 16.1 7 17.5 7H21M18 4l3 3-3 3M18 14l3 3-3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -580,9 +615,10 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
     </p>
     <p class="visually-hidden" id="progressLabel">0 known</p>
   </section>
+  <div id="srLive" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
 
   <main class="stage" id="stage">
-    <article id="card" class="card" tabindex="0" role="button" aria-expanded="false" aria-describedby="revealHint">
+    <article id="card" class="card" role="group" aria-roledescription="flashcard" aria-label="Flashcard">
       <div class="stamp stamp-know" aria-hidden="true"><span lang="zh-CN">会</span><small>I know it</small></div>
       <div class="stamp stamp-learn" aria-hidden="true"><span lang="zh-CN">学</span><small>Learning</small></div>
       <div class="card-meta">
@@ -592,7 +628,7 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
       <div id="cardPrompt" class="prompt" hidden></div>
       <div class="card-head">
         <div id="cardHanzi" class="hanzi" lang="zh-CN">…</div>
-        <div id="cardPinyin" class="pinyin">Loading…</div>
+        <div id="cardPinyin" class="pinyin" lang="zh-Latn-pinyin">Loading…</div>
         <button type="button" id="btnSpeak" class="speak-btn" aria-label="Read aloud: speak the word and its example sentences (S)"><svg class="speak-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span id="speakLabel">Read aloud</span></button>
       </div>
       <div id="choiceBox" class="choices" hidden></div>
@@ -601,7 +637,7 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
         <div class="meaning"><span class="tag hu">HU</span><p id="cardHu" lang="hu"></p></div>
         <div id="cardExamples" class="examples"></div>
       </div>
-      <div id="revealHint" class="hint">Tap the card to show the meaning</div>
+      <button type="button" id="revealHint" class="hint" aria-expanded="false" aria-controls="cardAnswer">Tap the card to show the meaning</button>
     </article>
 
     <section id="deckEnd" class="card end-card" hidden aria-live="polite">
@@ -665,6 +701,13 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
       </section>
       <section class="set-group">
         <h3>Progress and checks</h3>
+        <div class="set-row">
+          <span class="set-note">Continue on another phone or computer.</span>
+          <span class="set-btns">
+            <button type="button" class="btn small" id="btnExport">Export progress</button>
+            <button type="button" class="btn small" id="btnImport">Import progress</button>
+          </span>
+        </div>
         <div class="set-row">
           <span class="set-note">Clear all Known and Learning marks.</span>
           <button type="button" class="btn small danger-ghost" id="btnReset" aria-label="Reset all progress">Reset progress</button>
@@ -774,6 +817,7 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
           <dt>Meaning → 汉字</dt><dd>See English and Hungarian, say the Chinese word, then tap to check.</dd>
           <dt>Listening</dt><dd>Hear the word, guess it, then tap to see it.</dd>
           <dt>Multiple choice</dt><dd>Pick the right meaning from four. A right answer counts as Known.</dd>
+          <dt>Sentences</dt><dd>The same four styles for the 777 example sentences, in the lower half of the practice menu. Each sentence is a card of its own with its own progress, and its back shows the word it comes from.</dd>
         </dl>
       </section>
 
@@ -804,6 +848,7 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
 
       <section class="help-sec">
         <h3>Keyboard</h3>
+        <p>In the mode and level buttons, the arrow keys move the selection instead.</p>
         <p class="help-keys"><kbd>→</kbd> I know it <kbd>←</kbd> Still learning <kbd>Space</kbd> Skip <kbd>S</kbd> Read aloud <kbd>↑</kbd> <kbd>↓</kbd> Show or hide <kbd>1</kbd>–<kbd>4</kbd> Choose an answer <kbd>Esc</kbd> Close a panel</p>
       </section>
 
@@ -811,7 +856,8 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
         <h3>Your progress is saved on this device</h3>
         <ul>
           <li>Answers are stored in this browser only. Another phone, computer or browser starts fresh, and clearing your browsing data erases them.</li>
-          <li>On a phone, open the page in the browser and choose <b>Add to Home Screen</b> to use it like an app.</li>
+          <li>To continue on another device, open Settings and use <b>Export progress</b>, then <b>Import progress</b> on the other device.</li>
+          <li>On a phone, open the page in the browser and choose <b>Add to Home Screen</b> to use it like an app. Opened from its web address, the home-screen app also works without internet.</li>
         </ul>
       </section>
     </div>
@@ -828,6 +874,30 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
       <button type="button" class="btn ghost" id="btnTourSkip">Skip</button>
       <button type="button" class="btn" id="btnTourBack">Back</button>
       <button type="button" class="btn primary" id="btnTourNext">Next</button>
+    </div>
+  </div>
+</div>
+
+<div id="transferView" class="overlay" hidden>
+  <div class="sheet transfer" role="dialog" aria-modal="true" aria-labelledby="transferTitle">
+    <div class="sheet-head">
+      <h2 id="transferTitle">Export progress</h2>
+      <button type="button" class="close-btn" id="btnCloseTransfer" aria-label="Close">✕</button>
+    </div>
+    <div class="transfer-body">
+      <p id="transferIntro"></p>
+      <label for="transferText" class="visually-hidden">Progress code</label>
+      <textarea id="transferText" spellcheck="false" autocomplete="off"></textarea>
+      <div class="transfer-actions" id="transferExportActions">
+        <button type="button" class="btn primary" id="btnCopyProgress">Copy code</button>
+        <button type="button" class="btn" id="btnDownloadProgress">Save as file</button>
+      </div>
+      <div class="transfer-actions" id="transferImportActions">
+        <input type="file" id="importFile" class="visually-hidden" accept=".json,application/json,text/plain">
+        <label class="btn" for="importFile">Open a file</label>
+        <button type="button" class="btn primary" id="btnApplyImport">Import</button>
+      </div>
+      <p id="transferStatus" class="transfer-status" role="status"></p>
     </div>
   </div>
 </div>
@@ -861,16 +931,16 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
     'unmarkedCount', 'progressBar', 'progKnown', 'progLearning', 'progressLabel', 'stage', 'card', 'cardNumber', 'cardStatus', 'cardHanzi',
     'cardPinyin', 'btnSpeak', 'speakLabel', 'cardAnswer', 'cardEn', 'cardHu', 'cardExamples', 'revealHint', 'deckEnd', 'endEmoji', 'endTitle',
     'endText', 'btnEndRestart', 'btnEndLearning', 'btnEndUnmarked', 'btnEndAll', 'btnLearning', 'btnSkip', 'btnKnown', 'optAutoReveal',
-    'optRate', 'optVoice', 'optWarmup', 'btnTestVoices', 'footnote', 'btnSettings', 'settingsView', 'btnCloseSettings', 'btnHelp', 'helpView', 'btnCloseHelp', 'btnShowTour', 'tourView', 'tourArt', 'tourTitle', 'tourText', 'tourDots', 'btnTourSkip', 'btnTourBack', 'btnTourNext', 'modeDue', 'modeHard', 'countDueMode', 'countHardMode', 'optPractice', 'cardPrompt', 'choiceBox', 'optTones', 'optAutoplay', 'optVibrate', 'summaryView', 'summaryBody', 'btnSummaryClose', 'btnSummaryProgress', 'btnProgress', 'progressView', 'btnCloseProgress', 'pvBody', 'todayPill', 'levelAll', 'level1', 'level2', 'level3', 'countLvAll', 'countLv1', 'countLv2', 'countLv3', 'lvChips', 'listView', 'btnCloseList', 'searchInput', 'listSummary', 'wordList', 'confirmDialog', 'confirmTitle',
+    'optRate', 'optVoice', 'optWarmup', 'btnTestVoices', 'footnote', 'btnSettings', 'settingsView', 'btnCloseSettings', 'btnHelp', 'helpView', 'btnCloseHelp', 'srLive', 'transferView', 'transferTitle', 'transferIntro', 'transferText', 'btnCloseTransfer', 'btnCopyProgress', 'btnDownloadProgress', 'transferExportActions', 'transferImportActions', 'importFile', 'btnApplyImport', 'transferStatus', 'btnExport', 'btnImport', 'listTitle', 'btnShowTour', 'tourView', 'tourArt', 'tourTitle', 'tourText', 'tourDots', 'btnTourSkip', 'btnTourBack', 'btnTourNext', 'modeDue', 'modeHard', 'countDueMode', 'countHardMode', 'optPractice', 'cardPrompt', 'choiceBox', 'optTones', 'optAutoplay', 'optVibrate', 'summaryView', 'summaryBody', 'btnSummaryClose', 'btnSummaryProgress', 'btnProgress', 'progressView', 'btnCloseProgress', 'pvBody', 'todayPill', 'levelAll', 'level1', 'level2', 'level3', 'countLvAll', 'countLv1', 'countLv2', 'countLv3', 'lvChips', 'listView', 'btnCloseList', 'searchInput', 'listSummary', 'wordList', 'confirmDialog', 'confirmTitle',
     'confirmText', 'confirmCancel', 'confirmOk', 'diagView', 'btnCloseDiag', 'diagSummary', 'diagResults', 'btnRunCheck', 'toast', 'vocab-data'];
-  var CORE_BUTTONS = ['btnHelp', 'btnTourNext', 'btnSettings', 'btnKnown', 'btnLearning', 'btnSkip', 'btnSpeak', 'cardExamples', 'modeDue', 'modeHard', 'optPractice', 'choiceBox', 'cardPrompt', 'btnProgress', 'levelAll', 'level1', 'level2', 'level3', 'card', 'btnShuffle', 'btnUndo', 'btnReset', 'btnSelfCheck',
+  var CORE_BUTTONS = ['btnExport', 'btnImport', 'btnApplyImport', 'revealHint', 'btnHelp', 'btnTourNext', 'btnSettings', 'btnKnown', 'btnLearning', 'btnSkip', 'btnSpeak', 'cardExamples', 'modeDue', 'modeHard', 'optPractice', 'choiceBox', 'cardPrompt', 'btnProgress', 'levelAll', 'level1', 'level2', 'level3', 'card', 'btnShuffle', 'btnUndo', 'btnReset', 'btnSelfCheck',
     'btnList', 'btnCloseList', 'modeAll', 'modeLearning', 'modeUnmarked', 'searchInput', 'confirmOk', 'confirmCancel'];
 
   var $ = function (id) { return document.getElementById(id); };
   var els = {};
   var bound = {};
-  var cards = [];
-  var state = { status: {}, mode: 'all', deck: [], pos: 0, shuffled: false, revealed: false, autoReveal: false, rate: 0.85, voice: '', badVoices: [], voicesTested: false, level: 'all', activity: {}, goal: 20, warmup: true,
+  var cards = [], wordCards = [], sentCards = [];
+  var state = { status: {}, mode: 'all', deck: [], pos: 0, shuffled: false, revealed: false, autoReveal: false, rate: 0.85, voice: '', badVoices: [], voicesTested: false, level: 'all', activity: {}, goal: 20, warmup: true, deckType: 'words',
     srs: {}, misses: {}, milestones: [], practice: 'zh', toneColors: true, autoplay: false, vibrate: true, seenTour: false };
   var undoStack = [];
   var busy = false;
@@ -940,7 +1010,7 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
 
   function validateCards() {
     var missing = [], dups = [], seen = {};
-    cards.forEach(function (c) {
+    wordCards.forEach(function (c) {
       var miss = [];
       if (!c.zh) miss.push('Chinese');
       if (!c.py) miss.push('pinyin');
@@ -959,8 +1029,153 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
         seen[c.zh] = true;
       }
     });
-    return { count: cards.length, missing: missing, dups: dups };
+    return { count: wordCards.length, missing: missing, dups: dups };
   }
+
+  /* ---------- words or sentences ---------- */
+  // Sentence cards are built from the words' example sentences; a sentence used by two words lists both.
+  function buildSentences(words) {
+    var map = {}, list = [];
+    words.forEach(function (w) {
+      w.ex.forEach(function (e) {
+        var s = map[e.zh];
+        if (!s) {
+          s = map[e.zh] = { zh: e.zh, py: e.py, en: e.en, hu: e.hu, ex: [], lv: w.lv, sentence: true };
+          list.push(s);
+        }
+        s.lv = Math.min(s.lv, w.lv);
+        s.ex.push({ zh: w.zh, py: w.py, en: w.en, hu: w.hu });
+      });
+    });
+    list.forEach(function (s, i) {
+      s.n = i + 1;
+      s.search = fold([s.zh, s.py, s.en, s.hu].join(' | '));
+      s.searchCompact = compact(s.search);
+    });
+    return list;
+  }
+  function isSent() { return state.deckType === 'sentences'; }
+  function noun(n) { return isSent() ? (n === 1 ? 'sentence' : 'sentences') : (n === 1 ? 'word' : 'words'); }
+  function useDeckType(t) {
+    state.deckType = t === 'sentences' ? 'sentences' : 'words';
+    cards = isSent() ? sentCards : wordCards;
+    document.body.classList.toggle('deck-sentences', isSent());
+    if (els.card) els.card.classList.toggle('sentence', isSent());
+  }
+  function syncPracticeSelect() { els.optPractice.value = (isSent() ? 's-' : '') + state.practice; }
+  function syncSettingsUI() {
+    els.optAutoReveal.checked = state.autoReveal;
+    els.optTones.checked = state.toneColors;
+    els.optAutoplay.checked = state.autoplay;
+    els.optVibrate.checked = state.vibrate;
+    els.optWarmup.checked = state.warmup;
+    syncPracticeSelect();
+    var rateOpt = String(state.rate);
+    els.optRate.value = ['0.6', '0.85', '1'].indexOf(rateOpt) !== -1 ? rateOpt : '0.85';
+    state.rate = parseFloat(els.optRate.value);
+  }
+  function announce(msg) {
+    if (testing || !els.srLive) return;
+    els.srLive.textContent = '';
+    setTimeout(function () { els.srLive.textContent = msg; }, 40);
+  }
+
+  /* ---------- move progress between devices ---------- */
+  var APP_ID = 'mandarin-hsk-flashcards';
+  var DEVICE_ONLY = ['voice', 'badVoices', 'voicesTested', 'warmup'];
+  function exportText() {
+    var p = progressSnapshot();
+    DEVICE_ONLY.forEach(function (k) { delete p[k]; });
+    return JSON.stringify({ app: APP_ID, version: 1, exported: new Date().toISOString(), progress: p });
+  }
+  function parseImport(text) {
+    var obj;
+    try { obj = JSON.parse(String(text || '').trim()); } catch (e) {
+      return { error: 'This is not a progress code. Paste the whole code you copied, or open the saved file.' };
+    }
+    var p = obj && obj.app === APP_ID ? obj.progress : (obj && obj.version === 1 && obj.status ? obj : null);
+    if (!p || typeof p !== 'object' || !p.status || typeof p.status !== 'object') {
+      return { error: 'This code does not contain Mandarin HSK progress.' };
+    }
+    var k = 0, l = 0;
+    Object.keys(p.status).forEach(function (z) { if (p.status[z] === 'known') k++; else if (p.status[z] === 'learning') l++; });
+    var days = Object.keys(p.activity || {}).sort();
+    return { progress: p, known: k, learning: l, last: days[days.length - 1] || null };
+  }
+  function applyImport(p) {
+    stopSpeech();
+    DEVICE_ONLY.forEach(function (k) { delete p[k]; });
+    state.status = {}; state.srs = {}; state.misses = {}; state.activity = {}; state.milestones = [];
+    useDeckType(p.deckType === 'sentences' ? 'sentences' : 'words');
+    restore(p);
+    migrateSrs();
+    undoStack = [];
+    syncSettingsUI();
+    render(true);
+    save();
+  }
+  function markCounts(status) {
+    var k = 0, l = 0;
+    Object.keys(status).forEach(function (z) { if (status[z] === 'known') k++; else if (status[z] === 'learning') l++; });
+    return { known: k, learning: l };
+  }
+  function openTransfer(mode) {
+    var exp = mode === 'export';
+    els.transferTitle.textContent = exp ? 'Export progress' : 'Import progress';
+    els.transferIntro.textContent = exp
+      ? 'Copy this code or save it as a file, then use “Import progress” on your other device. It holds your marks, review schedule, streak and study settings.'
+      : 'Paste a progress code, or open a saved progress file. Importing replaces the progress on this device.';
+    els.transferText.value = exp ? exportText() : '';
+    els.transferText.readOnly = exp;
+    els.transferText.placeholder = exp ? '' : 'Paste your progress code here';
+    els.transferExportActions.hidden = !exp;
+    // Embedded viewers (such as the claude.ai link) block downloads, so only offer copying there.
+    var embedded = true;
+    try { embedded = window.self !== window.top; } catch (e) { embedded = true; }
+    els.btnDownloadProgress.hidden = embedded;
+    els.transferImportActions.hidden = exp;
+    els.transferStatus.textContent = '';
+    closeOverlay(els.settingsView);
+    openOverlay(els.transferView, exp ? els.btnCopyProgress : els.transferText);
+  }
+  function startImport() {
+    var r = parseImport(els.transferText.value);
+    if (r.error) { els.transferStatus.textContent = r.error; return; }
+    var cur = markCounts(state.status);
+    askConfirm('Replace progress on this device?',
+      'The imported progress has ' + r.known + ' known and ' + r.learning + ' learning cards' + (r.last ? ', last studied on ' + r.last : '') +
+      '. It replaces the progress on this device (' + cur.known + ' known, ' + cur.learning + ' learning).', 'Replace progress', function () {
+        applyImport(r.progress);
+        closeOverlay(els.transferView);
+        toast('Progress imported: ' + markCounts(state.status).known + ' known.');
+      });
+  }
+
+  /* ---------- keyboard helpers ---------- */
+  // Arrow keys move the selection inside a group of radio buttons (study mode, HSK level).
+  function moveRadio(radio, dir) {
+    var group = radio.closest('[role="radiogroup"]');
+    if (!group) return;
+    var radios = Array.prototype.slice.call(group.querySelectorAll('[role="radio"]'));
+    var next = radios[(radios.indexOf(radio) + dir + radios.length) % radios.length];
+    next.click();
+    next.focus();
+  }
+  function syncRovingTabs() {
+    document.querySelectorAll('[role="radiogroup"]').forEach(function (g) {
+      g.querySelectorAll('[role="radio"]').forEach(function (r) { r.tabIndex = r.getAttribute('aria-checked') === 'true' ? 0 : -1; });
+    });
+  }
+  function accessibleName(n) {
+    if (n.getAttribute('aria-label')) return n.getAttribute('aria-label');
+    var lb = n.getAttribute('aria-labelledby');
+    if (lb && $(lb)) return $(lb).textContent.trim();
+    if (n.id) { var l = document.querySelector('label[for="' + n.id + '"]'); if (l && l.textContent.trim()) return l.textContent.trim(); }
+    var wrap = n.closest('label');
+    if (wrap && wrap.textContent.trim()) return wrap.textContent.trim();
+    return (n.textContent || '').trim() || n.title || n.placeholder || '';
+  }
+
 
   /* ---------- persistence ---------- */
   function loadSaved() {
@@ -972,34 +1187,38 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
       return null;
     }
   }
+  function progressSnapshot() {
+    return {
+      version: 1,
+      status: state.status,
+      mode: state.mode,
+      deck: state.deck.map(function (i) { return cards[i].zh; }),
+      pos: state.pos,
+      shuffled: state.shuffled,
+      autoReveal: state.autoReveal,
+      rate: state.rate,
+      voice: state.voice,
+      badVoices: state.badVoices,
+      voicesTested: state.voicesTested,
+      level: state.level,
+      activity: state.activity,
+      goal: state.goal,
+      warmup: state.warmup,
+      srs: state.srs,
+      misses: state.misses,
+      milestones: state.milestones,
+      practice: state.practice,
+      toneColors: state.toneColors,
+      autoplay: state.autoplay,
+      vibrate: state.vibrate,
+      seenTour: state.seenTour,
+      deckType: state.deckType
+    };
+  }
   function save() {
     if (testing) return;
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        version: 1,
-        status: state.status,
-        mode: state.mode,
-        deck: state.deck.map(function (i) { return cards[i].zh; }),
-        pos: state.pos,
-        shuffled: state.shuffled,
-        autoReveal: state.autoReveal,
-        rate: state.rate,
-        voice: state.voice,
-        badVoices: state.badVoices,
-        voicesTested: state.voicesTested,
-        level: state.level,
-        activity: state.activity,
-        goal: state.goal,
-        warmup: state.warmup,
-        srs: state.srs,
-        misses: state.misses,
-        milestones: state.milestones,
-        practice: state.practice,
-        toneColors: state.toneColors,
-        autoplay: state.autoplay,
-        vibrate: state.vibrate,
-        seenTour: state.seenTour
-      }));
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(progressSnapshot()));
       storageOK = true;
     } catch (e) {
       storageOK = false;
@@ -1014,10 +1233,13 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
     var byZh = {};
     cards.forEach(function (c, i) { byZh[c.zh] = i; });
     var has = function (k) { return Object.prototype.hasOwnProperty.call(byZh, k); };
+    var anyKey = {};
+    wordCards.concat(sentCards).forEach(function (c) { anyKey[c.zh] = true; });
+    var hasAny = function (k) { return Object.prototype.hasOwnProperty.call(anyKey, k); };
     if (saved && saved.status && typeof saved.status === 'object') {
       Object.keys(saved.status).forEach(function (k) {
         var v = saved.status[k];
-        if (has(k) && (v === 'known' || v === 'learning')) state.status[k] = v;
+        if (hasAny(k) && (v === 'known' || v === 'learning')) state.status[k] = v;
       });
     }
     if (saved && typeof saved.autoReveal === 'boolean') state.autoReveal = saved.autoReveal;
@@ -1034,11 +1256,11 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
     if (saved && saved.srs && typeof saved.srs === 'object') {
       Object.keys(saved.srs).forEach(function (k) {
         var r = saved.srs[k];
-        if (has(k) && r && typeof r.d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(r.d)) state.srs[k] = { b: clampInt(r.b, 0, 5), d: r.d };
+        if (hasAny(k) && r && typeof r.d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(r.d)) state.srs[k] = { b: clampInt(r.b, 0, 5), d: r.d };
       });
     }
     if (saved && saved.misses && typeof saved.misses === 'object') {
-      Object.keys(saved.misses).forEach(function (k) { var n = parseInt(saved.misses[k], 10); if (has(k) && n > 0) state.misses[k] = n; });
+      Object.keys(saved.misses).forEach(function (k) { var n = parseInt(saved.misses[k], 10); if (hasAny(k) && n > 0) state.misses[k] = n; });
     }
     if (saved && saved.activity && typeof saved.activity === 'object') {
       Object.keys(saved.activity).forEach(function (k) {
@@ -1249,7 +1471,7 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
     var hero = el('div', 'pv-hero');
     hero.appendChild(ring(all));
     var tiles = el('div', 'pv-tiles');
-    [['Known', all.known, 'of ' + all.total + ' words'], ['Learning', all.learning, 'to practise'],
+    [['Known', all.known, 'of ' + all.total + ' ' + noun(all.total)], ['Learning', all.learning, 'to practise'],
      ['New', all.unmarked, 'not marked yet'], ['Due', dueCount('all'), 'to review today'], ['Streak', st, st === 1 ? 'day 🔥' : 'days 🔥'],
      ['Today', today, 'of ' + state.goal + ' goal']].forEach(function (t) {
       var tile = el('div', 'pv-tile');
@@ -1293,7 +1515,7 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
       row.appendChild(el('span', 'pv-lv-name', 'HSK ' + lv));
       row.appendChild(stackBar(n));
       row.appendChild(el('span', 'pv-lv-pct', pct(n.known, n.total) + '%'));
-      row.appendChild(el('span', 'pv-lv-text', n.known + ' known · ' + n.learning + ' learning · ' + n.unmarked + ' new · ' + n.total + ' words'));
+      row.appendChild(el('span', 'pv-lv-text', n.known + ' known · ' + n.learning + ' learning · ' + n.unmarked + ' new · ' + n.total + ' ' + noun(n.total)));
       lvSec.appendChild(row);
     });
     body.appendChild(lvSec);
@@ -1349,7 +1571,7 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
     body.appendChild(actSec);
 
     // Word map
-    var mapSec = section('Every word', 'Each square is one word. Hover or tap to see it, tap again to study it.');
+    var mapSec = section(isSent() ? 'Every sentence' : 'Every word', 'Each square is one ' + noun(1) + '. Hover or tap to see it, tap again to study it.');
     var info = el('p', 'pv-info', 'Pick a square to see the word.');
     LEVELS.forEach(function (lv) {
       var n = countsFor(lv);
@@ -1524,6 +1746,8 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
     if (!ok) b.classList.add('wrong');
     buzz(ok ? 12 : [30, 60, 30]);
     if (!ok) setRevealed(true);
+    var right = cards[currentIndex()];
+    announce(ok ? 'Correct.' : 'Not quite. The answer is: ' + shortText(right.en) + '.');
     if (testing) { act(ok ? 'known' : 'learning'); return; }
     var pos = state.pos;
     setTimeout(function () { if (state.pos === pos && !busy) act(ok ? 'known' : 'learning'); }, ok ? 650 : 1800);
@@ -1536,14 +1760,14 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
       var en = el('p', 'prompt-en', c.en);
       var hu = el('p', 'prompt-hu', c.hu);
       hu.setAttribute('lang', 'hu');
-      els.cardPrompt.appendChild(el('p', 'prompt-q', 'What is this in Chinese?'));
+      els.cardPrompt.appendChild(el('p', 'prompt-q', isSent() ? 'Say this in Chinese:' : 'What is this in Chinese?'));
       els.cardPrompt.appendChild(en);
       els.cardPrompt.appendChild(hu);
     } else if (p === 'listen') {
-      var lb = el('button', 'listen-btn', '🔊 Play the word');
+      var lb = el('button', 'listen-btn', isSent() ? '🔊 Play the sentence' : '🔊 Play the word');
       lb.type = 'button';
       lb.id = 'btnListen';
-      els.cardPrompt.appendChild(el('p', 'prompt-q', 'Listen. Which word is it?'));
+      els.cardPrompt.appendChild(el('p', 'prompt-q', isSent() ? 'Listen. What does it say?' : 'Listen. Which word is it?'));
       els.cardPrompt.appendChild(lb);
     }
     els.choiceBox.hidden = p !== 'choice';
@@ -1600,10 +1824,10 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
     var st = streak();
     STREAK_STEPS.forEach(function (n) { if (st >= n) celebrate('streak-' + n + '-' + addDays(1 - st), '🔥 ' + n + '-day streak! Keep it going.'); });
     var known = countsFor('all').known;
-    KNOWN_STEPS.forEach(function (n) { if (known >= n) celebrate('known-' + n, '🏆 ' + n + ' words known!'); });
+    KNOWN_STEPS.forEach(function (n) { if (known >= n) celebrate((isSent() ? 'sentence-known-' : 'known-') + n, '🏆 ' + n + ' ' + noun(n) + ' known!'); });
     LEVELS.forEach(function (lv) {
       var c = countsFor(lv);
-      if (c.total && c.known === c.total) celebrate('level-' + lv, '🎓 HSK ' + lv + ' complete: you know all ' + c.total + ' words!');
+      if (c.total && c.known === c.total) celebrate((isSent() ? 'sentence-level-' : 'level-') + lv, '🎓 HSK ' + lv + ' complete: you know all ' + c.total + ' ' + noun(c.total) + '!');
     });
   }
   var session = { n: 0, k: 0, l: 0, t0: Date.now() };
@@ -1643,7 +1867,7 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
     { art: 'seal', title: 'Welcome to Mandarin HSK', text: '598 words from HSK 1 to 3, with pinyin, English, Hungarian and example sentences. Here is how to use it in four quick steps.' },
     { art: 'swipe', title: 'Know it? Swipe right', text: 'Swipe right or press “I know it” when you know a word. Swipe left or press “Still learning” when you don’t. Tap the card to see the meaning and examples.' },
     { art: 'speak', title: 'Listen to every word', text: 'Read aloud speaks the word and its example sentences. Colours show the tones: 1st red, 2nd orange, 3rd green, 4th blue.' },
-    { art: 'due', title: 'Review at the right time', text: '“Due” brings back the words you know after 1, 3, 7, 14 and 30 days, and the ones you missed the same day. Try Listening or Multiple choice in the practice menu for variety.' },
+    { art: 'due', title: 'Review at the right time', text: '“Due” brings back the words you know after 1, 3, 7, 14 and 30 days, and the ones you missed the same day. The practice menu also has Listening, Multiple choice and the 777 example sentences as cards of their own.' },
     { art: 'goal', title: 'Keep a streak', text: 'Answer your daily goal of cards to grow your streak. The chart button shows your progress per level. The ? button brings back this help any time.' }
   ];
   var tourStep = 0;
@@ -1755,7 +1979,8 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
   function setRevealed(v) {
     state.revealed = !!v;
     els.card.classList.toggle('revealed', state.revealed);
-    els.card.setAttribute('aria-expanded', state.revealed ? 'true' : 'false');
+    els.revealHint.setAttribute('aria-expanded', state.revealed ? 'true' : 'false');
+    els.revealHint.setAttribute('aria-label', state.revealed ? 'Hide the answer' : 'Show the answer');
     var p = state.practice;
     els.cardPrompt.hidden = state.revealed || (p !== 'reverse' && p !== 'listen');
     els.revealHint.textContent = state.revealed
@@ -1780,7 +2005,7 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
   function showCard(c, animate) {
     els.deckEnd.hidden = true;
     els.card.hidden = false;
-    els.cardNumber.textContent = 'HSK ' + c.lv + ' · #' + c.n;
+    els.cardNumber.textContent = 'HSK ' + c.lv + ' · ' + (c.sentence ? 'sentence ' : '#') + c.n;
     renderHanzi(els.cardHanzi, c.zh, c.py);
     els.cardHanzi.setAttribute('data-len', String(Math.min(6, charLen(c.zh))));
     renderPinyin(els.cardPinyin, c.py);
@@ -1797,6 +2022,7 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
       var zh = el('p', 'ex-zh', e.zh);
       zh.setAttribute('lang', 'zh-CN');
       var py = el('p', 'ex-py');
+      py.setAttribute('lang', 'zh-Latn-pinyin');
       renderPinyin(py, e.py);
       var en = el('p', 'ex-line');
       en.appendChild(el('span', 'tag en', 'EN'));
@@ -1808,6 +2034,7 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
       box.appendChild(sb); box.appendChild(zh); box.appendChild(py); box.appendChild(en); box.appendChild(hu);
       els.cardExamples.appendChild(box);
     });
+    if (c.sentence) els.cardExamples.insertBefore(el('p', 'ex-caption', c.ex.length > 1 ? 'From the words' : 'From the word'), els.cardExamples.firstChild);
     var s = statusOf(c);
     els.cardStatus.textContent = s === 'unmarked' ? 'New' : STATUS_NAMES[s];
     els.cardStatus.className = 'status-tag' + (s === 'unmarked' ? '' : ' ' + s);
@@ -1821,6 +2048,10 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
       els.card.classList.remove('enter');
       void els.card.offsetWidth;
       els.card.classList.add('enter');
+    }
+    if (animate && !testing) {
+      announce('Card ' + (state.pos + 1) + ' of ' + state.deck.length + '. ' + (state.practice === 'reverse' ? 'Meaning: ' + c.en + '.' :
+        state.practice === 'listen' ? 'Listen to the ' + noun(1) + '.' : c.zh + ', ' + c.py + '.'));
     }
     if (animate && !testing && (state.autoplay || state.practice === 'listen') && userHasInteracted) {
       var pos = state.pos;
@@ -1896,6 +2127,7 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
       var b = els[id];
       b.setAttribute('aria-checked', b.getAttribute('data-level') === state.level ? 'true' : 'false');
     });
+    syncRovingTabs();
     els.countLvAll.textContent = String(cards.length);
     LEVELS.forEach(function (lv) { var n = countsFor(lv); els['countLv' + lv].textContent = n.known + '/' + n.total; });
     updateToday();
@@ -2207,13 +2439,14 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
 
   /* ---------- overlays ---------- */
   function anyOverlayOpen() {
-    return !els.listView.hidden || !els.diagView.hidden || !els.confirmDialog.hidden || !els.progressView.hidden || !els.summaryView.hidden || !els.settingsView.hidden || !els.helpView.hidden || !els.tourView.hidden;
+    return !els.listView.hidden || !els.diagView.hidden || !els.confirmDialog.hidden || !els.progressView.hidden || !els.summaryView.hidden || !els.settingsView.hidden || !els.helpView.hidden || !els.tourView.hidden || !els.transferView.hidden;
   }
   function openOverlay(node, focusEl) {
     if (anyOverlayOpen() === false) lastFocus = document.activeElement;
     stopSpeech();
     node.hidden = false;
     document.body.classList.add('modal-open');
+    els.app.inert = true;
     if (focusEl && !testing) { try { focusEl.focus({ preventScroll: true }); } catch (e) { focusEl.focus(); } }
   }
   function closeOverlay(node) {
@@ -2221,6 +2454,7 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
     node.hidden = true;
     if (!anyOverlayOpen()) {
       document.body.classList.remove('modal-open');
+      els.app.inert = false;
       if (lastFocus && lastFocus.focus && !testing && document.contains(lastFocus)) {
         try { lastFocus.focus({ preventScroll: true }); } catch (e) { /* ignore */ }
       }
@@ -2236,6 +2470,7 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
 
   /* ---------- list view ---------- */
   function openList() {
+    els.listTitle.textContent = isSent() ? 'All sentences' : 'All words';
     openOverlay(els.listView, els.searchInput);
     renderList();
     var cur = els.wordList.querySelector('.word-row.current');
@@ -2266,6 +2501,7 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
       b.appendChild(zh);
       var txt = el('span', 'wr-text');
       var wpy = el('span', 'wr-py');
+      wpy.setAttribute('lang', 'zh-Latn-pinyin');
       renderPinyin(wpy, c.py);
       txt.appendChild(wpy);
       txt.appendChild(el('span', 'wr-mean', c.en + ' · ' + c.hu));
@@ -2316,7 +2552,7 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
     closeOverlay(els.listView);
     render(true);
     save();
-    if (!testing) { try { els.card.focus({ preventScroll: true }); } catch (e) { /* ignore */ } }
+    if (!testing) { try { els.revealHint.focus({ preventScroll: true }); } catch (e) { /* ignore */ } }
   }
 
   /* ---------- keyboard ---------- */
@@ -2330,6 +2566,7 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
         if (!els.confirmDialog.hidden) { confirmCallback = null; closeOverlay(els.confirmDialog); }
         else if (!els.diagView.hidden) closeOverlay(els.diagView);
         else if (!els.summaryView.hidden) closeOverlay(els.summaryView);
+        else if (!els.transferView.hidden) closeOverlay(els.transferView);
         else if (!els.tourView.hidden) closeTour();
         else if (!els.helpView.hidden) closeOverlay(els.helpView);
         else if (!els.settingsView.hidden) closeOverlay(els.settingsView);
@@ -2339,6 +2576,15 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
       return;
     }
     if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (t && t.isContentEditable)) return;
+    var control = t && t.closest ? t.closest('button, a, summary, [role="radio"]') : null;
+    if (control) {
+      if (e.key === ' ' || e.key === 'Spacebar' || e.key === 'Enter') return;
+      if (control.getAttribute('role') === 'radio' && /^Arrow/.test(e.key)) {
+        e.preventDefault();
+        moveRadio(control, e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : -1);
+        return;
+      }
+    }
     switch (e.key) {
       case 'ArrowRight': e.preventDefault(); act('known'); break;
       case 'ArrowLeft': e.preventDefault(); act('learning'); break;
@@ -2354,14 +2600,26 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
       default: break;
     }
   }
-  function onKeyUp(e) {
-    // Stop a focused button from also "clicking" when Space is used as the Skip shortcut.
-    var t = e.target;
-    if ((e.key === ' ' || e.key === 'Spacebar') && t && t.tagName === 'BUTTON' && !anyOverlayOpen()) e.preventDefault();
+  function onKeyUp() {
+    // Space and Enter now work normally on focused buttons; a mouse click blurs the button, so Space still skips.
   }
 
   /* ---------- self-check ---------- */
   function runSelfCheck() {
+    // The checks run on the word deck; a sentence session is put back afterwards.
+    var outer = { type: state.deckType, deck: state.deck.slice(), pos: state.pos, mode: state.mode, shuffled: state.shuffled };
+    if (outer.type !== 'words') { useDeckType('words'); state.deck = buildDeck(state.mode); state.pos = 0; }
+    var result = runSelfCheckWords();
+    if (outer.type !== 'words') {
+      useDeckType(outer.type);
+      state.deck = outer.deck; state.pos = outer.pos; state.mode = outer.mode; state.shuffled = outer.shuffled;
+      syncPracticeSelect();
+      render(false);
+      save();
+    }
+    return result;
+  }
+  function runSelfCheckWords() {
     var results = [];
     var add = function (name, ok, detail, info) { results.push({ name: name, ok: ok, detail: detail || '', info: !!info }); };
 
@@ -2425,6 +2683,8 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
     var undoSnap = undoStack.slice();
     var diagWasOpen = !els.diagView.hidden;
     var tourWasOpen = !els.tourView.hidden, seenTourSnap = state.seenTour;
+    var activitySnap = JSON.parse(JSON.stringify(state.activity)), milestoneSnap = state.milestones.slice();
+    els.app.inert = false;
     els.tourView.hidden = true;
     els.helpView.hidden = true;
     var searchSnap = els.searchInput.value;
@@ -2568,6 +2828,70 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
       add('Help sheet and quick tour', helpOk && tourOpen && lastStep && back && tourClosed,
         'help opens: ' + helpOk + ', tour opens from help: ' + tourOpen + ', steps through ' + TOUR.length + ' screens: ' + lastStep + ', back works: ' + back + ', skip closes: ' + tourClosed);
 
+      var sentRes = (function () {
+        state.status = {}; state.srs = {};
+        els.optPractice.value = 's-zh';
+        els.optPractice.dispatchEvent(new Event('change'));
+        var switched = state.deckType === 'sentences' && cards === sentCards && state.deck.length === sentCards.length && els.card.classList.contains('sentence');
+        var s0 = cards[currentIndex()];
+        var shows = els.cardHanzi.textContent === s0.zh && els.cardPinyin.textContent === s0.py && els.cardExamples.textContent.indexOf(s0.ex[0].zh) !== -1;
+        els.btnKnown.click();
+        var marked = state.status[s0.zh] === 'known' && state.pos === 1 && els.knownCount.textContent === '1';
+        els.optPractice.value = 'zh';
+        els.optPractice.dispatchEvent(new Event('change'));
+        var back = state.deckType === 'words' && cards === wordCards && !els.card.classList.contains('sentence');
+        return { ok: switched && shows && marked && back, d: sentCards.length + ' sentence cards; switch: ' + switched + ', first sentence shown with its word: ' + shows + ', marking works: ' + marked + ', back to words: ' + back };
+      })();
+      add('Sentence mode', sentRes.ok, sentRes.d);
+
+      var transferRes = (function () {
+        state.status = {}; state.srs = {}; state.misses = {};
+        els.modeAll.click();
+        var a0 = cards[state.deck[0]], a1 = cards[state.deck[1]];
+        els.btnKnown.click();
+        els.btnLearning.click();
+        els.btnExport.click();
+        var code = els.transferText.value;
+        var exported = !els.transferView.hidden && code.indexOf(APP_ID) !== -1 && code.indexOf('badVoices') === -1;
+        els.btnCloseTransfer.click();
+        state.status = {}; state.srs = {}; state.misses = {};
+        els.btnImport.click();
+        els.transferText.value = code;
+        els.btnApplyImport.click();
+        var asked = !els.confirmDialog.hidden;
+        els.confirmOk.click();
+        var imported = state.status[a0.zh] === 'known' && state.status[a1.zh] === 'learning' && !!state.srs[a0.zh] && state.misses[a1.zh] === 1 && els.transferView.hidden;
+        els.btnImport.click();
+        els.transferText.value = 'not a code';
+        els.btnApplyImport.click();
+        var rejected = els.confirmDialog.hidden && /not a progress code/i.test(els.transferStatus.textContent);
+        els.btnCloseTransfer.click();
+        return { ok: exported && asked && imported && rejected, d: 'export: ' + exported + ', asks before replacing: ' + asked + ', import restores marks and schedule: ' + imported + ', rejects a bad code: ' + rejected };
+      })();
+      add('Export and import progress', transferRes.ok, transferRes.d);
+
+      var a11yRes = (function () {
+        var roles = els.card.getAttribute('role') === 'group' && els.revealHint.tagName === 'BUTTON';
+        els.revealHint.click();
+        var open = els.revealHint.getAttribute('aria-expanded') === 'true' && state.revealed;
+        els.revealHint.click();
+        var shut = els.revealHint.getAttribute('aria-expanded') === 'false' && !state.revealed;
+        els.modeAll.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }));
+        var arrows = state.mode === 'due' && els.modeDue.tabIndex === 0 && els.modeAll.tabIndex === -1;
+        els.modeAll.click();
+        els.btnHelp.click();
+        var locked = els.app.inert === true;
+        els.btnCloseHelp.click();
+        locked = locked && els.app.inert === false;
+        var unnamed = Array.prototype.filter.call(document.querySelectorAll('button, select, input, textarea'), function (n) { return !accessibleName(n); })
+          .map(function (n) { return n.id || n.className; });
+        var pinyinLang = els.cardPinyin.getAttribute('lang') === 'zh-Latn-pinyin';
+        return { ok: roles && open && shut && arrows && locked && !unnamed.length && pinyinLang,
+          d: 'card is a group with a show/hide button: ' + roles + ', button reports open/closed: ' + (open && shut) + ', arrow keys move through the mode buttons: ' + arrows +
+             ', page behind a panel is locked: ' + locked + ', controls without a name: ' + (unnamed.length ? unnamed.join(', ') : 'none') + ', pinyin marked as pinyin: ' + pinyinLang };
+      })();
+      add('Accessibility basics', a11yRes.ok, a11yRes.d);
+
       add('Progress overview renders', pvOk && els.progressView.hidden, 'Ring, ' + lvRows + ' level bars, 14-day chart and ' + cells + ' word squares (' + known2 + ' known).');
 
       els.btnList.click();
@@ -2632,6 +2956,8 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
       closeOverlay(els.summaryView);
       closeOverlay(els.settingsView);
       closeOverlay(els.helpView);
+      closeOverlay(els.transferView);
+      useDeckType('words');
       els.tourView.hidden = !tourWasOpen;
       state.seenTour = seenTourSnap;
       confirmCallback = null;
@@ -2653,7 +2979,9 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
       testing = false;
       render(false);
       save();
-      if (diagWasOpen) { els.diagView.hidden = false; document.body.classList.add('modal-open'); }
+      state.activity = activitySnap;
+      state.milestones = milestoneSnap;
+      if (diagWasOpen) { els.diagView.hidden = false; document.body.classList.add('modal-open'); els.app.inert = true; }
     }
   }
 
@@ -2697,6 +3025,55 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
     on('btnEndUnmarked', 'click', function () { setMode('unmarked'); });
     on('btnEndAll', 'click', function () { setMode('all'); });
     on('btnList', 'click', openList);
+    on('revealHint', 'click', function (e) { e.stopPropagation(); toggleReveal(); });
+    on('btnExport', 'click', function () { openTransfer('export'); });
+    on('btnImport', 'click', function () { openTransfer('import'); });
+    on('btnCloseTransfer', 'click', function () { closeOverlay(els.transferView); });
+    on('btnCopyProgress', 'click', function () {
+      var text = els.transferText.value;
+      var done = function (ok) {
+        els.transferStatus.textContent = ok ? 'Copied. Paste it into “Import progress” on your other device.'
+          : 'Copying is blocked here, so the code is selected. Copy it with your device’s copy command.';
+        if (!ok && !testing) { els.transferText.focus(); els.transferText.select(); }
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+      else done(false);
+    });
+    on('btnDownloadProgress', 'click', function () {
+      var name = 'mandarin-progress-' + dayKey() + '.json';
+      try {
+        var url = URL.createObjectURL(new Blob([els.transferText.value], { type: 'application/json' }));
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+        els.transferStatus.textContent = 'Saved as ' + name + '. If no file appears, use Copy code instead.';
+      } catch (err) {
+        els.transferStatus.textContent = 'Saving a file is blocked here. Use Copy code instead.';
+      }
+    });
+    on('importFile', 'change', function () {
+      var f = els.importFile.files && els.importFile.files[0];
+      if (!f) return;
+      var reader = new FileReader();
+      reader.onload = function () {
+        els.transferText.value = String(reader.result || '');
+        els.transferStatus.textContent = 'Loaded ' + f.name + '. Press Import to use it.';
+      };
+      reader.onerror = function () { els.transferStatus.textContent = 'This file could not be read. Try copying the code instead.'; };
+      reader.readAsText(f);
+      els.importFile.value = '';
+    });
+    on('btnApplyImport', 'click', startImport);
+    els.app.addEventListener('click', function (e) {
+      // After a mouse or touch click, give focus back to the page so Space keeps meaning “skip”.
+      if (!e.detail) return;
+      var b = e.target.closest ? e.target.closest('button') : null;
+      if (b) setTimeout(function () { if (document.activeElement === b) b.blur(); }, 0);
+    });
     on('btnSettings', 'click', function () { openOverlay(els.settingsView, els.btnCloseSettings); });
     on('btnHelp', 'click', function () { openOverlay(els.helpView, els.btnCloseHelp); els.helpView.querySelector('.help-body').scrollTop = 0; });
     on('btnCloseHelp', 'click', function () { closeOverlay(els.helpView); });
@@ -2747,7 +3124,7 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
     });
     on('btnRunCheck', 'click', runSelfCheck);
     on('btnCloseDiag', 'click', function () { closeOverlay(els.diagView); });
-    ['listView', 'diagView', 'confirmDialog', 'progressView', 'summaryView', 'settingsView', 'helpView'].forEach(function (id) {
+    ['listView', 'diagView', 'confirmDialog', 'progressView', 'summaryView', 'settingsView', 'helpView', 'transferView'].forEach(function (id) {
       on(id, 'click', function (e) {
         if (e.target !== els[id]) return;
         if (id === 'confirmDialog') confirmCallback = null;
@@ -2771,11 +3148,13 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
     on('modeDue', 'click', function () { setMode('due'); });
     on('modeHard', 'click', function () { setMode('hard'); });
     on('optPractice', 'change', function () {
-      state.practice = PRACTICE[els.optPractice.value] ? els.optPractice.value : 'zh';
+      var v = els.optPractice.value, type = v.indexOf('s-') === 0 ? 'sentences' : 'words';
+      var p = type === 'sentences' ? v.slice(2) : v;
+      state.practice = PRACTICE[p] ? p : 'zh';
       state.revealed = state.autoReveal && state.practice === 'zh';
       stopSpeech();
-      render(true);
-      save();
+      if (type !== state.deckType) { useDeckType(type); setMode(state.mode); }
+      else { render(true); save(); }
     });
     on('optTones', 'change', function () { state.toneColors = els.optTones.checked; render(false); save(); });
     on('optAutoplay', 'change', function () { state.autoplay = els.optAutoplay.checked; save(); });
@@ -2817,22 +3196,18 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
       if (!node) throw new Error('Missing page element #' + id);
       els[id] = node;
     });
-    cards = loadCards();
+    wordCards = loadCards();
+    sentCards = buildSentences(wordCards);
+    cards = wordCards;
     var v = validateCards();
     if (v.count !== EXPECTED_COUNT) reportError('Expected ' + EXPECTED_COUNT + ' vocabulary cards but found ' + v.count + '.');
     if (v.missing.length) reportError(v.missing.length + ' card(s) have missing fields, e.g. ' + v.missing[0] + '. Run the self-check for details.');
     if (v.dups.length) reportError('Duplicate Chinese headwords: ' + v.dups.join(', ') + '.');
-    restore(loadSaved());
+    var saved = loadSaved();
+    useDeckType(saved && saved.deckType === 'sentences' ? 'sentences' : 'words');
+    restore(saved);
     migrateSrs();
-    els.optAutoReveal.checked = state.autoReveal;
-    els.optTones.checked = state.toneColors;
-    els.optAutoplay.checked = state.autoplay;
-    els.optVibrate.checked = state.vibrate;
-    els.optPractice.value = state.practice;
-    els.optWarmup.checked = state.warmup;
-    var rateOpt = String(state.rate);
-    els.optRate.value = ['0.6', '0.85', '1'].indexOf(rateOpt) !== -1 ? rateOpt : '0.85';
-    state.rate = parseFloat(els.optRate.value);
+    syncSettingsUI();
     wire();
     pickVoice();
     render(false);
@@ -2840,7 +3215,7 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
     if (!storageOK) toast('This browser is blocking local storage, so your progress will not be kept after the page is closed.', 7000);
     window.__appStarted = true;
     if (!state.seenTour) setTimeout(function () { if (!anyOverlayOpen()) openTour(); }, 350);
-    window.__mandarinApp = { runSelfCheck: runSelfCheck, state: state, cards: function () { return cards; } };
+    window.__mandarinApp = { runSelfCheck: runSelfCheck, state: state, cards: function () { return cards; }, words: function () { return wordCards; }, sentences: function () { return sentCards; } };
   }
 
   try {
