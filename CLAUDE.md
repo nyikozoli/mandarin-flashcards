@@ -34,6 +34,9 @@ This repository is **public** (`nyikozoli/mandarin-flashcards`). Never commit se
   - Only accounts in `public.sync_allowlist` can read or write `progress` (a restrictive policy plus a check in `upsert_progress`). The ids live only in the database, never in this repo.
 - **Reading hidden:** `applyPractice()` sets `readingHidden` (characters only, the tone quiz, or the opt-in `fadePinyin` for cards in SRS box 3+). Pinyin, tone colours, autoplay and the screen-reader label all follow it.
 - **Word lookup:** `segment()` splits a sentence by longest match against the 598 headwords; known words become `button.w`, and `#wordPop` shows the word. The word list is the whole dictionary, so words outside HSK 1–3 stay plain text.
+- **Extras:** `build.js` adds rank (`rk`), frequency (`fq`) and topic (`tp`) to each card from `data/freq.json` and `data/topics.json`, and puts the topic list, character frequencies and `data/hints.json` in a second JSON block (`extra-data`, read by `loadExtra()` into `EXTRA`). Each file is optional; features hide without it. `data/freq.json` is CC BY-SA 4.0 (wordfreq).
+- **Practice styles:** `PRACTICE` lists them, `SKILL_OF` maps each to a skill, `DECK_ONLY` names styles that exist for one deck (with a same-skill fallback), `CHOICE_STYLES` the ones answered with the 1–4 chips. Per-card question state lives in `toneQ`, `clozeQ`, `buildQ`, `similarQ`; `faceHidden` and `readingHidden` say what the card hides until the reveal. `inLevel()` is the single deck filter (level, topic, and the similar-words subset).
+- **Game layer:** answers go through `recordAnswer()` → combo, XP (`gainXp`, `RANKS`), learned dates, `questEvent()`, the panda; `afterAnswer()` → `checkSeals()`. Challenges (`startQuiz` blitz/exam in `#quizView`) never touch the review schedule. Daily state: `state.quests`, `freezes`/`frozen` (`applyFreezes` at start-up), `wotdSeen`, `recapWeek`. Snapshot format is `FORMAT` (3); bump it when the saved shape changes, so the server refuses uploads from older copies.
 - **Element ids:** any id used from JS must be in `REQUIRED_IDS`; wired controls also go in `CORE_BUTTONS`. `verify.js` and the self-check enforce this.
 - **Self-check:**
   - `runSelfCheck()` → `functionalTest()` clicks through every feature with `testing = true`, which turns off animation, saving, toasts and speech. It snapshots state and restores it afterwards.
@@ -46,7 +49,7 @@ This repository is **public** (`nyikozoli/mandarin-flashcards`). Never commit se
 2. `npm run selfcheck` runs the in-app self-check in headless Chrome or Edge (Node 22+; `CHROME_PATH` to pick a browser) and fails on any failed check. CI runs it on the single file and on `dist/site/index.html`. To look at it yourself, open `dist/mandarin-flashcards.html` and run `await window.__mandarinApp.runSelfCheck().done`, or use Settings → Run self-check. Every check must pass.
    - In the Claude preview pane, "Progress storage" fails, because `file://` pages open as `data:` URLs without localStorage. That one is expected.
    - To test the Pages build, serve the repo root over http (pick a port other than 8765) and open `/dist/site/`.
-3. For layout changes, check a 375px and a 320px wide viewport. Nothing may scroll sideways.
+3. For layout changes, check a 375px and a 320px wide viewport. Nothing may scroll sideways. The installed iPhone app runs under a translucent status bar: keep the `env(safe-area-inset-*)` padding on `.app`, `.overlay` and fixed bars.
 4. For a migration, test it in a throwaway Postgres container before `supabase db push`. The local `postgres:16-alpine` image works with a stub `auth` schema: `auth.users` and an `auth.uid()` that reads `request.jwt.claim.sub`.
 
 ## Content rules
