@@ -75,6 +75,8 @@ Row-level security is what makes the anon key safe to publish:
 - `authenticated` holds only `SELECT, INSERT, UPDATE, DELETE`. `TRUNCATE` is revoked, because row-level security does not filter it.
 - `upsert_progress` is `security invoker`, so the policies still apply inside it, and it reads `auth.uid()` rather than trusting a `user_id` argument.
 
+**Sign-ups are closed.** Sync is for existing accounts: `[auth] enable_signup = false`, applied with `supabase config push` (preview it first with `echo n | supabase config push`). Leave `[auth.email] enable_signup = true`; the CLI treats it as the email login switch, and turning it off locks out existing users too.
+
 **Not production-ready yet:** magic-link email uses Supabase's built-in mail server, which allows only a few emails per hour. Configure `[auth.email.smtp]` in `supabase/config.toml` with your own SMTP provider before others depend on signing in.
 
 ## Pinyin conventions

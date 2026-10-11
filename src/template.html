@@ -79,6 +79,8 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .practice-row label { color: var(--muted); font-size: 14px; font-weight: 600; }
 .practice-row select { flex: 1; min-height: 42px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); padding: 6px 10px; font-weight: 600; }
 .card.hide-face:not(.revealed) .card-head { display: none; }
+.card.hide-reading:not(.revealed) .pinyin, .card.hide-reading:not(.revealed) .speak-btn { visibility: hidden; }
+.card.hide-reading:not(.revealed) .hanzi .cell { color: var(--paper); }
 .prompt { text-align: center; padding: 26px 4px 8px; }
 .prompt-q { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
 .prompt-en { margin: 0 0 6px; font-size: 24px; font-weight: 700; }
@@ -477,6 +479,7 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
 .card.sentence .hanzi { flex-wrap: wrap; gap: 0; padding: 10px 4px 0; font-family: var(--zh-font); font-size: clamp(28px, 7.4vw, 42px); line-height: 1.4; }
 .card.sentence .hanzi .cell { width: auto; height: auto; background: none; font-family: var(--zh-font); }
 .card.sentence .pinyin { font-size: clamp(17px, 4.4vw, 21px); }
+.ex-practice { align-self: flex-start; }
 .ex-caption { margin: 0 0 -2px; font-size: 12.5px; font-weight: 700; color: var(--muted); }
 .deck-sentences .word-row { grid-template-columns: 34px minmax(0, 1.2fr) minmax(0, 1fr) auto; }
 .deck-sentences .wr-zh { white-space: normal; font-family: var(--zh-font); font-size: 18px; }
@@ -578,12 +581,14 @@ label.btn { cursor: pointer; }
             <option value="reverse">Meaning → 汉字</option>
             <option value="listen">Listening</option>
             <option value="choice">Multiple choice</option>
+            <option value="hanzi">汉字 only (pinyin hidden)</option>
           </optgroup>
           <optgroup label="Sentences">
             <option value="s-zh">Sentences → meaning</option>
             <option value="s-reverse">Meaning → sentence</option>
             <option value="s-listen">Sentence listening</option>
             <option value="s-choice">Sentence multiple choice</option>
+            <option value="s-hanzi">Sentences, 汉字 only</option>
           </optgroup>
         </select>
       </label>
@@ -837,6 +842,7 @@ label.btn { cursor: pointer; }
           <dt>Meaning → 汉字</dt><dd>See English and Hungarian, say the Chinese word, then tap to check.</dd>
           <dt>Listening</dt><dd>Hear the word, guess it, then tap to see it.</dd>
           <dt>Multiple choice</dt><dd>Pick the right meaning from four. A right answer counts as Known.</dd>
+          <dt>汉字 only</dt><dd>Only the characters show; pinyin, tone colours and audio appear when you tap the card. Use it for words you can say but cannot read yet. A word card's back also has <b>Practice these sentences</b>, which opens just that word's example sentences in the current style.</dd>
           <dt>Sentences</dt><dd>The same four styles for the 777 example sentences, in the lower half of the practice menu. Each sentence is a card of its own with its own progress, and its back shows the word it comes from.</dd>
         </dl>
       </section>
@@ -1098,6 +1104,27 @@ label.btn { cursor: pointer; }
     cards = isSent() ? sentCards : wordCards;
     document.body.classList.toggle('deck-sentences', isSent());
     if (els.card) els.card.classList.toggle('sentence', isSent());
+  }
+  // Opens a short sentence deck with just this word's example sentences, in the current practice
+  // style (so “汉字 only” gives character-reading practice). Picking a study mode goes back to the full deck.
+  function practiceSentencesOf(word) {
+    if (!word || word.sentence) return;
+    var mine = word.ex.map(function (e) { return e.zh; });
+    var deckIdx = [];
+    sentCards.forEach(function (s, i) { if (mine.indexOf(s.zh) !== -1) deckIdx.push(i); });
+    if (!deckIdx.length) return;
+    stopSpeech();
+    useDeckType('sentences');
+    state.mode = 'all';
+    state.deck = deckIdx;
+    state.pos = 0;
+    state.shuffled = false;
+    state.revealed = state.autoReveal && state.practice === 'zh';
+    undoStack = [];
+    syncPracticeSelect();
+    render(true);
+    save();
+    toast('Practicing the sentences for ' + word.zh + '. Choose a study mode to go back to the full deck.', 5000);
   }
   function syncPracticeSelect() { els.optPractice.value = (isSent() ? 's-' : '') + state.practice; }
   function syncSettingsUI() {
@@ -2180,7 +2207,7 @@ label.btn { cursor: pointer; }
   }
 
   /* ---------- practice modes ---------- */
-  var PRACTICE = { zh: 'Chinese → meaning', reverse: 'Meaning → Chinese', listen: 'Listening', choice: 'Multiple choice' };
+  var PRACTICE = { zh: 'Chinese → meaning', reverse: 'Meaning → Chinese', listen: 'Listening', choice: 'Multiple choice', hanzi: 'Characters only' };
   var choiceDone = false;
   function shortText(s) {
     var t = String(s).split(';')[0].replace(/\s*\([^)]*\)/g, '').trim() || String(s);
@@ -2232,6 +2259,8 @@ label.btn { cursor: pointer; }
   function applyPractice(c) {
     var p = state.practice;
     els.card.classList.toggle('hide-face', p === 'reverse' || p === 'listen');
+    // Characters only: the reading is the answer, so pinyin, tone colours and audio wait for the reveal.
+    els.card.classList.toggle('hide-reading', p === 'hanzi');
     els.cardPrompt.textContent = '';
     if (p === 'reverse') {
       var en = el('p', 'prompt-en', c.en);
@@ -2463,7 +2492,8 @@ label.btn { cursor: pointer; }
     els.revealHint.textContent = state.revealed
       ? 'Tap the card to hide the meaning · swipe → know · ← learning'
       : { zh: 'Tap the card to show the meaning', reverse: 'Say the Chinese word, then tap the card to check',
-          listen: 'Listen, then tap the card to see the word', choice: 'Pick the meaning (keys 1–4), or tap the card to reveal' }[p];
+          listen: 'Listen, then tap the card to see the word', choice: 'Pick the meaning (keys 1–4), or tap the card to reveal',
+          hanzi: 'Read the characters aloud, then tap the card to check the pinyin and meaning' }[p];
   }
   function toggleReveal() {
     if (currentIndex() === null) return;
@@ -2512,11 +2542,17 @@ label.btn { cursor: pointer; }
       els.cardExamples.appendChild(box);
     });
     if (c.sentence) els.cardExamples.insertBefore(el('p', 'ex-caption', c.ex.length > 1 ? 'From the words' : 'From the word'), els.cardExamples.firstChild);
+    else {
+      var ps = el('button', 'btn small ex-practice', c.ex.length > 1 ? 'Practice these ' + c.ex.length + ' sentences' : 'Practice this sentence');
+      ps.type = 'button';
+      els.cardExamples.appendChild(ps);
+    }
     var s = statusOf(c);
     els.cardStatus.textContent = s === 'unmarked' ? 'New' : STATUS_NAMES[s];
     els.cardStatus.className = 'status-tag' + (s === 'unmarked' ? '' : ' ' + s);
     var hidesFace = state.practice === 'reverse' || state.practice === 'listen';
-    els.card.setAttribute('aria-label', 'Flashcard ' + (state.pos + 1) + (hidesFace ? '' : ': ' + c.zh + ', ' + c.py));
+    var reading = state.practice === 'hanzi' ? '' : ', ' + c.py;
+    els.card.setAttribute('aria-label', 'Flashcard ' + (state.pos + 1) + (hidesFace ? '' : ': ' + c.zh + reading));
     applyPractice(c);
     setRevealed(state.revealed);
     els.cardCounter.textContent = 'Card ' + (state.pos + 1) + ' / ' + state.deck.length;
@@ -2528,9 +2564,9 @@ label.btn { cursor: pointer; }
     }
     if (animate && !testing) {
       announce('Card ' + (state.pos + 1) + ' of ' + state.deck.length + '. ' + (state.practice === 'reverse' ? 'Meaning: ' + c.en + '.' :
-        state.practice === 'listen' ? 'Listen to the ' + noun(1) + '.' : c.zh + ', ' + c.py + '.'));
+        state.practice === 'listen' ? 'Listen to the ' + noun(1) + '.' : c.zh + (state.practice === 'hanzi' ? '.' : ', ' + c.py + '.')));
     }
-    if (animate && !testing && (state.autoplay || state.practice === 'listen') && userHasInteracted) {
+    if (animate && !testing && ((state.autoplay && state.practice !== 'hanzi') || state.practice === 'listen') && userHasInteracted) {
       var pos = state.pos;
       setTimeout(function () { if (state.pos === pos && currentIndex() !== null) speakParts([c.zh], null); }, 280);
     }
@@ -3417,9 +3453,28 @@ label.btn { cursor: pointer; }
       for (var oi = 0; oi < opts.length; oi++) if (opts[oi].getAttribute('data-ok') === '1') right = oi;
       if (right >= 0) opts[right].click();
       var choice = opts.length === 4 && right >= 0 && state.status[cur.zh] === 'known' && state.pos === posBefore + 1;
+      state.practice = 'hanzi'; render(false);
+      var hidden = getComputedStyle(els.cardPinyin).visibility === 'hidden' && getComputedStyle(els.btnSpeak).visibility === 'hidden' &&
+        getComputedStyle(head).display !== 'none';
+      els.card.click();
+      var hanziReveal = getComputedStyle(els.cardPinyin).visibility === 'visible' && getComputedStyle(els.btnSpeak).visibility === 'visible';
+      els.card.click();
+      var hanzi = hidden && hanziReveal;
       state.practice = 'zh'; render(false);
-      add('Practice modes: meaning → Chinese, listening, multiple choice', rev && revShown && listen && choice,
-        'reverse hides the word: ' + rev + ', reveal shows it: ' + revShown + ', listening: ' + listen + ', multiple choice (4 options, right answer marks Known): ' + choice);
+      add('Practice modes: meaning → Chinese, listening, multiple choice, characters only', rev && revShown && listen && choice && hanzi,
+        'reverse hides the word: ' + rev + ', reveal shows it: ' + revShown + ', listening: ' + listen + ', multiple choice (4 options, right answer marks Known): ' + choice +
+        ', characters only hides pinyin and audio until the reveal: ' + hanzi);
+
+      var wordCard = cards[currentIndex()];
+      els.card.click();
+      var practiceBtn = els.cardExamples.querySelector('.ex-practice');
+      if (practiceBtn) practiceBtn.click();
+      var mineSent = state.deckType === 'sentences' && state.deck.length === wordCard.ex.length &&
+        state.deck.every(function (i) { return sentCards[i].ex.some(function (w) { return w.zh === wordCard.zh; }); });
+      els.optPractice.value = 'zh';
+      els.optPractice.dispatchEvent(new Event('change'));
+      add('“Practice these sentences” opens that word’s sentences', !!practiceBtn && mineSent && state.deckType === 'words',
+        wordCard.zh + ': ' + wordCard.ex.length + ' sentence(s), deck switched: ' + mineSent);
 
       els.btnHelp.click();
       var helpOk = !els.helpView.hidden && els.helpView.querySelectorAll('.help-sec').length >= 6;
@@ -3597,6 +3652,8 @@ label.btn { cursor: pointer; }
     on('btnSkip', 'click', function () { act('skip'); });
     on('btnSpeak', 'click', function (e) { e.stopPropagation(); speakCurrent(); });
     on('cardExamples', 'click', function (e) {
+      var p = e.target.closest ? e.target.closest('.ex-practice') : null;
+      if (p) { e.stopPropagation(); practiceSentencesOf(cards[currentIndex()]); return; }
       var b = e.target.closest ? e.target.closest('.ex-speak') : null;
       if (!b) return;
       e.stopPropagation();
@@ -3655,7 +3712,14 @@ label.btn { cursor: pointer; }
       requestMagicLink(email).then(function () {
         setSyncStatus('Check ' + email + ' for the sign-in link. It expires in about an hour.');
         toast('Sign-in link sent to ' + email);
-      }).catch(onSyncError).then(function () { els.btnSignIn.disabled = false; });
+      }).catch(function (e) {
+        // Sign-ups are closed on the server: only existing accounts can sign in.
+        if (e && e.status === 422 && /signup/i.test(e.message || '')) {
+          setSyncStatus('There is no account for ' + email + '. Sync is limited to existing accounts.', true);
+          return;
+        }
+        onSyncError(e);
+      }).then(function () { els.btnSignIn.disabled = false; });
     });
     on('syncEmail', 'keydown', function (e) {
       if (e.key === 'Enter') { e.preventDefault(); els.btnSignIn.click(); }

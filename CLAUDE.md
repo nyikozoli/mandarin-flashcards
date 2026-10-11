@@ -28,6 +28,7 @@ This repository is **public** (`nyikozoli/mandarin-flashcards`). Never commit se
 - **Sync:**
   - Writes go only through the `upsert_progress` RPC, a compare-and-set on `updated_at`. A refusal opens the conflict dialog; the client never merges or silently overwrites.
   - `ensureSession()` signs out only when the auth server rejects the refresh token (400/401). A network error or a 5xx keeps the session.
+  - Sign-ups are closed: `[auth] enable_signup = false` in `supabase/config.toml`, applied with `supabase config push`. Keep `[auth.email] enable_signup = true`: the CLI maps it to the email provider switch, so `false` also blocks existing users' magic-link sign-in. That happened once, for about a minute.
 - **Element ids:** any id used from JS must be in `REQUIRED_IDS`; wired controls also go in `CORE_BUTTONS`. `verify.js` and the self-check enforce this.
 - **Self-check:**
   - `runSelfCheck()` → `functionalTest()` clicks through every feature with `testing = true`, which turns off animation, saving, toasts and speech. It snapshots state and restores it afterwards.
