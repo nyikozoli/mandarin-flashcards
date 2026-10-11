@@ -85,6 +85,11 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .prompt-q { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
 .prompt-en { margin: 0 0 6px; font-size: 24px; font-weight: 700; }
 .prompt-hu { margin: 0; font-size: 19px; color: var(--soft); }
+.prompt-zh { margin: 0 0 10px; font-family: var(--zh-font); font-size: clamp(24px, 6.6vw, 32px); line-height: 1.45; color: var(--paper); letter-spacing: .02em; }
+.prompt-zh .gap { display: inline-block; height: 1.1em; margin: 0 .12em; vertical-align: -.2em; border-bottom: 3px solid var(--cinnabar); }
+.prompt-sub { margin: 0 0 2px; font-size: 15px; color: var(--soft); }
+.choice-zh { font-family: var(--zh-font); font-size: 22px; line-height: 1.25; color: var(--paper); }
+.choice-pyl { font-size: 13.5px; color: var(--pinyin); }
 .listen-btn { min-height: 64px; padding: 10px 26px; border-radius: 999px; border: 0; background: var(--accent); color: #2a0606; font-size: 19px; font-weight: 800; }
 .choices { display: grid; gap: 8px; margin-top: 10px; }
 .choice { display: flex; gap: 12px; align-items: center; text-align: left; min-height: 56px; padding: 8px 12px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface2); }
@@ -631,6 +636,7 @@ label.btn { cursor: pointer; }
             <option value="choice">Multiple choice</option>
             <option value="hanzi">汉字 only (pinyin hidden)</option>
             <option value="tone">Which tone? (listen)</option>
+            <option value="cloze">Fill the gap (sentence)</option>
           </optgroup>
           <optgroup label="Sentences">
             <option value="s-zh">Sentences → meaning</option>
@@ -903,6 +909,7 @@ label.btn { cursor: pointer; }
           <dt>Listening</dt><dd>Hear the word, guess it, then tap to see it.</dd>
           <dt>Multiple choice</dt><dd>Pick the right meaning from four. A right answer counts as Known.</dd>
           <dt>汉字 only</dt><dd>Only the characters show; pinyin, tone colours and audio appear when you tap the card. Use it for words you can say but cannot read yet. A word card's back also has <b>Practice these sentences</b>, which opens just that word's example sentences in the current style.</dd>
+          <dt>Fill the gap</dt><dd>One of the word's example sentences with the word blanked out, and its translation. Pick the word that fits from four of the same length; keys 1–4 pick. Words only; it counts toward reading.</dd>
           <dt>Which tone?</dt><dd>Hear the word, then pick the tone of its first syllable from the four written forms; keys 1–4 pick tones 1–4. Words only. The 21 words whose first syllable is neutral, or changes tone when it is spoken (你好, 可以), come up as normal cards.</dd>
           <dt>Tap a word</dt><dd>In any example sentence, and on sentence cards, the words from HSK 1–3 have a dotted underline. Tap one to see its pinyin and meaning; tap elsewhere or press Esc to close it. On a word card the word itself is highlighted instead.</dd>
           <dt>Progress per skill</dt><dd>Reading (Chinese → meaning, 汉字 only, multiple choice), recall (meaning → Chinese) and listening (listening, which tone) each keep their own Known and Learning marks and their own Due list, so a word you can read is not marked as one you can say or hear. Words and sentences also keep their own place in the deck.</dd>
@@ -1176,13 +1183,14 @@ label.btn { cursor: pointer; }
   function noun(n) { return deck().noun[n === 1 ? 0 : 1]; }
   function useDeckType(t) {
     state.deckType = t === 'sentences' ? 'sentences' : 'words';
-    dropToneQuiz();
+    fixStyleForDeck();
     cards = isSent() ? sentCards : wordCards;
     document.body.classList.toggle('deck-sentences', isSent());
     if (els.card) els.card.classList.toggle('sentence', isSent());
   }
-  // The tone quiz asks about one word's first syllable, so it exists for the words deck only.
-  function dropToneQuiz() { if (isSent() && state.practice === 'tone') state.practice = 'listen'; }
+  // Styles that exist for one deck only, and the style of the same skill to use on the other deck.
+  var DECK_ONLY = { tone: ['words', 'listen'], cloze: ['words', 'choice'] };
+  function fixStyleForDeck() { var o = DECK_ONLY[state.practice]; if (o && o[0] !== state.deckType) state.practice = o[1]; }
   // Opens a short sentence deck with just this word's example sentences, in the current practice
   // style (so “汉字 only” gives character-reading practice). Picking a study mode goes back to the full deck.
   function practiceSentencesOf(word) {
@@ -1845,7 +1853,7 @@ label.btn { cursor: pointer; }
     if (saved && typeof saved.warmup === 'boolean') state.warmup = saved.warmup;
     ['toneColors', 'fadePinyin', 'choicePinyin', 'autoplay', 'vibrate', 'seenTour'].forEach(function (k) { if (saved && typeof saved[k] === 'boolean') state[k] = saved[k]; });
     if (saved && PRACTICE[saved.practice]) state.practice = saved.practice;
-    dropToneQuiz();
+    fixStyleForDeck();
     if (saved && Array.isArray(saved.milestones)) state.milestones = saved.milestones.filter(function (m) { return typeof m === 'string'; }).slice(-500);
     var readMarks = function (src) {
       var m = emptyMarks();
@@ -2323,7 +2331,7 @@ label.btn { cursor: pointer; }
   // Snapshot format. 2 added `skills`. The server refuses uploads older than the stored format, and this copy refuses
   // to apply progress written by a newer one, so neither side drops what it does not understand.
   var FORMAT = 2;
-  var SKILL_OF = { zh: 'read', hanzi: 'read', choice: 'read', reverse: 'recall', listen: 'listen', tone: 'listen' };
+  var SKILL_OF = { zh: 'read', hanzi: 'read', choice: 'read', cloze: 'read', reverse: 'recall', listen: 'listen', tone: 'listen' };
   function skillOf(p) { return SKILL_OF[p] || 'read'; }
   function emptyMarks() { return { status: {}, srs: {}, misses: {} }; }
   function stashSkill() { state.marks[state.skill] = { status: state.status, srs: state.srs, misses: state.misses }; }
@@ -2579,10 +2587,16 @@ label.btn { cursor: pointer; }
   }
 
   /* ---------- practice modes ---------- */
-  var PRACTICE = { zh: 'Chinese → meaning', reverse: 'Meaning → Chinese', listen: 'Listening', choice: 'Multiple choice', hanzi: 'Characters only', tone: 'Which tone?' };
+  var PRACTICE = { zh: 'Chinese → meaning', reverse: 'Meaning → Chinese', listen: 'Listening', choice: 'Multiple choice', hanzi: 'Characters only', tone: 'Which tone?', cloze: 'Fill the gap' };
+  // Styles answered by picking one of the chips in #choiceBox (keys 1–4).
+  var CHOICE_STYLES = { choice: true, tone: true, cloze: true };
   var choiceDone = false;
   // The syllable the tone quiz is asking about on the current card; null when the card has no quiz.
   var toneQ = null;
+  // The fill-the-gap question on the current card ({ ex, blanked, options }); null when the card has none.
+  var clozeQ = null;
+  // True while the card's Chinese face is hidden because it is the answer.
+  var faceHidden = false;
   var TONE_CONTOUR = { 1: 'Level', 2: 'Rising', 3: 'Dipping', 4: 'Falling' };
   // True while the current card hides its reading (pinyin, tone colours, audio) until the reveal.
   var readingHidden = false;
@@ -2616,6 +2630,47 @@ label.btn { cursor: pointer; }
     });
     choiceDone = false;
   }
+  function shuffled(a) {
+    a = a.slice();
+    for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
+  }
+  // One of the word's example sentences with the word blanked out, and four words of the same length to choose from.
+  // Distractors never occur in the sentence and never contain the word (or sit inside it), so only one choice fits.
+  function clozeTarget(c) {
+    if (c.sentence) return null;
+    var exs = c.ex.filter(function (e) { return e.zh.indexOf(c.zh) !== -1; });
+    if (!exs.length) return null;
+    var ex = exs[(c.n + state.pos) % exs.length], len = charLen(c.zh);
+    var pool = wordCards.filter(function (w) {
+      return w !== c && charLen(w.zh) === len && ex.zh.indexOf(w.zh) === -1 && w.zh.indexOf(c.zh) === -1 && c.zh.indexOf(w.zh) === -1;
+    });
+    var same = pool.filter(function (w) { return w.lv === c.lv; });
+    if (same.length >= 3) pool = same;
+    var opts = [c];
+    while (opts.length < 4 && pool.length) opts.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+    return { ex: ex, blanked: ex.zh.replace(c.zh, new Array(len + 1).join('＿')), options: shuffled(opts) };
+  }
+  // Chips that show words (characters and pinyin) rather than meanings.
+  function buildWordChoices(right, opts) {
+    els.choiceBox.textContent = '';
+    opts.forEach(function (o, k) {
+      var b = el('button', 'choice');
+      b.type = 'button';
+      b.setAttribute('data-ok', o === right ? '1' : '0');
+      b.appendChild(el('span', 'choice-num', String(k + 1)));
+      var tx = el('span', 'choice-text');
+      var zh = el('span', 'choice-zh', o.zh);
+      zh.setAttribute('lang', 'zh-CN');
+      var py = el('span', 'choice-pyl', o.py);
+      py.setAttribute('lang', 'zh-Latn-pinyin');
+      tx.appendChild(zh);
+      tx.appendChild(py);
+      b.appendChild(tx);
+      els.choiceBox.appendChild(b);
+    });
+    choiceDone = false;
+  }
   // Four chips for one syllable: the same syllable written in tones 1 to 4, so the keys 1–4 pick a tone.
   function buildToneChoices(t) {
     els.choiceBox.textContent = '';
@@ -2635,7 +2690,7 @@ label.btn { cursor: pointer; }
     choiceDone = false;
   }
   function pickChoice(k) {
-    if (choiceDone || (state.practice !== 'choice' && state.practice !== 'tone') || currentIndex() === null) return;
+    if (choiceDone || !CHOICE_STYLES[state.practice] || currentIndex() === null) return;
     var btns = els.choiceBox.querySelectorAll('.choice');
     var b = btns[k];
     if (!b) return;
@@ -2651,6 +2706,7 @@ label.btn { cursor: pointer; }
     var right = cards[currentIndex()];
     announce(ok ? 'Correct.' : state.practice === 'tone'
       ? 'Not quite. ' + right.zh + ' starts with ' + toneQ.text + ', tone ' + toneQ.tone + '.'
+      : state.practice === 'cloze' ? 'Not quite. The answer is ' + right.zh + ', ' + right.py + '.'
       : 'Not quite. The answer is: ' + shortText(right.en) + '.');
     if (testing) { act(ok ? 'known' : 'learning'); return; }
     var pos = state.pos;
@@ -2659,7 +2715,9 @@ label.btn { cursor: pointer; }
   function applyPractice(c) {
     var p = state.practice;
     toneQ = p === 'tone' ? toneQuizTarget(c) : null;
-    els.card.classList.toggle('hide-face', p === 'reverse' || p === 'listen');
+    clozeQ = p === 'cloze' ? clozeTarget(c) : null;
+    faceHidden = p === 'reverse' || p === 'listen' || !!clozeQ;
+    els.card.classList.toggle('hide-face', faceHidden);
     // Characters only, the tone quiz and faded pinyin: the reading is the answer, so pinyin, tone colours and audio wait for the reveal.
     readingHidden = p === 'hanzi' || !!toneQ || (p === 'zh' && state.fadePinyin && wellKnown(c)) || (p === 'choice' && !state.choicePinyin);
     els.card.classList.toggle('hide-reading', readingHidden);
@@ -2679,10 +2737,26 @@ label.btn { cursor: pointer; }
       lb.id = 'btnListen';
       els.cardPrompt.appendChild(el('p', 'prompt-q', toneQ ? deck().toneQ : deck().listenQ));
       els.cardPrompt.appendChild(lb);
+    } else if (clozeQ) {
+      els.cardPrompt.appendChild(el('p', 'prompt-q', 'Which word fills the gap?'));
+      var gap = el('p', 'prompt-zh'), at = clozeQ.ex.zh.indexOf(c.zh);
+      gap.setAttribute('lang', 'zh-CN');
+      gap.appendChild(document.createTextNode(clozeQ.ex.zh.slice(0, at)));
+      var hole = el('span', 'gap');
+      hole.style.width = (charLen(c.zh) * 1.1) + 'em';
+      hole.setAttribute('aria-label', 'blank');
+      gap.appendChild(hole);
+      gap.appendChild(document.createTextNode(clozeQ.ex.zh.slice(at + c.zh.length)));
+      els.cardPrompt.appendChild(gap);
+      els.cardPrompt.appendChild(el('p', 'prompt-sub', clozeQ.ex.en));
+      var gapHu = el('p', 'prompt-sub', clozeQ.ex.hu);
+      gapHu.setAttribute('lang', 'hu');
+      els.cardPrompt.appendChild(gapHu);
     }
-    els.choiceBox.hidden = !(p === 'choice' || toneQ);
+    els.choiceBox.hidden = !(p === 'choice' || toneQ || clozeQ);
     if (p === 'choice') buildChoices(c);
     else if (toneQ) buildToneChoices(toneQ);
+    else if (clozeQ) buildWordChoices(c, clozeQ.options);
     else els.choiceBox.textContent = '';
   }
 
@@ -2910,11 +2984,12 @@ label.btn { cursor: pointer; }
     els.revealHint.setAttribute('aria-expanded', state.revealed ? 'true' : 'false');
     els.revealHint.setAttribute('aria-label', state.revealed ? 'Hide the answer' : 'Show the answer');
     var p = state.practice;
-    els.cardPrompt.hidden = state.revealed || !(p === 'reverse' || p === 'listen' || toneQ);
+    els.cardPrompt.hidden = state.revealed || !(p === 'reverse' || p === 'listen' || toneQ || clozeQ);
     els.revealHint.textContent = state.revealed
       ? 'Tap the card to hide the meaning · swipe → know · ← learning'
       : p === 'tone'
         ? (toneQ ? 'Listen, then pick the tone of the first syllable (keys 1–4)' : 'Tap the card to show the meaning')
+        : p === 'cloze' ? (clozeQ ? 'Pick the word that fills the gap (keys 1–4)' : 'Tap the card to show the meaning')
         : p === 'zh' && readingHidden ? 'You know this one well: read it, then tap the card to check the pinyin'
         : { zh: 'Tap the card to show the meaning', reverse: 'Say the Chinese word, then tap the card to check',
             listen: 'Listen, then tap the card to see the word', choice: 'Pick the meaning (keys 1–4), or tap the card to reveal',
@@ -2979,10 +3054,9 @@ label.btn { cursor: pointer; }
     els.cardStatus.textContent = s === 'unmarked' ? 'New' : STATUS_NAMES[s];
     els.cardStatus.className = 'status-tag' + (s === 'unmarked' ? '' : ' ' + s);
     applyPractice(c);
-    var hidesFace = state.practice === 'reverse' || state.practice === 'listen';
-    // In these styles the reading is the answer, so a screen reader must not hear it either.
+    // In these styles the word or its reading is the answer, so a screen reader must not hear it either.
     var reading = readingHidden ? '' : ', ' + c.py;
-    els.card.setAttribute('aria-label', 'Flashcard ' + (state.pos + 1) + (hidesFace ? '' : ': ' + c.zh + reading));
+    els.card.setAttribute('aria-label', 'Flashcard ' + (state.pos + 1) + (faceHidden ? '' : ': ' + c.zh + reading));
     setRevealed(state.revealed);
     els.cardCounter.textContent = 'Card ' + (state.pos + 1) + ' / ' + state.deck.length;
     setActionsEnabled(true);
@@ -2995,10 +3069,11 @@ label.btn { cursor: pointer; }
       announce('Card ' + (state.pos + 1) + ' of ' + state.deck.length + '. ' + (state.practice === 'reverse' ? 'Meaning: ' + c.en + '.' :
         state.practice === 'listen' ? 'Listen to the ' + noun(1) + '.' :
         toneQ ? 'Listen to ' + c.zh + ', then pick the tone of the first syllable.' :
+        clozeQ ? 'Which word fills the gap? ' + clozeQ.blanked.replace(/＿+/g, ' blank ') + ' ' + clozeQ.ex.en :
         c.zh + (readingHidden ? '.' : ', ' + c.py + '.')));
     }
     // The tone quiz always speaks: hearing the word is the question.
-    if (animate && !testing && ((state.autoplay && !readingHidden) || state.practice === 'listen' || state.practice === 'tone') && userHasInteracted) {
+    if (animate && !testing && ((state.autoplay && !readingHidden && !faceHidden) || state.practice === 'listen' || state.practice === 'tone') && userHasInteracted) {
       var pos = state.pos;
       setTimeout(function () { if (state.pos === pos && currentIndex() !== null) speakParts([c.zh], null); }, 280);
     }
@@ -3565,7 +3640,7 @@ label.btn { cursor: pointer; }
         break;
       case 'ArrowUp': case 'ArrowDown': e.preventDefault(); toggleReveal(); break;
       case '1': case '2': case '3': case '4':
-        if (state.practice === 'choice' || state.practice === 'tone') { e.preventDefault(); pickChoice(Number(e.key) - 1); }
+        if (CHOICE_STYLES[state.practice]) { e.preventDefault(); pickChoice(Number(e.key) - 1); }
         break;
       case 'Enter':
         if (t === els.card) { e.preventDefault(); toggleReveal(); }
@@ -3962,6 +4037,29 @@ label.btn { cursor: pointer; }
         return { ok: today0 && day3 && drawn, d: 'overdue counts today: ' + today0 + ', a review in 3 days lands on day 4: ' + day3 + ', 7 bars drawn: ' + drawn };
       })();
       add('Coming reviews forecast', fcRes.ok, fcRes.d);
+
+      var clozeRes = (function () {
+        var deckSnap = state.deck, posSnap = state.pos, w = wordCards[3];
+        state.practice = 'cloze';
+        state.deck = [3]; state.pos = 0; state.revealed = false; render(false);
+        var prompt = els.cardPrompt.textContent;
+        var hidden = els.card.classList.contains('hide-face') && !els.cardPrompt.hidden && !!els.cardPrompt.querySelector('.gap') && prompt.indexOf(w.zh) === -1;
+        var chips = els.choiceBox.querySelectorAll('.choice'), right = els.choiceBox.querySelector('[data-ok="1"]');
+        var fair = chips.length === 4 && !!right && right.textContent.indexOf(w.zh) !== -1 &&
+          Array.prototype.every.call(chips, function (b) { return b === right || prompt.indexOf(b.querySelector('.choice-zh').textContent) === -1; });
+        right.click();
+        var graded = state.status[w.zh] === 'known';
+        useDeckType('sentences');
+        var fallback = state.practice === 'choice';
+        useDeckType('words');
+        delete state.status[w.zh]; delete state.srs[w.zh];
+        state.practice = 'zh';
+        state.deck = deckSnap; state.pos = posSnap; render(false);
+        return { ok: hidden && fair && graded && fallback,
+          d: w.zh + ': sentence with a gap, word hidden: ' + hidden + ', four chips and only the right one fits: ' + fair +
+            ', right answer marks Known: ' + graded + ', sentences fall back to multiple choice: ' + fallback };
+      })();
+      add('Fill the gap', clozeRes.ok, clozeRes.d);
 
       var newer = parseImport(JSON.stringify({ version: 1, format: FORMAT + 1, status: {} }));
       var current = parseImport(JSON.stringify({ version: 1, format: FORMAT, status: {} }));
