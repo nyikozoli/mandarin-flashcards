@@ -171,6 +171,11 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .s-learning { background: var(--learn); }
 .s-unmarked { background: #6b7489; }
 .pv-section { margin-top: 20px; }
+.pv-tabs { position: sticky; top: 0; z-index: 2; display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; margin: 0 0 6px; border-radius: 12px; background: var(--surface2); }
+.pv-tab { min-height: 40px; border: 0; border-radius: 9px; background: transparent; color: var(--muted); font-weight: 700; font-size: 14px; }
+.pv-tab[aria-pressed="true"] { background: var(--paper); color: var(--bg); }
+.pv-pane > :first-child { margin-top: 10px; }
+.pv-visit { margin-top: 12px; }
 .seal-grid { list-style: none; margin: 6px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
 .seal-item { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; padding: 10px 6px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface2); }
 .seal-mark { min-width: 48px; height: 48px; padding: 0 6px; display: grid; place-items: center; border-radius: 9px; border: 2px dashed var(--line); color: var(--muted); font-family: var(--kai-font); font-size: 22px; }
@@ -206,28 +211,29 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .qz-result.pass { color: var(--known); }
 .qz-msg { margin: 0; text-align: center; color: var(--soft); }
 .qz-again { align-self: center; margin-top: 6px; }
-.wotd { display: flex; gap: 12px; align-items: flex-start; margin: 10px 0 0; padding: 10px 10px 10px 12px; border-radius: 14px; border: 1px solid var(--line); background: linear-gradient(135deg, rgba(224, 74, 47, .14), rgba(224, 74, 47, 0) 60%), var(--surface); }
-.wotd p { margin: 0; }
-.wotd-seal { flex: none; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 8px; background: var(--cinnabar); color: var(--paper); font-family: var(--kai-font); font-size: 22px; margin-top: 2px; }
-.wotd-body { flex: 1; min-width: 0; }
-.wotd-label { font-size: 12px; color: var(--muted); font-weight: 600; }
-.wotd-word { font-size: 15px; }
-.wotd-word #wotdZh { font-family: var(--zh-font); font-size: 24px; color: var(--paper); }
+/* Word of the day: one line, so the card keeps the screen. */
+.wotd { display: flex; gap: 8px; align-items: center; padding: 5px 4px 5px 6px; border-radius: 12px; border: 1px solid var(--line); background: linear-gradient(90deg, rgba(224, 74, 47, .14), rgba(224, 74, 47, 0) 55%), var(--surface); }
+.wotd-seal { flex: none; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 6px; background: var(--cinnabar); color: var(--paper); font-family: var(--kai-font); font-size: 17px; }
+.wotd-body { flex: 1; min-width: 0; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14px; }
+.wotd-body #wotdZh { font-family: var(--zh-font); font-size: 19px; color: var(--paper); vertical-align: -1px; }
 .wotd-py { color: var(--pinyin); font-weight: 600; }
-.wotd-en { font-size: 13.5px; color: var(--soft); }
-.wotd-hint { font-size: 12.5px; color: var(--muted); margin-top: 4px !important; }
-.wotd-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex: none; }
+.wotd-en { color: var(--soft); }
+.wotd .btn.small { flex: none; min-height: 34px; padding: 4px 12px; }
+.wotd .icon-btn.small { flex: none; width: 34px; height: 34px; }
 .q-list { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .q-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 12px; background: var(--surface2); border: 1px solid var(--line); }
 .q-item.done { border-color: var(--known); }
-.q-check { flex: none; width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; border: 2px solid var(--line); color: var(--known-ink); font-weight: 900; font-size: 13px; }
-.q-item.done .q-check { background: var(--known); border-color: var(--known); }
+.q-ring { flex: none; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; color: var(--known-ink); font-weight: 900; font-size: 13px;
+  background: radial-gradient(closest-side, var(--surface2) 72%, transparent 74%), conic-gradient(var(--known) var(--p, 0%), var(--surface3) 0); }
+.q-item.done .q-ring { background: var(--known); }
 .q-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
 .q-label { font-size: 14px; font-weight: 650; }
 .q-count { font-size: 13px; color: var(--soft); font-variant-numeric: tabular-nums; }
-.topic-btn { margin-top: 8px; width: 100%; min-height: 40px; display: flex; align-items: center; gap: 10px; padding: 4px 12px 4px 6px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--text); font-weight: 650; font-size: 14px; text-align: left; }
+.topic-btn { flex: none; min-height: 44px; display: flex; align-items: center; gap: 8px; padding: 4px 7px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--text); font-weight: 650; font-size: 14px; text-align: left; }
+.topic-btn-name { max-width: 9em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-right: 4px; }
+@media (max-width: 599px) { .topic-btn-name { display: none; } }
+.topic-btn.active { border-color: var(--cinnabar); }
 .topic-btn-zh { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 7px; background: var(--cinnabar); color: var(--paper); font-family: var(--kai-font); font-size: 19px; }
-.topic-btn-more { margin-left: auto; color: var(--muted); }
 .tp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
 .tp-tile { display: flex; gap: 10px; align-items: center; text-align: left; padding: 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface2); color: var(--text); min-width: 0; }
 .tp-tile[aria-pressed="true"] { border-color: var(--paper); box-shadow: inset 0 0 0 1px var(--paper); }
@@ -259,6 +265,8 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .st-seal { flex: none; min-width: 56px; height: 56px; padding: 0 8px; display: grid; place-items: center; border-radius: 10px; background: var(--cinnabar); color: var(--paper); font-family: var(--kai-font); font-size: 22px; letter-spacing: .04em; }
 .st-rank-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
 .st-rank-text .pv-goalbar { display: block; }
+.tp-seal.done, .st-seal, .wotd-seal, .topic-btn-zh, .ch-btn.passed .ch-zh, .seal-item.on .seal-mark {
+  box-shadow: inset 0 0 0 2px var(--cinnabar), inset 0 0 0 3px rgba(241, 236, 226, .5); }
 .pv-fc { list-style: none; margin: 4px 0 0; padding: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; align-items: end; }
 .pv-fc-day { display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .pv-fc-num { font-size: 13px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
@@ -602,7 +610,8 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
 .legend > span { display: inline-flex; align-items: center; gap: 6px; }
 .legend b { color: var(--text); font-variant-numeric: tabular-nums; }
 /* Tone colour key for beginners; shown while tone colours are on. */
-.legend .legend-tones { margin-left: auto; gap: 7px; font-size: 14px; font-weight: 700; }
+.legend .legend-tones { margin-left: auto; gap: 5px; font-size: 13px; font-weight: 700; }
+@media (max-width: 400px) { .legend { gap: 4px 10px; } .legend .legend-tones { gap: 3px; font-size: 12.5px; } }
 .dot { background: #6b7489; }
 
 .card { border-radius: 20px; background: var(--surface); border-color: var(--line); box-shadow: 0 18px 40px rgba(4, 7, 10, .5); }
@@ -830,6 +839,7 @@ label.btn { cursor: pointer; }
         <button type="button" class="level" id="level2" role="radio" aria-checked="false" data-level="2" aria-label="HSK 2"><span class="lv-pre">HSK </span>2 <span class="count" id="countLv2">0</span></button>
         <button type="button" class="level" id="level3" role="radio" aria-checked="false" data-level="3" aria-label="HSK 3"><span class="lv-pre">HSK </span>3 <span class="count" id="countLv3">0</span></button>
       </div>
+      <button type="button" class="topic-btn" id="btnTopic" aria-haspopup="dialog" hidden><span class="topic-btn-zh" id="topicBtnZh" lang="zh-CN" aria-hidden="true">全</span><span class="topic-btn-name" id="topicBtnName">All topics</span></button>
       <label class="practice" for="optPractice"><span class="visually-hidden">Practice mode</span>
         <select id="optPractice">
           <optgroup label="Words">
@@ -853,7 +863,7 @@ label.btn { cursor: pointer; }
         </select>
       </label>
     </div>
-    <button type="button" class="topic-btn" id="btnTopic" aria-haspopup="dialog" hidden><span class="topic-btn-zh" id="topicBtnZh" lang="zh-CN" aria-hidden="true">全</span><span id="topicBtnName">All topics</span><span class="topic-btn-more" aria-hidden="true">▾</span></button>
+
   </nav>
 
   <section class="stats" aria-label="Progress">
@@ -877,23 +887,16 @@ label.btn { cursor: pointer; }
     <p class="legend">
       <span><span class="dot known" aria-hidden="true"></span><b id="knownCount">0</b> known</span>
       <span><span class="dot learning" aria-hidden="true"></span><b id="learningCount">0</b> learning</span>
-      <span><span class="dot" aria-hidden="true"></span><b id="unmarkedCount">0</b> unmarked</span>
+      <span><span class="dot" aria-hidden="true"></span><b id="unmarkedCount">0</b> new</span>
       <span class="legend-tones" id="legendTones" title="Tone colours: 1st, 2nd, 3rd, 4th and neutral tone"><span class="visually-hidden">Tone colours: </span><span class="t1">mā</span><span class="t2">má</span><span class="t3">mǎ</span><span class="t4">mà</span><span class="t5">ma</span></span>
     </p>
     <p class="visually-hidden" id="progressLabel">0 known</p>
   </section>
   <section id="wotd" class="wotd" aria-labelledby="wotdLabel" hidden>
     <div class="wotd-seal" lang="zh-CN" aria-hidden="true">日</div>
-    <div class="wotd-body">
-      <p class="wotd-label" id="wotdLabel">Word of the day</p>
-      <p class="wotd-word"><span id="wotdZh" lang="zh-CN"></span> <span id="wotdPy" class="wotd-py" lang="zh-Latn-pinyin"></span></p>
-      <p id="wotdEn" class="wotd-en"></p>
-      <p id="wotdHint" class="wotd-hint" hidden></p>
-    </div>
-    <div class="wotd-actions">
-      <button type="button" class="btn small" id="btnWotdStudy">Study it</button>
-      <button type="button" class="icon-btn small" id="btnWotdClose" aria-label="Hide the word of the day until tomorrow">✕</button>
-    </div>
+    <p class="wotd-body"><span class="visually-hidden" id="wotdLabel">Word of the day: </span><span id="wotdZh" lang="zh-CN"></span> <span id="wotdPy" class="wotd-py" lang="zh-Latn-pinyin"></span> <span id="wotdEn" class="wotd-en"></span><span id="wotdHint" hidden></span></p>
+    <button type="button" class="btn small" id="btnWotdStudy">Study</button>
+    <button type="button" class="icon-btn small" id="btnWotdClose" aria-label="Hide the word of the day until tomorrow">✕</button>
   </section>
   <div id="srLive" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
 
@@ -2575,16 +2578,32 @@ label.btn { cursor: pointer; }
     });
     hero.appendChild(tiles);
     els.progressTitle.textContent = 'Your progress: ' + SKILLS[state.skill].toLowerCase();
-    body.appendChild(el('p', 'pv-skills', 'Known ' + noun(2) + ' per skill: reading ' + knownIn('read') + ', recall ' + knownIn('recall') +
+    // Three tabs: what to do today, how far you are, and what you have collected.
+    var panes = { today: el('div', 'pv-pane'), progress: el('div', 'pv-pane'), collection: el('div', 'pv-pane') };
+    var tabs = el('div', 'pv-tabs');
+    tabs.setAttribute('role', 'group');
+    tabs.setAttribute('aria-label', 'Progress sections');
+    [['today', 'Today'], ['progress', 'Progress'], ['collection', 'Collection']].forEach(function (t) {
+      var b = el('button', 'pv-tab', t[1]);
+      b.type = 'button';
+      b.setAttribute('data-pvtab', t[0]);
+      tabs.appendChild(b);
+      panes[t[0]].setAttribute('data-pane', t[0]);
+    });
+    body.appendChild(tabs);
+    panes.today.appendChild(questSection());
+    panes.progress.appendChild(hero);
+    panes.progress.appendChild(legend());
+    panes.progress.appendChild(el('p', 'pv-skills', 'Known ' + noun(2) + ' per skill: reading ' + knownIn('read') + ', recall ' + knownIn('recall') +
       ', listening ' + knownIn('listen') + '. The practice style you pick decides which one you are training.'));
-    body.appendChild(hero);
-    body.appendChild(legend());
-    body.insertBefore(questSection(), hero);
-    body.appendChild(readingSection());
-    body.appendChild(statsSection());
-    body.appendChild(challengeSection());
-    body.appendChild(sealSection());
-    if (EXTRA.topics.length) body.appendChild(topicSection());
+    panes.progress.appendChild(readingSection());
+    panes.collection.appendChild(statsSection());
+    var visit = el('button', 'btn small pv-visit', '🐼 Visit ' + (state.petName || '宝宝'));
+    visit.type = 'button';
+    visit.setAttribute('data-pet', '1');
+    panes.collection.appendChild(visit);
+    panes.collection.appendChild(challengeSection());
+    panes.collection.appendChild(sealSection());
 
     // Daily goal
     var goal = section('Daily goal');
@@ -2604,7 +2623,7 @@ label.btn { cursor: pointer; }
     gLabel.appendChild(gSel);
     gRow.appendChild(gLabel);
     goal.appendChild(gRow);
-    body.appendChild(goal);
+    panes.today.appendChild(goal);
 
     // Coming reviews for the current skill and deck, so a heavy day is visible in advance.
     var fc = forecast(7), fcMax = Math.max.apply(null, fc.map(function (f) { return f.n; }).concat([1]));
@@ -2622,7 +2641,7 @@ label.btn { cursor: pointer; }
       fcList.appendChild(li);
     });
     fcSec.appendChild(fcList);
-    body.appendChild(fcSec);
+    panes.today.appendChild(fcSec);
 
     // By level
     var lvSec = section('By HSK level', 'Tap a level to study it.');
@@ -2638,7 +2657,8 @@ label.btn { cursor: pointer; }
       row.appendChild(el('span', 'pv-lv-text', n.known + ' known · ' + n.learning + ' learning · ' + n.unmarked + ' new · ' + n.total + ' ' + noun(n.total)));
       lvSec.appendChild(row);
     });
-    body.appendChild(lvSec);
+    panes.progress.appendChild(lvSec);
+    if (EXTRA.topics.length) panes.progress.appendChild(topicSection());
 
     // Activity, last 14 days
     var days = [];
@@ -2688,7 +2708,7 @@ label.btn { cursor: pointer; }
     });
     det.appendChild(tbl);
     actSec.appendChild(det);
-    body.appendChild(actSec);
+    panes.today.appendChild(actSec);
 
     // Word map
     var mapSec = section(deck().mapTitle, 'Each square is one ' + noun(1) + '. Hover or tap to see it, tap again to study it.');
@@ -2732,9 +2752,20 @@ label.btn { cursor: pointer; }
       closeOverlay(els.progressView);
       studyCard(Number(cell.getAttribute('data-index')));
     });
-    body.appendChild(mapSec);
+    panes.progress.appendChild(mapSec);
+    body.appendChild(panes.today);
+    body.appendChild(panes.progress);
+    body.appendChild(panes.collection);
+    showPvTab(pvTab);
   }
-  function openProgress() {
+  var pvTab = 'today';
+  function showPvTab(t) {
+    pvTab = t;
+    Array.prototype.forEach.call(els.pvBody.querySelectorAll('[data-pane]'), function (p) { p.hidden = p.getAttribute('data-pane') !== t; });
+    Array.prototype.forEach.call(els.pvBody.querySelectorAll('[data-pvtab]'), function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-pvtab') === t ? 'true' : 'false'); });
+  }
+  function openProgress(tab) {
+    if (typeof tab === 'string') pvTab = tab;
     renderProgress();
     openOverlay(els.progressView, els.btnCloseProgress);
   }
@@ -3527,10 +3558,9 @@ label.btn { cursor: pointer; }
     if (els.wotd.hidden) return;
     els.wotdZh.textContent = w.zh;
     renderPinyin(els.wotdPy, w.py);
-    els.wotdEn.textContent = shortText(w.en) + ' · ' + shortText(w.hu);
-    var h = hintsFor(w)[0];
-    els.wotdHint.hidden = !h;
-    if (h) els.wotdHint.textContent = h.ch + ' = ' + h.parts + '. ' + h.en;
+    els.wotdEn.textContent = shortText(w.en);
+    els.wotd.title = 'Word of the day: ' + w.zh + ' ' + w.py + ', ' + shortText(w.en) + ' (' + shortText(w.hu) + ')';
+
     els.btnWotdStudy.setAttribute('data-study', w.zh);
   }
   function dismissWotd() { state.wotdSeen = dayKey(); renderWotd(); save(); }
@@ -3550,8 +3580,8 @@ label.btn { cursor: pointer; }
     goal: { label: function (q) { return 'Answer ' + q.goal + ' cards'; } },
     fresh: { label: function (q) { return 'Learn ' + q.goal + ' new cards'; } },
     due: { label: function (q) { return 'Review ' + q.goal + ' due cards'; } },
-    listen: { label: function (q) { return q.goal + ' answers in a listening style'; } },
-    recall: { label: function (q) { return q.goal + ' answers in Meaning → Chinese or Build'; } },
+    listen: { label: function (q) { return q.goal + ' answers in listening practice'; } },
+    recall: { label: function (q) { return q.goal + ' answers in recall practice'; } },
     sentence: { label: function (q) { return q.goal + ' sentence cards'; } },
     combo: { label: function (q) { return 'Reach a ' + q.goal + ' combo'; } },
     topic: { label: function (q) { return q.goal + ' answers inside one topic'; } }
@@ -3669,7 +3699,10 @@ label.btn { cursor: pointer; }
     var list = el('ul', 'q-list');
     qs.list.forEach(function (q) {
       var li = el('li', 'q-item' + (q.n >= q.goal ? ' done' : ''));
-      li.appendChild(el('span', 'q-check', q.n >= q.goal ? '✓' : ''));
+      var ring = el('span', 'q-ring', q.n >= q.goal ? '✓' : '');
+      ring.style.setProperty('--p', pct(q.n, q.goal) + '%');
+      ring.setAttribute('aria-hidden', 'true');
+      li.appendChild(ring);
       var tx = el('span', 'q-text');
       tx.appendChild(el('span', 'q-label', QUESTS[q.id].label(q)));
       var bar = el('span', 'tp-bar');
@@ -3776,6 +3809,7 @@ label.btn { cursor: pointer; }
     setTimeout(function () { n.classList.add('out'); }, 2600);
     setTimeout(function () { if (n.parentNode) n.parentNode.removeChild(n); }, 3200);
   }
+  function shortDate(k) { var p = k.split('-'); return Number(p[2]) + ' ' + MONTHS[Number(p[1]) - 1]; }
   function sealSection() {
     var got = SEALS.filter(function (x) { return state.seals[x.id]; }).length;
     var sec = section('Seals', got + ' of ' + SEALS.length + ' collected. Each one is worth 50 XP.');
@@ -3788,7 +3822,7 @@ label.btn { cursor: pointer; }
       mark.setAttribute('aria-hidden', 'true');
       li.appendChild(mark);
       li.appendChild(el('span', 'seal-name', x.en));
-      li.appendChild(el('span', 'seal-how', on ? 'Earned ' + state.seals[x.id] : x.how));
+      li.appendChild(el('span', 'seal-how', on ? 'Earned ' + shortDate(state.seals[x.id]) : x.how));
       li.setAttribute('aria-label', x.en + (on ? ', earned on ' + state.seals[x.id] : ', not yet earned: ' + x.how));
       grid.appendChild(li);
     });
@@ -4968,6 +5002,8 @@ label.btn { cursor: pointer; }
     els.btnTopic.hidden = !EXTRA.topics.length;
     els.topicBtnZh.textContent = t ? t.zh : '全';
     els.topicBtnName.textContent = t ? t.en : 'All topics';
+    els.btnTopic.title = t ? t.en : 'All topics';
+    els.btnTopic.classList.toggle('active', !!t);
     els.btnTopic.setAttribute('aria-label', 'Topic: ' + (t ? t.en : 'all topics') + '. Choose a topic');
   }
   function setTopic(id) {
@@ -5773,6 +5809,19 @@ label.btn { cursor: pointer; }
       })();
       add('Similar words', simRes.ok, simRes.d);
 
+      var tabRes = (function () {
+        var vis = function (sel) { var n = els.pvBody.querySelector(sel); return !!n && !n.closest('[data-pane]').hidden; };
+        openProgress('collection');
+        var coll = vis('.seal-grid') && !vis('.q-list');
+        els.pvBody.querySelector('[data-pvtab="today"]').click();
+        var today = vis('.q-list') && vis('.pv-fc') && !vis('.seal-grid') && els.pvBody.querySelector('[data-pvtab="today"]').getAttribute('aria-pressed') === 'true';
+        els.pvBody.querySelector('[data-pvtab="progress"]').click();
+        var prog = vis('.rp-num') && vis('.pv-hero');
+        closeOverlay(els.progressView);
+        return { ok: coll && today && prog, d: 'Collection shows seals: ' + coll + ', Today shows quests and the forecast: ' + today + ', Progress shows reading power: ' + prog };
+      })();
+      add('Progress view tabs', tabRes.ok, tabRes.d);
+
       var newer = parseImport(JSON.stringify({ version: 1, format: FORMAT + 1, status: {} }));
       var current = parseImport(JSON.stringify({ version: 1, format: FORMAT, status: {} }));
       add('Progress from a newer app version is refused', !!newer.error && !current.error && progressSnapshot().format === FORMAT,
@@ -6266,8 +6315,8 @@ label.btn { cursor: pointer; }
     on('btnTourBack', 'click', function () { if (tourStep > 0) { tourStep--; showTourStep(); } });
     on('btnTourSkip', 'click', closeTour);
     on('btnCloseSettings', 'click', function () { closeOverlay(els.settingsView); });
-    on('btnProgress', 'click', openProgress);
-    on('todayPill', 'click', openProgress);
+    on('btnProgress', 'click', function () { openProgress('progress'); });
+    on('todayPill', 'click', function () { openProgress('today'); });
     on('btnTopic', 'click', openTopics);
     on('btnPet', 'click', openPet);
     on('btnClosePet', 'click', function () { closeOverlay(els.petView); });
@@ -6287,6 +6336,9 @@ label.btn { cursor: pointer; }
       if (b) setTopic(b.getAttribute('data-topic'));
     });
     on('pvBody', 'click', function (e) {
+      var tb = e.target.closest ? e.target.closest('[data-pvtab]') : null;
+      if (tb) { showPvTab(tb.getAttribute('data-pvtab')); els.pvBody.scrollTop = 0; return; }
+      if (e.target.closest && e.target.closest('[data-pet]')) { closeOverlay(els.progressView); openPet(); return; }
       var t = e.target.closest ? e.target.closest('[data-topic]') : null;
       if (t) { closeOverlay(els.progressView); setTopic(t.getAttribute('data-topic')); return; }
       var w = e.target.closest ? e.target.closest('[data-study]') : null;
