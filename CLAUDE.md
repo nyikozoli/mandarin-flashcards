@@ -8,7 +8,9 @@ This repository is **public** (`nyikozoli/mandarin-flashcards`). Never commit se
 
 | Path | What |
 |---|---|
-| `src/template.html` | The whole app: markup, CSS, JS. |
+| `src/index.html` | The page: markup, the early error reporter, and the `/*__STYLES__*/` and `/*__SCRIPTS__*/` lines the build fills. |
+| `src/styles/*.css` | The CSS, in cascade order (`01-base.css` … `08-features.css`). |
+| `src/js/*.js` | The app's JavaScript, one file per area (`01-core.js` … `19-wiring.js`), in load order. |
 | `src/sync-config.json` | Supabase URL, public anon key and magic-link return URL. The anon key is public by design. |
 | `src/pwa/` | Service worker, manifest and icons for the Pages build. |
 | `data/` | Word data (`hsk12/`, `hsk3/`) and the official HSK lists (`lists/`). |
@@ -19,9 +21,14 @@ This repository is **public** (`nyikozoli/mandarin-flashcards`). Never commit se
 
 `npm run build` regenerates everything in `dist/` and fails if `scripts/verify.js` rejects an output. `npm run check` runs the data checks. README.md has the data formats, pinyin conventions and the sync/security model.
 
-## How the app is put together (`src/template.html`)
+## How the app is put together (`src/index.html`, `src/styles/`, `src/js/`)
 
-- **Structure:** the JS is one IIFE, split into sections marked `/* ---------- name ---------- */`. The build fills `__VOCAB_JSON__`, `__EXPECTED_TOTAL__`, `__EXPECTED_LEVELS__`, `__SYNC_CONFIG__` (null except in the Pages build), `<!--__SITE_HEAD__-->`, and `__BUILD_DATE__` / `__BUILD_ID__` for the version line in Settings.
+- **Structure:**
+  - `build.js` joins `src/styles/*.css` and `src/js/*.js` in file-name order into `src/index.html`, so the output is still one file.
+  - The JS files together are the body of one IIFE, so they share one scope and need no imports. Within a file, sections are marked `/* ---------- name ---------- */`.
+  - Keep the numeric prefixes. CSS order is the cascade, and `01-core.js` defines what later files use at load time.
+  - A new file needs a prefix that puts it in the right place; the files keep the IIFE's two-space indent.
+  - The build fills `__VOCAB_JSON__`, `__EXPECTED_TOTAL__`, `__EXPECTED_LEVELS__`, `__SYNC_CONFIG__` (null except in the Pages build), `<!--__SITE_HEAD__-->`, and `__BUILD_DATE__` / `__BUILD_ID__` for the version line in Settings.
 - **State:** everything lives in `state`. `progressSnapshot()` is the single list of persisted fields: `save()` stores it, and export and sync send it minus `DEVICE_ONLY`. `restore(saved)` reads it back, so a new persisted field needs an entry in both.
 - **Skills:** reading, recall and listening (`SKILLS`, `SKILL_OF`) each have their own marks, schedule and misses in `state.marks`. `state.status` / `srs` / `misses` always point at the active skill's maps, so ordinary code stays skill-blind; switch only with `useSkill()`, and call `stashSkill()` (or `marksOf()`) before reading another skill. The snapshot keeps reading at the top level for older copies of the app and puts the rest under `skills`.
 - **Decks:** `wordCards`, plus `sentCards` built from them at startup. `cards` points at the active one; switch only through `useDeckType()`, or `switchDeck()` when the user changes deck, which also remembers each deck's place (`state.deckMemory`). Text that differs between words and sentences goes in `DECKS`, read through `deck()` and `noun()`.

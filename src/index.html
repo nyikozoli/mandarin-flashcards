@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#12171d">
+<!--__SITE_HEAD__-->
+<title>Mandarin HSK Flashcards</title>
+<style>
+/*__STYLES__*/
+</style>
+<script>
+/* Early error reporter: shows any JavaScript error visibly on the page, even if the main script fails to load. */
+(function () {
+  var queue = [];
+  function report(msg) {
+    var box = document.getElementById('errorBanner');
+    var list = document.getElementById('errorList');
+    if (!box || !list) { queue.push(msg); return; }
+    box.hidden = false;
+    var li = document.createElement('li');
+    li.textContent = msg;
+    list.appendChild(li);
+  }
+  window.__appError = report;
+  document.addEventListener('DOMContentLoaded', function () {
+    var pending = queue; queue = [];
+    pending.forEach(report);
+  });
+  window.addEventListener('error', function (e) {
+    report('JavaScript error: ' + (e && e.message ? e.message : 'unknown error') + (e && e.lineno ? ' (line ' + e.lineno + ')' : ''));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    var r = e && e.reason;
+    report('Unhandled error: ' + (r && r.message ? r.message : String(r)));
+  });
+  window.addEventListener('load', function () {
+    if (!window.__appStarted) {
+      report('The app could not initialize. Try reloading the page; if the problem persists, the file may be damaged.');
+      var hz = document.getElementById('cardHanzi');
+      var py = document.getElementById('cardPinyin');
+      if (hz) hz.textContent = '⚠';
+      if (py) py.textContent = 'The app failed to start – see the error message above.';
+    }
+  });
+})();
+</script>
+</head>
+<body>
+<div class="app" id="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="seal" aria-hidden="true" lang="zh-CN">汉</div>
+      <h1><span class="h1-lang">Mandarin </span>HSK <span class="h1-levels">1–3</span></h1>
+    </div>
+    <div class="top-actions">
+      <button type="button" class="icon-btn" id="btnHelp" aria-label="Open help: how the app works" title="Help">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.4 2.4c-.6.3-1 .8-1 1.5v.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17" r="1.2" fill="currentColor"/></svg>
+      </button>
+      <button type="button" class="icon-btn" id="btnProgress" aria-label="Open your progress overview" title="Progress">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V11M10 20V5M16 20v-7M22 20H2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <button type="button" class="icon-btn" id="btnList" aria-label="Open the word list and search all words" title="Word list">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 15.5 21 21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <button type="button" class="icon-btn" id="btnSettings" aria-label="Open settings" title="Settings">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="7" r="2.2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="17" r="2.2" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div id="errorBanner" class="banner error" role="alert" hidden>
+    <strong>Problem detected</strong>
+    <ul id="errorList"></ul>
+  </div>
+
+  <nav class="deckbar" aria-label="Choose what to study">
+    <div class="modes" role="radiogroup" aria-label="Study mode">
+      <button type="button" class="mode" id="modeAll" role="radio" aria-checked="true" data-mode="all"><span data-lbl>All cards</span> <span class="count" id="countAll">0</span></button>
+      <button type="button" class="mode" id="modeDue" role="radio" aria-checked="false" data-mode="due"><span data-lbl>Due</span> <span class="count" id="countDueMode">0</span></button>
+      <button type="button" class="mode" id="modeLearning" role="radio" aria-checked="false" data-mode="learning"><span data-lbl>Learning</span> <span class="count" id="countLearningMode">0</span></button>
+      <button type="button" class="mode" id="modeUnmarked" role="radio" aria-checked="false" data-mode="unmarked"><span data-lbl>New</span> <span class="count" id="countUnmarkedMode">0</span></button>
+      <button type="button" class="mode" id="modeHard" role="radio" aria-checked="false" data-mode="hard"><span data-lbl>Hardest</span> <span class="count" id="countHardMode">0</span></button>
+    </div>
+    <div class="deckbar-row">
+      <div class="levels" role="radiogroup" aria-label="HSK level">
+        <button type="button" class="level" id="levelAll" role="radio" aria-checked="true" data-level="all">All <span class="count" id="countLvAll">0</span></button>
+        <button type="button" class="level" id="level1" role="radio" aria-checked="false" data-level="1" aria-label="HSK 1"><span class="lv-pre">HSK </span>1 <span class="count" id="countLv1">0</span></button>
+        <button type="button" class="level" id="level2" role="radio" aria-checked="false" data-level="2" aria-label="HSK 2"><span class="lv-pre">HSK </span>2 <span class="count" id="countLv2">0</span></button>
+        <button type="button" class="level" id="level3" role="radio" aria-checked="false" data-level="3" aria-label="HSK 3"><span class="lv-pre">HSK </span>3 <span class="count" id="countLv3">0</span></button>
+      </div>
+      <button type="button" class="topic-btn" id="btnTopic" aria-haspopup="dialog" hidden><span class="topic-btn-zh" id="topicBtnZh" lang="zh-CN" aria-hidden="true">全</span><span class="topic-btn-name" id="topicBtnName">All topics</span></button>
+      <label class="practice" for="optPractice"><span class="visually-hidden">Practice mode</span>
+        <select id="optPractice">
+          <optgroup label="Words">
+            <option value="zh">汉字 → meaning</option>
+            <option value="reverse">Meaning → 汉字</option>
+            <option value="listen">Listening</option>
+            <option value="choice">Multiple choice</option>
+            <option value="hanzi">汉字 only (pinyin hidden)</option>
+            <option value="tone">Which tone? (listen)</option>
+            <option value="cloze">Fill the gap (sentence)</option>
+            <option value="pairs">Similar words (look and sound alike)</option>
+          </optgroup>
+          <optgroup label="Sentences">
+            <option value="s-zh">Sentences → meaning</option>
+            <option value="s-reverse">Meaning → sentence</option>
+            <option value="s-listen">Sentence listening</option>
+            <option value="s-choice">Sentence multiple choice</option>
+            <option value="s-hanzi">Sentences, 汉字 only</option>
+            <option value="s-build">Sentences: build from words</option>
+          </optgroup>
+        </select>
+      </label>
+    </div>
+
+  </nav>
+
+  <section class="stats" aria-label="Progress">
+    <div class="stats-row">
+      <div class="counter" id="cardCounter">Card 0 / 0</div>
+      <div class="deck-tools">
+        <button type="button" class="icon-btn small" id="btnShuffle" aria-label="Shuffle the current deck" title="Shuffle">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h3.5c2.5 0 4 1.5 5.5 5s3 5 5.5 5H21M3 17h3.5c1.4 0 2.5-.5 3.4-1.5M14.1 8.5C15 7.5 16.1 7 17.5 7H21M18 4l3 3-3 3M18 14l3 3-3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button type="button" class="icon-btn small" id="btnUndo" aria-label="Undo the last answer" title="Undo">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <button type="button" class="pet-mini" id="btnPet" aria-haspopup="dialog" aria-label="Your panda"><span id="petMini" class="pet-art" aria-hidden="true"></span></button>
+      <button type="button" class="today-pill" id="todayPill" aria-label="Today's progress">0/20 today</button>
+    </div>
+    <div class="progress" id="progressBar" role="progressbar" aria-label="Words marked as known" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0">
+      <div class="seg known" id="progKnown"></div>
+      <div class="seg learning" id="progLearning"></div>
+    </div>
+    <p class="legend">
+      <span><span class="dot known" aria-hidden="true"></span><b id="knownCount">0</b> known</span>
+      <span><span class="dot learning" aria-hidden="true"></span><b id="learningCount">0</b> learning</span>
+      <span><span class="dot" aria-hidden="true"></span><b id="unmarkedCount">0</b> new</span>
+      <span class="legend-tones" id="legendTones" title="Tone colours: 1st, 2nd, 3rd, 4th and neutral tone"><span class="visually-hidden">Tone colours: </span><span class="t1">mā</span><span class="t2">má</span><span class="t3">mǎ</span><span class="t4">mà</span><span class="t5">ma</span></span>
+    </p>
+    <p class="visually-hidden" id="progressLabel">0 known</p>
+  </section>
+  <section id="newsStrip" class="wotd news-strip" aria-label="What's new" hidden>
+    <div class="wotd-seal" lang="zh-CN" aria-hidden="true">新</div>
+    <p class="wotd-body" id="newsStripText"></p>
+    <button type="button" class="btn small" id="btnNewsSee">See</button>
+    <button type="button" class="icon-btn small" id="btnNewsClose" aria-label="Hide what's new">✕</button>
+  </section>
+  <section id="wotd" class="wotd" aria-labelledby="wotdLabel" hidden>
+    <div class="wotd-seal" lang="zh-CN" aria-hidden="true">日</div>
+    <p class="wotd-body"><span class="visually-hidden" id="wotdLabel">Word of the day: </span><span id="wotdZh" lang="zh-CN"></span> <span id="wotdPy" class="wotd-py" lang="zh-Latn-pinyin"></span> <span id="wotdEn" class="wotd-en"></span><span id="wotdHint" hidden></span></p>
+    <button type="button" class="btn small" id="btnWotdStudy">Study</button>
+    <button type="button" class="icon-btn small" id="btnWotdClose" aria-label="Hide the word of the day until tomorrow">✕</button>
+  </section>
+  <div id="srLive" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
+
+  <main class="stage" id="stage">
+    <article id="card" class="card" role="group" aria-roledescription="flashcard" aria-label="Flashcard">
+      <div class="stamp stamp-know" aria-hidden="true"><span lang="zh-CN">会</span><small>I know it</small></div>
+      <div class="stamp stamp-learn" aria-hidden="true"><span lang="zh-CN">学</span><small>Learning</small></div>
+      <div class="card-meta">
+        <span class="meta-left"><span id="cardNumber">#1</span><span id="cardRank" class="rank-tag" hidden></span><span id="comboTag" class="combo-tag" hidden></span></span>
+        <span id="cardStatus" class="status-tag">New</span>
+      </div>
+      <div id="cardPrompt" class="prompt" hidden></div>
+      <div class="card-head">
+        <div id="cardHanzi" class="hanzi" lang="zh-CN">…</div>
+        <div id="cardPinyin" class="pinyin" lang="zh-Latn-pinyin">Loading…</div>
+        <button type="button" id="btnSpeak" class="speak-btn" aria-label="Read aloud: speak the word and its example sentences (S)"><svg class="speak-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span id="speakLabel">Read aloud</span></button>
+      </div>
+      <div id="choiceBox" class="choices" hidden></div>
+      <div id="cardAnswer" class="answer">
+        <div id="gradeRow" class="grade-row" role="group" aria-label="How well did you know it?" hidden>
+          <span class="grade-q">How well did you know it?</span>
+          <button type="button" class="grade hard" data-grade="hard"><span data-lbl>Hard</span> <small></small></button>
+          <button type="button" class="grade good" data-grade="good"><span data-lbl>Good</span> <small></small></button>
+          <button type="button" class="grade easy" data-grade="easy"><span data-lbl>Easy</span> <small></small></button>
+        </div>
+        <div class="meaning"><span class="tag en">EN</span><p id="cardEn"></p></div>
+        <div class="meaning"><span class="tag hu">HU</span><p id="cardHu" lang="hu"></p></div>
+        <div id="cardHints" class="hints" hidden></div>
+        <div id="cardExamples" class="examples"></div>
+      </div>
+      <button type="button" id="revealHint" class="hint" aria-expanded="false" aria-controls="cardAnswer">Tap the card to show the meaning</button>
+    </article>
+
+    <section id="deckEnd" class="card end-card" hidden aria-live="polite">
+      <div class="big-emoji" id="endEmoji" aria-hidden="true">🎉</div>
+      <h2 id="endTitle">Deck complete</h2>
+      <p id="endText"></p>
+      <div class="end-actions">
+        <button type="button" class="btn primary" id="btnEndRestart">Start this deck again</button>
+        <button type="button" class="btn" id="btnEndLearning">Study learning cards</button>
+        <button type="button" class="btn" id="btnEndUnmarked">Study new cards</button>
+        <button type="button" class="btn" id="btnEndAll">All cards</button>
+      </div>
+    </section>
+  </main>
+
+  <nav class="actions" aria-label="Answer">
+    <button type="button" class="act learn" id="btnLearning" aria-label="Still learning (Left arrow)"><span class="act-key" aria-hidden="true">←</span><span class="act-seal" lang="zh-CN" aria-hidden="true">学</span><span class="act-text"><span class="act-label" data-lbl>Still learning</span></span></button>
+    <button type="button" class="act skip" id="btnSkip" aria-label="Skip to the next card (Space)"><svg class="act-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15a8 8 0 0 1 14.6-4.5M19 5v5.5h-5.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="act-label" data-lbl>Skip</span></button>
+    <button type="button" class="act know" id="btnKnown" aria-label="I know it (Right arrow)"><span class="act-seal" lang="zh-CN" aria-hidden="true">会</span><span class="act-text"><span class="act-label" data-lbl>I know it</span></span><span class="act-key" aria-hidden="true">→</span></button>
+  </nav>
+  <p class="kbd-hint"><span><kbd>Space</kbd> skip</span><span><kbd>S</kbd> speak</span><span><kbd>↑</kbd><kbd>↓</kbd> flip</span><span><kbd>1</kbd>–<kbd>4</kbd> choose</span><span><kbd>H</kbd> <kbd>E</kbd> hard, easy</span><span><kbd>T</kbd> type</span><span>more in Help</span></p>
+
+  <footer>
+    <p class="footnote" id="footnote">Works offline. Progress is saved in this browser.</p>
+  </footer>
+</div>
+
+<div id="settingsView" class="overlay" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="sheet-head">
+      <h2 id="settingsTitle" data-lbl="inline">Settings</h2>
+      <button type="button" class="close-btn" id="btnCloseSettings" aria-label="Close settings">✕</button>
+    </div>
+    <div class="settings-body">
+      <section class="set-group">
+        <h3 data-lbl="inline">Cards</h3>
+        <div class="set-row">
+          <label for="optLabels">Interface labels</label>
+          <select id="optLabels">
+            <option value="both">中文 + English</option>
+            <option value="en">English</option>
+            <option value="zh">中文 only</option>
+          </select>
+        </div>
+        <label class="switch"><input type="checkbox" id="optAutoReveal"><span>Always show meanings</span></label>
+        <label class="switch"><input type="checkbox" id="optTones"><span>Tone colours <span class="tone-key" aria-hidden="true"><span class="t1">mā</span> <span class="t2">má</span> <span class="t3">mǎ</span> <span class="t4">mà</span> <span class="t5">ma</span></span></span></label>
+        <label class="switch"><input type="checkbox" id="optAutoplay"><span>Read each new card aloud</span></label>
+        <label class="switch"><input type="checkbox" id="optFadePinyin"><span>Hide pinyin on cards I know well (until I tap)</span></label>
+        <label class="switch"><input type="checkbox" id="optChoicePinyin"><span>Show pinyin in multiple choice</span></label>
+        <label class="switch"><input type="checkbox" id="optVibrate"><span>Vibrate on answers</span></label>
+      </section>
+      <section class="set-group">
+        <h3 data-lbl="inline">Voice</h3>
+        <div class="set-row">
+          <label for="optVoice">Chinese voice</label>
+          <select id="optVoice"><option value="">Automatic</option></select>
+        </div>
+        <div class="set-row">
+          <span class="set-note">Hide voices that cannot play on this device.</span>
+          <button type="button" class="btn small" id="btnTestVoices" aria-label="Test which Chinese voices work and hide the ones that fail">Test voices</button>
+        </div>
+        <div class="set-row">
+          <label for="optRate">Speech speed</label>
+          <select id="optRate">
+            <option value="0.6">Slow</option>
+            <option value="0.85">Normal</option>
+            <option value="1">Fast</option>
+          </select>
+        </div>
+        <label class="switch" title="Plays a near-silent sound first so speakers or headphones are awake. Adds about a second of delay."><input type="checkbox" id="optWarmup"><span>Fix cut-off audio start</span></label>
+      </section>
+      <section class="set-group" id="syncGroup">
+        <h3 data-lbl="inline">Sync across devices</h3>
+        <div class="set-row" id="syncEmailRow">
+          <label for="syncEmail">Email</label>
+          <input type="email" id="syncEmail" autocomplete="email" inputmode="email" spellcheck="false" placeholder="you@example.com" aria-describedby="syncEmailNote">
+        </div>
+        <div class="set-row" id="syncLinkRow">
+          <span class="set-note" id="syncEmailNote">We send a sign-in link. No password to remember.</span>
+          <button type="button" class="btn small" id="btnSignIn">Email me a link</button>
+        </div>
+        <div class="set-row" id="syncAccountRow" hidden>
+          <span class="set-note" id="syncAccount"></span>
+          <button type="button" class="btn small danger-ghost" id="btnSignOut">Sign out</button>
+        </div>
+        <div class="set-row" id="syncDatesRow" hidden>
+          <ul class="sync-dates" id="syncDates"></ul>
+          <button type="button" class="btn small" id="btnSyncNow">Sync now</button>
+        </div>
+        <p id="syncStatus" class="transfer-status" role="status"></p>
+      </section>
+      <section class="set-group">
+        <h3 data-lbl="inline">Progress and checks</h3>
+        <div class="set-row">
+          <span class="set-note">Move progress without an account.</span>
+          <span class="set-btns">
+            <button type="button" class="btn small" id="btnExport">Export progress</button>
+            <button type="button" class="btn small" id="btnImport">Import progress</button>
+          </span>
+        </div>
+        <div class="set-row">
+          <span class="set-note">Clear all Known and Learning marks.</span>
+          <button type="button" class="btn small danger-ghost" id="btnReset" aria-label="Reset all progress">Reset progress</button>
+        </div>
+        <div class="set-row">
+          <span class="set-note">Check the word data and test every control.</span>
+          <button type="button" class="btn small" id="btnSelfCheck" aria-label="Run the self-check diagnostics">Run self-check</button>
+        </div>
+        <div class="set-row">
+          <span class="set-note">See what changed in each version.</span>
+          <button type="button" class="btn small" id="btnNews">What's new</button>
+        </div>
+        <p class="set-note app-version">Version __BUILD_DATE__, build __BUILD_ID__</p>
+      </section>
+    </div>
+  </div>
+</div>
+
+<div id="listView" class="overlay" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="listTitle">
+    <div class="sheet-head">
+      <h2 id="listTitle">All words</h2>
+      <button type="button" class="close-btn" id="btnCloseList" aria-label="Close the word list">✕</button>
+    </div>
+    <label class="visually-hidden" for="searchInput">Search words</label>
+    <input id="searchInput" class="search" type="search" autocomplete="off" spellcheck="false" placeholder="Search: 你好, ni hao, hello, szia…">
+    <div class="chips" role="group" aria-label="Filter by status">
+      <button type="button" class="chip" data-filter="all" aria-pressed="true">All</button>
+      <button type="button" class="chip" data-filter="known" aria-pressed="false">Known</button>
+      <button type="button" class="chip" data-filter="learning" aria-pressed="false">Learning</button>
+      <button type="button" class="chip" data-filter="unmarked" aria-pressed="false">New</button>
+    </div>
+    <div class="chips" id="lvChips" role="group" aria-label="Filter by HSK level">
+      <button type="button" class="chip lvchip" data-lv="all" aria-pressed="true">All levels</button>
+      <button type="button" class="chip lvchip" data-lv="1" aria-pressed="false">HSK 1</button>
+      <button type="button" class="chip lvchip" data-lv="2" aria-pressed="false">HSK 2</button>
+      <button type="button" class="chip lvchip" data-lv="3" aria-pressed="false">HSK 3</button>
+    </div>
+    <p class="list-summary" id="listSummary" aria-live="polite"></p>
+    <ul class="word-list" id="wordList"></ul>
+  </div>
+</div>
+
+<div id="confirmDialog" class="overlay dialog-wrap" hidden>
+  <div class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmText">
+    <h2 id="confirmTitle">Are you sure?</h2>
+    <p id="confirmText"></p>
+    <div class="dialog-actions">
+      <button type="button" class="btn" id="confirmCancel">Cancel</button>
+      <button type="button" class="btn" id="confirmAlt" hidden>Other choice</button>
+      <button type="button" class="btn danger" id="confirmOk">OK</button>
+    </div>
+  </div>
+</div>
+
+<div id="newsView" class="overlay" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="newsTitle">
+    <div class="sheet-head">
+      <h2 id="newsTitle" data-lbl="inline">What's new</h2>
+      <button type="button" class="close-btn" id="btnCloseNews" aria-label="Close what's new">✕</button>
+    </div>
+    <div class="pv-body" id="newsBody"></div>
+  </div>
+</div>
+
+<div id="petView" class="overlay" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="petTitle">
+    <div class="sheet-head">
+      <h2 id="petTitle" data-lbl="inline">Your panda</h2>
+      <button type="button" class="close-btn" id="btnClosePet" aria-label="Close the panda">✕</button>
+    </div>
+    <div class="pv-body pet-body">
+      <button type="button" class="pet-stage" id="petBig" aria-label="Pet your panda"></button>
+      <p class="pet-name"><span id="petName">宝宝</span> <span class="pet-stage-name" id="petStageName"></span></p>
+      <p class="pet-mood" id="petMood"></p>
+      <div class="pet-bars">
+        <p class="pet-bar-label"><span>Fed today</span><b id="petFedText"></b></p>
+        <span class="pv-goalbar"><span class="pv-goalfill" id="petFed"></span></span>
+        <p class="pet-bar-label"><span>Growing</span><b id="petGrowText"></b></p>
+        <span class="pv-goalbar"><span class="pv-goalfill done" id="petGrow"></span></span>
+      </div>
+      <p class="pv-sub">Every card you answer feeds one bamboo leaf 🎋. Reaching your daily goal fills the belly; all your answers together make the panda grow.</p>
+      <form class="pet-rename" id="petRename">
+        <label for="petNameInput">Name</label>
+        <input id="petNameInput" maxlength="16" autocomplete="off" spellcheck="false">
+        <button type="submit" class="btn small">Rename</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div id="quizView" class="overlay" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="quizTitle">
+    <div class="sheet-head">
+      <h2 id="quizTitle">Challenge</h2>
+      <button type="button" class="close-btn" id="btnCloseQuiz" aria-label="Close the challenge">✕</button>
+    </div>
+    <div class="pv-body qz-body" id="quizBody" aria-live="polite"></div>
+  </div>
+</div>
+
+<div id="topicView" class="overlay" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="topicTitle">
+    <div class="sheet-head">
+      <h2 id="topicTitle" data-lbl="inline">Topics</h2>
+      <button type="button" class="close-btn" id="btnCloseTopic" aria-label="Close topics">✕</button>
+    </div>
+    <div class="pv-body">
+      <p class="pv-sub">Study one area at a time. A topic's seal turns red when you know all of its words.</p>
+      <div class="tp-grid" id="topicGrid"></div>
+    </div>
+  </div>
+</div>
+
+<div id="progressView" class="overlay" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="progressTitle">
+    <div class="sheet-head">
+      <h2 id="progressTitle">Your progress</h2>
+      <button type="button" class="close-btn" id="btnCloseProgress" aria-label="Close the progress overview">✕</button>
+    </div>
+    <div class="pv-body" id="pvBody"></div>
+  </div>
+</div>
+
+<div id="summaryView" class="overlay dialog-wrap" hidden>
+  <div class="dialog summary" role="dialog" aria-modal="true" aria-labelledby="summaryTitle">
+    <h2 id="summaryTitle">Nice work! 🎉</h2>
+    <div id="summaryBody"></div>
+    <div class="dialog-actions">
+      <button type="button" class="btn" id="btnSummaryProgress">📊 Progress</button>
+      <button type="button" class="btn primary" id="btnSummaryClose">Keep going</button>
+    </div>
+  </div>
+</div>
+
+<div id="helpView" class="overlay" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+    <div class="sheet-head">
+      <h2 id="helpTitle" data-lbl="inline">How it works</h2>
+      <button type="button" class="close-btn" id="btnCloseHelp" aria-label="Close help">✕</button>
+    </div>
+    <div class="help-body">
+      <p class="help-lead">598 words from HSK 1, 2 and 3. Each card has the characters, pinyin, English and Hungarian meanings, and example sentences you can listen to.</p>
+      <button type="button" class="btn" id="btnShowTour">Show the quick tour again</button>
+
+      <section class="help-sec">
+        <h3>Study a card</h3>
+        <ul>
+          <li><b>Tap the card</b> to show or hide the meanings and example sentences.</li>
+          <li><b>Swipe right</b> or press <b>I know it</b> when you know the word. <b>Swipe left</b> or press <b>Still learning</b> when you don't. <b>Skip</b> moves on without marking.</li>
+          <li><b>Read aloud</b> speaks the word, then its example sentences. The small speaker on each sentence plays just that sentence.</li>
+          <li>Made a mistake? The <b>undo</b> arrow next to the card counter takes back the last answer.</li>
+        </ul>
+      </section>
+
+      <section class="help-sec">
+        <h3>Choose what to study</h3>
+        <dl class="help-defs">
+          <dt>All cards</dt><dd>Every word in the chosen level, in order. Use the shuffle icon to mix them.</dd>
+          <dt>Due</dt><dd>Words that are ready for review today. A word you know comes back after 1, 3, 7, 14, 30, 60 and then 120 days; a word you miss comes back the same day.</dd>
+          <dt>Hard, Good, Easy</dt><dd>When the answer is showing, three buttons say how well you knew it, each with when the card comes back. Good is the same as “I know it”. Easy skips a step, Hard keeps the same wait. Keys: <kbd>H</kbd> Hard, <kbd>→</kbd> Good, <kbd>E</kbd> Easy.</dd>
+          <dt>Learning</dt><dd>Words you marked “Still learning”.</dd>
+          <dt>New</dt><dd>Cards you have not answered yet.</dd>
+          <dt>Hardest</dt><dd>The 20 words you have missed most often.</dd>
+        </dl>
+        <p>The level buttons (All, 1, 2, 3) narrow every mode to one HSK level.</p>
+      </section>
+
+      <section class="help-sec">
+        <h3>Practice styles</h3>
+        <dl class="help-defs">
+          <dt>汉字 → meaning</dt><dd>See the Chinese, recall the meaning.</dd>
+          <dt>Meaning → 汉字</dt><dd>See English and Hungarian, say the Chinese word, then tap to check.</dd>
+          <dt>Listening</dt><dd>Hear the word, guess it, then tap to see it.</dd>
+          <dt>Multiple choice</dt><dd>Pick the right meaning from four. A right answer counts as Known.</dd>
+          <dt>汉字 only</dt><dd>Only the characters show; pinyin, tone colours and audio appear when you tap the card. Use it for words you can say but cannot read yet. A word card's back also has <b>Practice these sentences</b>, which opens just that word's example sentences in the current style.</dd>
+          <dt>Build the sentence</dt><dd>Sentences only. The translation shows, with the sentence's words shuffled below it: tap them in order (tap a placed word, or press Backspace, to take it back). A right order counts as Known toward recall. Another order can still be correct Chinese, so a mismatch shows the sentence and you mark it yourself.</dd>
+          <dt>Typing the answer</dt><dd>In Meaning → 汉字 (words) you can type the pinyin and press Enter: tone numbers (xue2sheng) or tone marks (xuésheng) both work, and neutral tones can be left out. A right answer counts as Known. <kbd>T</kbd> jumps to the box.</dd>
+          <dt>Similar words</dt><dd>Words only. The meaning shows (🔊 plays the word); pick the right one among words that look or sound alike, such as 买 mǎi “buy” and 卖 mài “sell”, 他 / 她 / 它, or 大 / 太. Only the about 135 words that have such a twin are in this deck; it counts toward reading.</dd>
+          <dt>Fill the gap</dt><dd>One of the word's example sentences with the word blanked out, and its translation. Pick the word that fits from four of the same length; keys 1–4 pick. Words only; it counts toward reading.</dd>
+          <dt>Which tone?</dt><dd>Hear the word, then pick the tone of its first syllable from the four written forms; keys 1–4 pick tones 1–4. Words only. The 21 words whose first syllable is neutral, or changes tone when it is spoken (你好, 可以), come up as normal cards.</dd>
+          <dt>Tap a word</dt><dd>In any example sentence, and on sentence cards, the words from HSK 1–3 have a dotted underline. Tap one to see its pinyin and meaning; tap elsewhere or press Esc to close it. On a word card the word itself is highlighted instead.</dd>
+          <dt>What's new</dt><dd>After an update a short notice appears at the top; Settings → What's new lists every version.</dd>
+          <dt>Chinese labels</dt><dd>Buttons and headings carry their Chinese name (复习 fùxí = Due, 我会了 wǒ huì le = I know it), so you pick up everyday words as you use the app. Settings → Interface labels switches between 中文 + English, English, and 中文 only; hover or long-press a label to see its pinyin.</dd>
+          <dt>Your panda</dt><dd>The little panda next to today's count lives on your studying. Every answer feeds it a bamboo leaf, your daily goal fills its belly, and all your answers together make it grow from newborn to sage. Tap it to see how it is doing and to give it a name.</dd>
+          <dt>Word of the day</dt><dd>Each day a useful word you do not know yet appears above the card. “Study it” opens it; ✕ hides it until tomorrow.</dd>
+          <dt>Daily quests</dt><dd>Three small goals each day, shown in the progress view. Each finished quest gives 30 XP; all three give 50 XP more and a 🧊 streak freeze. You can save two, and a saved freeze keeps your streak alive over a missed day. Every Monday a short recap of last week appears.</dd>
+          <dt>Seals and challenges</dt><dd>The progress view collects 20 red seals (印章) for milestones such as 100 words, a 7-day streak or a passed exam, each worth 50 XP. Its challenges are a 60-second blitz (as many meanings as you can) and a 20-question exam per HSK level (pass at 80%). Challenges never change your review schedule.</dd>
+          <dt>Character hints</dt><dd>The back of a word card explains its characters where a well-established explanation exists (about 180 characters): a picture (山 mountain peaks), a combination of meanings (休 a person resting by a tree), or a meaning part plus a sound part (妈 = 女 woman + 马 mǎ for the sound).</dd>
+          <dt>Topics</dt><dd>The button under the level row picks a topic (food, travel, time…). Every study mode then works inside it, and a topic's seal turns red when you know all its words.</dd>
+          <dt>What you can read</dt><dd>The progress view counts the example sentences whose HSK words you all know, shows how much of everyday Chinese text your words cover, and suggests the next word to learn. Word frequencies come from <i>wordfreq</i> by Robyn Speer and contributors (CC BY-SA 4.0).</dd>
+          <dt>XP, ranks, combo</dt><dd>Every answer earns XP (10 for a known card, 3 for one you are still learning, more during a combo). XP raises your rank from 新手 Newcomer to 大师 Master. Three or more right answers in a row show a 连 combo counter on the card.</dd>
+          <dt>Progress per skill</dt><dd>Reading (Chinese → meaning, 汉字 only, multiple choice), recall (meaning → Chinese) and listening (listening, which tone) each keep their own Known and Learning marks and their own Due list, so a word you can read is not marked as one you can say or hear. Words and sentences also keep their own place in the deck.</dd>
+          <dt>Fading pinyin</dt><dd>Settings → <b>Hide pinyin on cards I know well</b>. In Chinese → meaning, a card whose next review is a week or more away shows only its characters until you tap it, so the pinyin fades as you learn. Off by default.</dd>
+          <dt>Sentences</dt><dd>The same four styles for the 777 example sentences, in the lower half of the practice menu. Each sentence is a card of its own with its own progress, and its back shows the word it comes from.</dd>
+        </dl>
+      </section>
+
+      <section class="help-sec">
+        <h3>Reading the card</h3>
+        <ul>
+          <li>Colours show the tone of each syllable: <span class="t1">1st mā</span>, <span class="t2">2nd má</span>, <span class="t3">3rd mǎ</span>, <span class="t4">4th mà</span>, <span class="t5">neutral ma</span>. Turn them off in Settings.</li>
+          <li>The red dashed square around each character is a 米字格 practice grid, the same one used in Chinese exercise books. It helps you see how the character fills its square.</li>
+        </ul>
+      </section>
+
+      <section class="help-sec">
+        <h3>Progress and goals</h3>
+        <ul>
+          <li>The pill at the top right shows today’s answers against your daily goal, and your streak 🔥 of days in a row.</li>
+          <li>The chart button opens your progress: words known per level, the last 14 days, and a map of every word. Tap a square to study that word.</li>
+          <li>After every 20 cards you get a short summary.</li>
+        </ul>
+      </section>
+
+      <section class="help-sec">
+        <h3>Sound</h3>
+        <ul>
+          <li>Speech uses the Chinese voices on your device. If nothing plays, add a Chinese voice: on iPhone, Settings → Accessibility → Spoken Content → Voices → Chinese; on Android, the Google text-to-speech settings; on Windows, Settings → Time &amp; language → Speech.</li>
+          <li>In Settings, <b>Test voices</b> hides the voices that do not work on this device. If the start of a word gets cut off, keep <b>Fix cut-off audio start</b> switched on.</li>
+        </ul>
+      </section>
+
+      <section class="help-sec">
+        <h3>Keyboard</h3>
+        <p>In the mode and level buttons, the arrow keys move the selection instead.</p>
+        <p class="help-keys"><kbd>→</kbd> I know it <kbd>←</kbd> Still learning <kbd>Space</kbd> Skip <kbd>S</kbd> Read aloud <kbd>↑</kbd> <kbd>↓</kbd> Show or hide <kbd>1</kbd>–<kbd>4</kbd> Choose an answer <kbd>H</kbd> Hard <kbd>E</kbd> Easy <kbd>Esc</kbd> Close a panel</p>
+      </section>
+
+      <section class="help-sec">
+        <h3>Your progress is saved on this device</h3>
+        <ul>
+          <li>Answers are stored in this browser only. Another phone, computer or browser starts fresh, and clearing your browsing data erases them.</li>
+          <li>To continue on another device, open Settings and use <b>Export progress</b>, then <b>Import progress</b> on the other device.</li>
+          <li>On a phone, open the page in the browser and choose <b>Add to Home Screen</b> to use it like an app. Opened from its web address, the home-screen app also works without internet.</li>
+        </ul>
+      </section>
+    </div>
+  </div>
+</div>
+
+<div id="tourView" class="overlay dialog-wrap" hidden>
+  <div class="dialog tour" role="dialog" aria-modal="true" aria-labelledby="tourTitle" aria-describedby="tourText">
+    <div class="tour-art" id="tourArt" aria-hidden="true"></div>
+    <h2 id="tourTitle">Welcome</h2>
+    <p id="tourText"></p>
+    <div class="tour-dots" id="tourDots" aria-hidden="true"></div>
+    <div class="dialog-actions tour-actions">
+      <button type="button" class="btn ghost" id="btnTourSkip">Skip</button>
+      <button type="button" class="btn" id="btnTourBack">Back</button>
+      <button type="button" class="btn primary" id="btnTourNext">Next</button>
+    </div>
+  </div>
+</div>
+
+<div id="transferView" class="overlay" hidden>
+  <div class="sheet transfer" role="dialog" aria-modal="true" aria-labelledby="transferTitle">
+    <div class="sheet-head">
+      <h2 id="transferTitle">Export progress</h2>
+      <button type="button" class="close-btn" id="btnCloseTransfer" aria-label="Close">✕</button>
+    </div>
+    <div class="transfer-body">
+      <p id="transferIntro"></p>
+      <label for="transferText" class="visually-hidden">Progress code</label>
+      <textarea id="transferText" spellcheck="false" autocomplete="off"></textarea>
+      <div class="transfer-actions" id="transferExportActions">
+        <button type="button" class="btn primary" id="btnCopyProgress">Copy code</button>
+        <button type="button" class="btn" id="btnDownloadProgress">Save as file</button>
+      </div>
+      <div class="transfer-actions" id="transferImportActions">
+        <input type="file" id="importFile" class="visually-hidden" accept=".json,application/json,text/plain">
+        <label class="btn" for="importFile">Open a file</label>
+        <button type="button" class="btn primary" id="btnApplyImport">Import</button>
+      </div>
+      <p id="transferStatus" class="transfer-status" role="status"></p>
+    </div>
+  </div>
+</div>
+
+<div id="diagView" class="overlay" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="diagTitle">
+    <div class="sheet-head">
+      <h2 id="diagTitle">Self-check</h2>
+      <button type="button" class="close-btn" id="btnCloseDiag" aria-label="Close the self-check">✕</button>
+    </div>
+    <p class="diag-summary" id="diagSummary">Not run yet.</p>
+    <ul class="diag-list" id="diagResults"></ul>
+    <div style="padding: 10px 0 14px;"><button type="button" class="btn" id="btnRunCheck">Run self-check again</button></div>
+  </div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<div id="wordPop" class="word-pop" role="dialog" aria-labelledby="wordPopZh" hidden>
+  <div class="wp-head"><span id="wordPopZh" class="wp-zh" lang="zh-CN"></span><span id="wordPopLv" class="wp-lv"></span></div>
+  <p id="wordPopPy" class="wp-py" lang="zh-Latn-pinyin"></p>
+  <p class="ex-line"><span class="tag en">EN</span><span id="wordPopEn"></span></p>
+  <p class="ex-line" lang="hu"><span class="tag hu">HU</span><span id="wordPopHu"></span></p>
+  <button type="button" class="btn small wp-speak" id="btnWordPopSpeak">🔊 Read aloud</button>
+  <button type="button" class="close-btn wp-close" id="btnWordPopClose" aria-label="Close the word">✕</button>
+</div>
+
+<script id="vocab-data" type="application/json">__VOCAB_JSON__</script>
+<script id="extra-data" type="application/json">__EXTRA_JSON__</script>
+<script>
+(function () {
+/*__SCRIPTS__*/
+})();
+</script>
+</body>
+</html>

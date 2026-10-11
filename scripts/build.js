@@ -107,7 +107,16 @@ const json = safeJson(cards);
 const extraJson = safeJson({ chars: FREQ ? FREQ.chars : {}, topics: TOPICS ? TOPICS.topics : [], hints: HINTS ? HINTS.hints : {}, news: CHANGELOG ? CHANGELOG.releases : [] });
 
 // ---------- html ----------
-const template = read(rel('template.html')).replace(/\r\n/g, '\n');
+// The app's source: src/index.html is the page. Its /*__STYLES__*/ and /*__SCRIPTS__*/ lines are replaced by the
+// files in src/styles/ and src/js/, joined in file-name order (the numeric prefixes keep the CSS cascade and the
+// script order). The scripts form the body of one function, so they share one scope.
+const joinDir = (dir, ext) => fs.readdirSync(rel(dir)).filter((f) => f.endsWith(ext)).sort()
+  .map((f) => read(rel(dir, f)).replace(/\r\n/g, '\n')).join('');
+const page = read(rel('index.html')).replace(/\r\n/g, '\n');
+['/*__STYLES__*/\n', '/*__SCRIPTS__*/\n'].forEach((m) => {
+  if (page.split(m).length !== 2) throw new Error('Expected one ' + m.trim() + ' line in src/index.html');
+});
+const template = page.replace('/*__STYLES__*/\n', () => joinDir('styles', '.css')).replace('/*__SCRIPTS__*/\n', () => joinDir('js', '.js'));
 const buildId = crypto.createHash('sha1').update(template).update(json).update(extraJson).digest('hex').slice(0, 10);
 // Shown in Settings, so you can tell which version a device runs. The build id is a content hash
 // and also names the service worker cache, so it changes exactly when the app does.

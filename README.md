@@ -39,7 +39,9 @@ The build stops if a check fails.
 
 | Path | Contents |
 |---|---|
-| `src/template.html` | The whole app: markup, CSS and JavaScript. `__VOCAB_JSON__`, `__EXPECTED_TOTAL__`, `__EXPECTED_LEVELS__`, `__SYNC_CONFIG__` and `<!--__SITE_HEAD__-->` are filled in by the build. |
+| `src/index.html` | The page: markup and the early error reporter. `__VOCAB_JSON__`, `__EXPECTED_TOTAL__`, `__EXPECTED_LEVELS__`, `__SYNC_CONFIG__` and `<!--__SITE_HEAD__-->` are filled in by the build. |
+| `src/styles/*.css` | The CSS, split by area, joined in file-name order (the order is the cascade). |
+| `src/js/*.js` | The JavaScript, one file per area (labels, sync, deck, practice, game, panda, speech, self-check…), joined in file-name order into one script. |
 | `src/sync-config.json` | Supabase project URL, public `anon` key and the URL a magic link returns to. See [Cloud sync](#cloud-sync). |
 | `src/pwa/` | Service worker, web-app manifest and icons for the GitHub Pages version. |
 | `data/hsk12/v1.js` … `v6.js` | HSK 1–2 words, grouped by topic. Entry: `[hanzi, pinyin, english, hungarian, sentence, sentenceEn, sentenceHu, (second sentence …)]` |
@@ -57,7 +59,7 @@ Optional, and switched on for the GitHub Pages build only. It syncs progress (ma
 
 Sign-in is an email magic link, so there is no password to store. Writes go through the `upsert_progress` SQL function, which receives the `updated_at` this device last saw and writes only if the cloud row still has it, in one atomic statement. When it refuses, the app shows both copies with their last-modified date and known/learning counts, and offers to keep either one. Nothing is merged, and nothing is overwritten in the background.
 
-`voice`, `badVoices`, `voicesTested` and `warmup` never leave the device (see `DEVICE_ONLY` in `src/template.html`). Voice names belong to one operating system, so syncing them would break audio elsewhere.
+`voice`, `badVoices`, `voicesTested` and `warmup` never leave the device (see `DEVICE_ONLY` in `src/js/04-transfer.js`). Voice names belong to one operating system, so syncing them would break audio elsewhere.
 
 The single file and `dist/artifact.html` ship with sync off. Neither has a stable `https` address for a magic link to return to: one opens over `file://`, the other runs in a cross-origin frame. Both hide the whole Settings → Sync section and stay fully offline.
 
@@ -112,7 +114,7 @@ The build adds rank, frequency and topic to each card and puts the topic list, c
 
 ## Interface labels
 
-Buttons and headings carry their Chinese name (`ZH_LABELS` in `src/template.html`: 复习 Due, 我会了 I know it…), with the pinyin in the tooltip. Settings → Interface labels picks 中文 + English (the default), English, or 中文 only. In 中文 only, the English stays in the page, visually hidden, for screen readers. Static labels are marked `data-lbl` in the markup; labels built in code go through `zhLabel()`.
+Buttons and headings carry their Chinese name (`ZH_LABELS` in `src/js/02-labels.js`: 复习 Due, 我会了 I know it…), with the pinyin in the tooltip. Settings → Interface labels picks 中文 + English (the default), English, or 中文 only. In 中文 only, the English stays in the page, visually hidden, for screen readers. Static labels are marked `data-lbl` in the markup; labels built in code go through `zhLabel()`.
 
 ## Pinyin conventions
 

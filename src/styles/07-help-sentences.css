@@ -1,0 +1,44 @@
+/* Help sheet and first-visit tour */
+.help-body { overflow-y: auto; flex: 1; margin: 0 -16px; padding: 0 16px 28px; display: flex; flex-direction: column; gap: 20px; }
+.help-lead { margin: 0; max-width: 62ch; color: var(--soft); font-size: 15.5px; }
+.help-body > .btn { align-self: flex-start; }
+.help-sec h3 { margin: 0 0 8px; font-size: 16px; text-wrap: balance; }
+.help-sec ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; max-width: 65ch; color: var(--soft); font-size: 14.5px; line-height: 1.55; }
+.help-sec p { margin: 8px 0 0; max-width: 65ch; color: var(--soft); font-size: 14.5px; line-height: 1.55; }
+.help-sec b { color: var(--text); }
+.help-defs { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 8px 16px; font-size: 14.5px; line-height: 1.5; }
+.help-defs dt { font-weight: 700; color: var(--text); }
+.help-defs dd { margin: 0; color: var(--soft); max-width: 60ch; }
+.help-keys { line-height: 2.3; }
+.help-keys kbd { margin: 0 2px 0 8px; }
+.help-keys kbd:first-child { margin-left: 0; }
+.tour { max-width: 380px; text-align: center; }
+.tour h2 { margin: 0 0 8px; text-wrap: balance; }
+.tour p { min-height: 4.6em; margin: 0 0 14px; }
+.tour-art { min-height: 96px; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px; }
+.tour-seal { width: 72px; height: 72px; display: grid; place-items: center; border-radius: 8px; background: var(--cinnabar); color: var(--paper); font-family: var(--kai-font); font-size: 48px; line-height: 1; box-shadow: inset 0 0 0 3px var(--cinnabar), inset 0 0 0 5px rgba(241, 236, 226, .6); }
+.tour-cell { font-size: 56px; line-height: 1; color: var(--paper); }
+.tour-chip { padding: 6px 10px; border-radius: 10px; font-weight: 800; white-space: nowrap; }
+.tour-chip.know { background: var(--known-strong); color: var(--known-ink); }
+.tour-chip.learn { background: var(--learn-strong); color: var(--learn-ink); }
+.tour-tone { font-size: 30px; font-weight: 700; }
+.tour-day { padding: 6px 9px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface2); font-weight: 700; font-variant-numeric: tabular-nums; }
+.tour-goal { font-size: 40px; font-weight: 800; }
+.tour-dots { display: flex; justify-content: center; gap: 6px; margin-bottom: 16px; }
+.tour-dots span { width: 7px; height: 7px; border-radius: 50%; background: var(--surface3); }
+.tour-dots span.on { background: var(--paper); }
+.tour-actions { justify-content: center; }
+.btn.ghost { background: transparent; border-color: transparent; color: var(--muted); }
+@media (max-width: 420px) {
+  .help-defs { grid-template-columns: 1fr; gap: 2px; }
+  .help-defs dd { margin-bottom: 8px; }
+  .icon-btn { width: 40px; }
+  .h1-levels { display: none; }
+}
+
+/* Sentences, progress transfer, accessibility */
+.hint { display: block; width: 100%; margin-top: auto; padding: 14px 4px 2px; border: 0; border-radius: 10px; background: transparent; color: var(--muted); font: inherit; font-size: 13px; text-align: center; cursor: pointer; }
+.hint:hover { color: var(--text); }
+.card.sentence .hanzi { flex-wrap: wrap; gap: 0; padding: 10px 4px 0; font-family: var(--zh-font); font-size: clamp(28px, 7.4vw, 42px); line-height: 1.4; }
+.card.sentence .hanzi .cell { width: auto; height: auto; background: none; font-family: var(--zh-font); }
+.card.sentence .pinyin { font-size: clamp(17px, 4.4vw, 21px); }

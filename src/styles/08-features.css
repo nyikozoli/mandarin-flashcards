@@ -1,0 +1,85 @@
+/* Tap-for-definition: each known word in a sentence is a button. A faint dotted rule shows what can be tapped. */
+button.w { font: inherit; color: inherit; background: none; border: 0; border-bottom: 1px dotted rgba(241, 236, 226, .38); border-radius: 3px 3px 0 0; padding: 0; margin: 0; cursor: pointer; line-height: inherit; }
+.hanzi button.w { display: inline-flex; border-bottom-width: 2px; }
+button.w:hover { background: rgba(241, 236, 226, .07); }
+button.w[aria-expanded="true"] { background: rgba(224, 74, 47, .24); border-bottom-color: var(--cinnabar); }
+.w-head { font-weight: inherit; color: var(--pinyin); }
+.word-pop { position: fixed; z-index: 60; width: min(320px, calc(100vw - 24px)); display: grid; gap: 6px; padding: 12px 14px 14px; background: var(--surface2); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 14px 34px rgba(4, 7, 10, .55); }
+.wp-head { display: flex; align-items: baseline; gap: 10px; padding-right: 48px; }
+.wp-zh { font-family: var(--zh-font); font-size: 30px; line-height: 1.2; color: var(--paper); }
+.wp-lv { font-size: 12.5px; color: var(--muted); white-space: nowrap; }
+.wp-py { margin: 0; font-size: 18px; color: var(--pinyin); }
+.word-pop .ex-line { margin: 0; }
+.wp-close { position: absolute; top: 8px; right: 8px; }
+.wp-speak { justify-self: start; margin-top: 4px; }
+.ex-practice { align-self: flex-start; }
+.hints { display: flex; flex-direction: column; gap: 8px; margin: 4px 0 12px; }
+.hint-row { display: flex; gap: 12px; align-items: flex-start; padding: 8px 10px; border-radius: 12px; border: 1px dashed var(--line); }
+.hint-ch { flex: none; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 8px; background: var(--surface2); color: var(--paper); font-family: var(--kai-font); font-size: 26px; }
+.hint-text { min-width: 0; }
+.hint-text p { margin: 0; }
+.hint-parts { font-weight: 700; font-size: 14px; }
+.hint-en { font-size: 13.5px; color: var(--soft); }
+.hint-hu { font-size: 12.5px; color: var(--muted); }
+/* Hard / Good / Easy: shown on the revealed answer in the self-graded styles; each says when the card comes back. */
+.grade-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 14px; }
+.grade-q { flex: 1 1 100%; color: var(--muted); font-size: 13px; }
+.grade { flex: 1 1 0; min-width: 0; min-height: 44px; padding: 6px 8px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface2); color: var(--text); font-weight: 700; font-size: 15px; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; }
+.grade small { font-weight: 500; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.grade.hard { border-color: var(--learn); }
+.grade.easy { border-color: var(--known); }
+.ex-caption { margin: 0 0 -2px; font-size: 12.5px; font-weight: 700; color: var(--muted); }
+.deck-sentences .word-row { grid-template-columns: 34px minmax(0, 1.2fr) minmax(0, 1fr) auto; }
+.deck-sentences .wr-zh { white-space: normal; font-family: var(--zh-font); font-size: 18px; }
+#confirmDialog { z-index: 70; }
+.transfer-body { overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 12px; padding-bottom: 20px; }
+.transfer-body p { margin: 0; max-width: 62ch; color: var(--soft); }
+#transferText { width: 100%; min-height: 150px; resize: vertical; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--text); font: 12.5px/1.45 ui-monospace, Consolas, "Courier New", monospace; }
+.transfer-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.transfer-status { min-height: 1.4em; font-size: 14px; }
+.transfer-status.bad { color: #ff9aa2; }
+#importFile:focus-visible + label { outline: 3px solid var(--focus); outline-offset: 2px; }
+label.btn { cursor: pointer; }
+.set-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Tap targets: every control in the counter row is at least 44 px; the panda keeps a 40 px picture inside a 44 px button. */
+.deck-tools .icon-btn.small, .pet-mini { width: 44px; height: 44px; }
+.today-pill { min-height: 44px; }
+.pet-mini { border: 0; background: transparent; }
+.pet-mini .pet-art { border-radius: 50%; }
+/* Seal geometry: every seal is a rounded square with corners at about 18% of its size; filled ones carry a thin paper rule. */
+.seal, .tp-seal, .ch-zh, .hint-ch { border-radius: 7px; }
+.act-seal { border-radius: 6px; }
+.wotd-seal, .topic-btn-zh { border-radius: 5px; }
+.seal-mark { border-radius: 9px; }
+.st-seal { border-radius: 10px; }
+.stamp { border-radius: 14px; }
+.seal-stamp-mark { border-radius: 22px; }
+.act.know .act-seal { box-shadow: inset 0 0 0 1.5px var(--known-ink), inset 0 0 0 2.5px rgba(79, 209, 161, .55); }
+@media (max-width: 360px) { .act-seal { border-radius: 5px; } .h1-lang { display: none; } }
+
+/* Interface labels: the Chinese sits small above the English in buttons and before it in headings. */
+.lbl { display: inline-flex; flex-direction: column; align-items: center; line-height: 1.12; }
+.lbl .zl { font-family: var(--zh-font); font-size: .78em; font-weight: 600; letter-spacing: .06em; opacity: .78; }
+.lbl.inline { flex-direction: row; align-items: baseline; gap: .45em; }
+.lbl.inline .zl { font-size: .92em; opacity: 1; color: var(--pinyin); }
+.act-label .lbl { align-items: flex-start; }
+body.labels-en .lbl .zl { display: none; }
+body.labels-zh .lbl .el { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+body.labels-zh .lbl .zl { font-size: 1em; opacity: 1; letter-spacing: .03em; }
+body.labels-zh .lbl.inline .zl { color: inherit; }
+@media (max-width: 360px) { .act-label .lbl { align-items: center; } }
+/* Arrow key caps only where there is a keyboard and room for them. */
+@media (max-width: 440px), (hover: none) { .act-key { display: none; } }
+
+/* What's new */
+.news-strip { background: linear-gradient(90deg, rgba(240, 176, 63, .14), rgba(240, 176, 63, 0) 55%), var(--surface); }
+.news-strip .wotd-seal { background: var(--learn-strong); color: var(--learn-ink); }
+.news-release { padding: 4px 0 14px; border-bottom: 1px solid var(--line); }
+.news-release + .news-release { margin-top: 14px; }
+.news-head { margin: 0; display: flex; align-items: baseline; gap: 10px; font-size: 17px; }
+.news-ver { flex: none; padding: 1px 8px; border-radius: 6px; background: var(--surface3); font-size: 13px; font-variant-numeric: tabular-nums; }
+.news-release.latest .news-ver { background: var(--cinnabar); color: var(--paper); }
+.news-date { margin: 2px 0 6px; font-size: 12.5px; color: var(--muted); }
+.news-group { margin: 10px 0 2px; font-size: 14px; color: var(--pinyin); }
+.news-list { margin: 4px 0 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; color: var(--soft); font-size: 14.5px; line-height: 1.45; }
