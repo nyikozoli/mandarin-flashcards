@@ -381,7 +381,7 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
 
 .card { border-radius: 20px; background: var(--surface); border-color: var(--line); box-shadow: 0 18px 40px rgba(4, 7, 10, .5); }
 .hanzi { display: flex; justify-content: center; gap: .08em; font-family: var(--kai-font); font-weight: 400; color: var(--paper); line-height: 1; padding-top: 6px; }
-.hanzi .cell { font-family: var(--kai-font); display: inline-grid; place-items: center; width: 1.14em; height: 1.14em; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Crect x='1' y='1' width='98' height='98' fill='none' stroke='%23e04a2f' stroke-opacity='.6' stroke-width='1.5' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M50 0V100M0 50H100M0 0L100 100M100 0L0 100' fill='none' stroke='%23e04a2f' stroke-opacity='.32' stroke-width='1' stroke-dasharray='5 5' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") center / 100% 100% no-repeat; }
+.hanzi .cell, .tour-cell { font-family: var(--kai-font); display: inline-grid; place-items: center; width: 1.14em; height: 1.14em; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Crect x='1' y='1' width='98' height='98' fill='none' stroke='%23e04a2f' stroke-opacity='.6' stroke-width='1.5' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M50 0V100M0 50H100M0 0L100 100M100 0L0 100' fill='none' stroke='%23e04a2f' stroke-opacity='.32' stroke-width='1' stroke-dasharray='5 5' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") center / 100% 100% no-repeat; }
 .pinyin { margin-top: 12px; }
 .speak-btn { background: transparent; border-color: var(--line); color: var(--soft); }
 .speak-btn:hover { background: var(--surface2); color: var(--text); }
@@ -423,6 +423,44 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
   .level { padding: 0 10px; font-size: 13px; }
   .lv-pre { display: none; }
   .brand h1 { font-size: 17px; }
+}
+
+/* Help sheet and first-visit tour */
+.help-body { overflow-y: auto; flex: 1; margin: 0 -16px; padding: 0 16px 28px; display: flex; flex-direction: column; gap: 20px; }
+.help-lead { margin: 0; max-width: 62ch; color: var(--soft); font-size: 15.5px; }
+.help-body > .btn { align-self: flex-start; }
+.help-sec h3 { margin: 0 0 8px; font-size: 16px; text-wrap: balance; }
+.help-sec ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; max-width: 65ch; color: var(--soft); font-size: 14.5px; line-height: 1.55; }
+.help-sec p { margin: 8px 0 0; max-width: 65ch; color: var(--soft); font-size: 14.5px; line-height: 1.55; }
+.help-sec b { color: var(--text); }
+.help-defs { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 8px 16px; font-size: 14.5px; line-height: 1.5; }
+.help-defs dt { font-weight: 700; color: var(--text); }
+.help-defs dd { margin: 0; color: var(--soft); max-width: 60ch; }
+.help-keys { line-height: 2.3; }
+.help-keys kbd { margin: 0 2px 0 8px; }
+.help-keys kbd:first-child { margin-left: 0; }
+.tour { max-width: 380px; text-align: center; }
+.tour h2 { margin: 0 0 8px; text-wrap: balance; }
+.tour p { min-height: 4.6em; margin: 0 0 14px; }
+.tour-art { min-height: 96px; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px; }
+.tour-seal { width: 72px; height: 72px; display: grid; place-items: center; border-radius: 8px; background: var(--cinnabar); color: var(--paper); font-family: var(--kai-font); font-size: 48px; line-height: 1; box-shadow: inset 0 0 0 3px var(--cinnabar), inset 0 0 0 5px rgba(241, 236, 226, .6); }
+.tour-cell { font-size: 56px; line-height: 1; color: var(--paper); }
+.tour-chip { padding: 6px 10px; border-radius: 10px; font-weight: 800; white-space: nowrap; }
+.tour-chip.know { background: var(--known-strong); color: var(--known-ink); }
+.tour-chip.learn { background: var(--learn-strong); color: var(--learn-ink); }
+.tour-tone { font-size: 30px; font-weight: 700; }
+.tour-day { padding: 6px 9px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface2); font-weight: 700; font-variant-numeric: tabular-nums; }
+.tour-goal { font-size: 40px; font-weight: 800; }
+.tour-dots { display: flex; justify-content: center; gap: 6px; margin-bottom: 16px; }
+.tour-dots span { width: 7px; height: 7px; border-radius: 50%; background: var(--surface3); }
+.tour-dots span.on { background: var(--paper); }
+.tour-actions { justify-content: center; }
+.btn.ghost { background: transparent; border-color: transparent; color: var(--muted); }
+@media (max-width: 420px) {
+  .help-defs { grid-template-columns: 1fr; gap: 2px; }
+  .help-defs dd { margin-bottom: 8px; }
+  .icon-btn { width: 40px; }
+  .h1-levels { display: none; }
 }
 </style>
 <script>
@@ -470,6 +508,9 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
       <h1>Mandarin HSK <span class="h1-levels">1–3</span></h1>
     </div>
     <div class="top-actions">
+      <button type="button" class="icon-btn" id="btnHelp" aria-label="Open help: how the app works" title="Help">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.4 2.4c-.6.3-1 .8-1 1.5v.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17" r="1.2" fill="currentColor"/></svg>
+      </button>
       <button type="button" class="icon-btn" id="btnProgress" aria-label="Open your progress overview" title="Progress">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V11M10 20V5M16 20v-7M22 20H2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
@@ -692,6 +733,103 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
   </div>
 </div>
 
+<div id="helpView" class="overlay" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+    <div class="sheet-head">
+      <h2 id="helpTitle">How it works</h2>
+      <button type="button" class="close-btn" id="btnCloseHelp" aria-label="Close help">✕</button>
+    </div>
+    <div class="help-body">
+      <p class="help-lead">598 words from HSK 1, 2 and 3. Each card has the characters, pinyin, English and Hungarian meanings, and example sentences you can listen to.</p>
+      <button type="button" class="btn" id="btnShowTour">Show the quick tour again</button>
+
+      <section class="help-sec">
+        <h3>Study a card</h3>
+        <ul>
+          <li><b>Tap the card</b> to show or hide the meanings and example sentences.</li>
+          <li><b>Swipe right</b> or press <b>I know it</b> when you know the word. <b>Swipe left</b> or press <b>Still learning</b> when you don't. <b>Skip</b> moves on without marking.</li>
+          <li><b>Read aloud</b> speaks the word, then its example sentences. The small speaker on each sentence plays just that sentence.</li>
+          <li>Made a mistake? The <b>undo</b> arrow next to the card counter takes back the last answer.</li>
+        </ul>
+      </section>
+
+      <section class="help-sec">
+        <h3>Choose what to study</h3>
+        <dl class="help-defs">
+          <dt>All cards</dt><dd>Every word in the chosen level, in order. Use the shuffle icon to mix them.</dd>
+          <dt>Due</dt><dd>Words that are ready for review today. A word you know comes back after 1, 3, 7, 14 and then 30 days; a word you miss comes back the same day.</dd>
+          <dt>Learning</dt><dd>Words you marked “Still learning”.</dd>
+          <dt>Unmarked</dt><dd>Words you have not answered yet.</dd>
+          <dt>Hardest</dt><dd>The 20 words you have missed most often.</dd>
+        </dl>
+        <p>The level buttons (All, 1, 2, 3) narrow every mode to one HSK level.</p>
+      </section>
+
+      <section class="help-sec">
+        <h3>Practice styles</h3>
+        <dl class="help-defs">
+          <dt>汉字 → meaning</dt><dd>See the Chinese, recall the meaning.</dd>
+          <dt>Meaning → 汉字</dt><dd>See English and Hungarian, say the Chinese word, then tap to check.</dd>
+          <dt>Listening</dt><dd>Hear the word, guess it, then tap to see it.</dd>
+          <dt>Multiple choice</dt><dd>Pick the right meaning from four. A right answer counts as Known.</dd>
+        </dl>
+      </section>
+
+      <section class="help-sec">
+        <h3>Reading the card</h3>
+        <ul>
+          <li>Colours show the tone of each syllable: <span class="t1">1st mā</span>, <span class="t2">2nd má</span>, <span class="t3">3rd mǎ</span>, <span class="t4">4th mà</span>, <span class="t5">neutral ma</span>. Turn them off in Settings.</li>
+          <li>The red dashed square around each character is a 米字格 practice grid, the same one used in Chinese exercise books. It helps you see how the character fills its square.</li>
+        </ul>
+      </section>
+
+      <section class="help-sec">
+        <h3>Progress and goals</h3>
+        <ul>
+          <li>The pill at the top right shows today’s answers against your daily goal, and your streak 🔥 of days in a row.</li>
+          <li>The chart button opens your progress: words known per level, the last 14 days, and a map of every word. Tap a square to study that word.</li>
+          <li>After every 20 cards you get a short summary.</li>
+        </ul>
+      </section>
+
+      <section class="help-sec">
+        <h3>Sound</h3>
+        <ul>
+          <li>Speech uses the Chinese voices on your device. If nothing plays, add a Chinese voice: on iPhone, Settings → Accessibility → Spoken Content → Voices → Chinese; on Android, the Google text-to-speech settings; on Windows, Settings → Time &amp; language → Speech.</li>
+          <li>In Settings, <b>Test voices</b> hides the voices that do not work on this device. If the start of a word gets cut off, keep <b>Fix cut-off audio start</b> switched on.</li>
+        </ul>
+      </section>
+
+      <section class="help-sec">
+        <h3>Keyboard</h3>
+        <p class="help-keys"><kbd>→</kbd> I know it <kbd>←</kbd> Still learning <kbd>Space</kbd> Skip <kbd>S</kbd> Read aloud <kbd>↑</kbd> <kbd>↓</kbd> Show or hide <kbd>1</kbd>–<kbd>4</kbd> Choose an answer <kbd>Esc</kbd> Close a panel</p>
+      </section>
+
+      <section class="help-sec">
+        <h3>Your progress is saved on this device</h3>
+        <ul>
+          <li>Answers are stored in this browser only. Another phone, computer or browser starts fresh, and clearing your browsing data erases them.</li>
+          <li>On a phone, open the page in the browser and choose <b>Add to Home Screen</b> to use it like an app.</li>
+        </ul>
+      </section>
+    </div>
+  </div>
+</div>
+
+<div id="tourView" class="overlay dialog-wrap" hidden>
+  <div class="dialog tour" role="dialog" aria-modal="true" aria-labelledby="tourTitle" aria-describedby="tourText">
+    <div class="tour-art" id="tourArt" aria-hidden="true"></div>
+    <h2 id="tourTitle">Welcome</h2>
+    <p id="tourText"></p>
+    <div class="tour-dots" id="tourDots" aria-hidden="true"></div>
+    <div class="dialog-actions tour-actions">
+      <button type="button" class="btn ghost" id="btnTourSkip">Skip</button>
+      <button type="button" class="btn" id="btnTourBack">Back</button>
+      <button type="button" class="btn primary" id="btnTourNext">Next</button>
+    </div>
+  </div>
+</div>
+
 <div id="diagView" class="overlay" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="diagTitle">
     <div class="sheet-head">
@@ -721,9 +859,9 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
     'unmarkedCount', 'progressBar', 'progKnown', 'progLearning', 'progressLabel', 'stage', 'card', 'cardNumber', 'cardStatus', 'cardHanzi',
     'cardPinyin', 'btnSpeak', 'speakLabel', 'cardAnswer', 'cardEn', 'cardHu', 'cardExamples', 'revealHint', 'deckEnd', 'endEmoji', 'endTitle',
     'endText', 'btnEndRestart', 'btnEndLearning', 'btnEndUnmarked', 'btnEndAll', 'btnLearning', 'btnSkip', 'btnKnown', 'optAutoReveal',
-    'optRate', 'optVoice', 'optWarmup', 'btnTestVoices', 'footnote', 'btnSettings', 'settingsView', 'btnCloseSettings', 'modeDue', 'modeHard', 'countDueMode', 'countHardMode', 'optPractice', 'cardPrompt', 'choiceBox', 'optTones', 'optAutoplay', 'optVibrate', 'summaryView', 'summaryBody', 'btnSummaryClose', 'btnSummaryProgress', 'btnProgress', 'progressView', 'btnCloseProgress', 'pvBody', 'todayPill', 'levelAll', 'level1', 'level2', 'level3', 'countLvAll', 'countLv1', 'countLv2', 'countLv3', 'lvChips', 'listView', 'btnCloseList', 'searchInput', 'listSummary', 'wordList', 'confirmDialog', 'confirmTitle',
+    'optRate', 'optVoice', 'optWarmup', 'btnTestVoices', 'footnote', 'btnSettings', 'settingsView', 'btnCloseSettings', 'btnHelp', 'helpView', 'btnCloseHelp', 'btnShowTour', 'tourView', 'tourArt', 'tourTitle', 'tourText', 'tourDots', 'btnTourSkip', 'btnTourBack', 'btnTourNext', 'modeDue', 'modeHard', 'countDueMode', 'countHardMode', 'optPractice', 'cardPrompt', 'choiceBox', 'optTones', 'optAutoplay', 'optVibrate', 'summaryView', 'summaryBody', 'btnSummaryClose', 'btnSummaryProgress', 'btnProgress', 'progressView', 'btnCloseProgress', 'pvBody', 'todayPill', 'levelAll', 'level1', 'level2', 'level3', 'countLvAll', 'countLv1', 'countLv2', 'countLv3', 'lvChips', 'listView', 'btnCloseList', 'searchInput', 'listSummary', 'wordList', 'confirmDialog', 'confirmTitle',
     'confirmText', 'confirmCancel', 'confirmOk', 'diagView', 'btnCloseDiag', 'diagSummary', 'diagResults', 'btnRunCheck', 'toast', 'vocab-data'];
-  var CORE_BUTTONS = ['btnSettings', 'btnKnown', 'btnLearning', 'btnSkip', 'btnSpeak', 'cardExamples', 'modeDue', 'modeHard', 'optPractice', 'choiceBox', 'cardPrompt', 'btnProgress', 'levelAll', 'level1', 'level2', 'level3', 'card', 'btnShuffle', 'btnUndo', 'btnReset', 'btnSelfCheck',
+  var CORE_BUTTONS = ['btnHelp', 'btnTourNext', 'btnSettings', 'btnKnown', 'btnLearning', 'btnSkip', 'btnSpeak', 'cardExamples', 'modeDue', 'modeHard', 'optPractice', 'choiceBox', 'cardPrompt', 'btnProgress', 'levelAll', 'level1', 'level2', 'level3', 'card', 'btnShuffle', 'btnUndo', 'btnReset', 'btnSelfCheck',
     'btnList', 'btnCloseList', 'modeAll', 'modeLearning', 'modeUnmarked', 'searchInput', 'confirmOk', 'confirmCancel'];
 
   var $ = function (id) { return document.getElementById(id); };
@@ -731,7 +869,7 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
   var bound = {};
   var cards = [];
   var state = { status: {}, mode: 'all', deck: [], pos: 0, shuffled: false, revealed: false, autoReveal: false, rate: 0.85, voice: '', badVoices: [], voicesTested: false, level: 'all', activity: {}, goal: 20, warmup: true,
-    srs: {}, misses: {}, milestones: [], practice: 'zh', toneColors: true, autoplay: false, vibrate: true };
+    srs: {}, misses: {}, milestones: [], practice: 'zh', toneColors: true, autoplay: false, vibrate: true, seenTour: false };
   var undoStack = [];
   var busy = false;
   var testing = false;
@@ -857,7 +995,8 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
         practice: state.practice,
         toneColors: state.toneColors,
         autoplay: state.autoplay,
-        vibrate: state.vibrate
+        vibrate: state.vibrate,
+        seenTour: state.seenTour
       }));
       storageOK = true;
     } catch (e) {
@@ -887,7 +1026,7 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
     if (saved && (saved.level === 'all' || LEVELS.indexOf(saved.level) !== -1)) state.level = saved.level;
     if (saved && GOALS.indexOf(saved.goal) !== -1) state.goal = saved.goal;
     if (saved && typeof saved.warmup === 'boolean') state.warmup = saved.warmup;
-    ['toneColors', 'autoplay', 'vibrate'].forEach(function (k) { if (saved && typeof saved[k] === 'boolean') state[k] = saved[k]; });
+    ['toneColors', 'autoplay', 'vibrate', 'seenTour'].forEach(function (k) { if (saved && typeof saved[k] === 'boolean') state[k] = saved[k]; });
     if (saved && PRACTICE[saved.practice]) state.practice = saved.practice;
     if (saved && Array.isArray(saved.milestones)) state.milestones = saved.milestones.filter(function (m) { return typeof m === 'string'; }).slice(-500);
     if (saved && saved.srs && typeof saved.srs === 'object') {
@@ -1497,6 +1636,55 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
     openOverlay(els.summaryView, els.btnSummaryClose);
   }
 
+  /* ---------- help and first-visit tour ---------- */
+  var TOUR = [
+    { art: 'seal', title: 'Welcome to Mandarin HSK', text: '598 words from HSK 1 to 3, with pinyin, English, Hungarian and example sentences. Here is how to use it in four quick steps.' },
+    { art: 'swipe', title: 'Know it? Swipe right', text: 'Swipe right or press “I know it” when you know a word. Swipe left or press “Still learning” when you don’t. Tap the card to see the meaning and examples.' },
+    { art: 'speak', title: 'Listen to every word', text: 'Read aloud speaks the word and its example sentences. Colours show the tones: 1st red, 2nd orange, 3rd green, 4th blue.' },
+    { art: 'due', title: 'Review at the right time', text: '“Due” brings back the words you know after 1, 3, 7, 14 and 30 days, and the ones you missed the same day. Try Listening or Multiple choice in the practice menu for variety.' },
+    { art: 'goal', title: 'Keep a streak', text: 'Answer your daily goal of cards to grow your streak. The chart button shows your progress per level. The ? button brings back this help any time.' }
+  ];
+  var tourStep = 0;
+  function tourArt(kind) {
+    var a = els.tourArt;
+    a.textContent = '';
+    if (kind === 'seal') { var s = el('span', 'tour-seal', '学'); s.setAttribute('lang', 'zh-CN'); a.appendChild(s); }
+    else if (kind === 'swipe') {
+      var l = el('span', 'tour-chip learn', '← 学');
+      var cell = el('span', 'tour-cell', '我');
+      cell.setAttribute('lang', 'zh-CN');
+      var k = el('span', 'tour-chip know', '会 →');
+      a.appendChild(l); a.appendChild(cell); a.appendChild(k);
+    } else if (kind === 'speak') {
+      ['mā', 'má', 'mǎ', 'mà'].forEach(function (t, i) { a.appendChild(el('span', 'tour-tone t' + (i + 1), t)); });
+    } else if (kind === 'due') {
+      [1, 3, 7, 14, 30].forEach(function (d) { a.appendChild(el('span', 'tour-day', d + 'd')); });
+    } else if (kind === 'goal') {
+      a.appendChild(el('span', 'tour-goal', '🔥 ' + Math.max(1, streak())));
+    }
+  }
+  function showTourStep() {
+    var st = TOUR[tourStep];
+    tourArt(st.art);
+    els.tourTitle.textContent = st.title;
+    els.tourText.textContent = st.text;
+    els.tourDots.textContent = '';
+    TOUR.forEach(function (x, i) { els.tourDots.appendChild(el('span', i === tourStep ? 'on' : '')); });
+    els.btnTourBack.hidden = tourStep === 0;
+    els.btnTourSkip.hidden = tourStep === TOUR.length - 1;
+    els.btnTourNext.textContent = tourStep === TOUR.length - 1 ? 'Start learning' : 'Next';
+  }
+  function openTour() {
+    tourStep = 0;
+    showTourStep();
+    openOverlay(els.tourView, els.btnTourNext);
+  }
+  function closeTour() {
+    state.seenTour = true;
+    save();
+    closeOverlay(els.tourView);
+  }
+
   /* ---------- answering ---------- */
   function act(kind) {
     if (busy) return false;
@@ -2017,7 +2205,7 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
 
   /* ---------- overlays ---------- */
   function anyOverlayOpen() {
-    return !els.listView.hidden || !els.diagView.hidden || !els.confirmDialog.hidden || !els.progressView.hidden || !els.summaryView.hidden || !els.settingsView.hidden;
+    return !els.listView.hidden || !els.diagView.hidden || !els.confirmDialog.hidden || !els.progressView.hidden || !els.summaryView.hidden || !els.settingsView.hidden || !els.helpView.hidden || !els.tourView.hidden;
   }
   function openOverlay(node, focusEl) {
     if (anyOverlayOpen() === false) lastFocus = document.activeElement;
@@ -2140,6 +2328,8 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
         if (!els.confirmDialog.hidden) { confirmCallback = null; closeOverlay(els.confirmDialog); }
         else if (!els.diagView.hidden) closeOverlay(els.diagView);
         else if (!els.summaryView.hidden) closeOverlay(els.summaryView);
+        else if (!els.tourView.hidden) closeTour();
+        else if (!els.helpView.hidden) closeOverlay(els.helpView);
         else if (!els.settingsView.hidden) closeOverlay(els.settingsView);
         else if (!els.progressView.hidden) closeOverlay(els.progressView);
         else closeOverlay(els.listView);
@@ -2232,6 +2422,9 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
     };
     var undoSnap = undoStack.slice();
     var diagWasOpen = !els.diagView.hidden;
+    var tourWasOpen = !els.tourView.hidden, seenTourSnap = state.seenTour;
+    els.tourView.hidden = true;
+    els.helpView.hidden = true;
     var searchSnap = els.searchInput.value;
     var filterSnap = listFilter;
     var key = function (k) { document.dispatchEvent(new KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true })); };
@@ -2360,6 +2553,19 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
       add('Practice modes: meaning → Chinese, listening, multiple choice', rev && revShown && listen && choice,
         'reverse hides the word: ' + rev + ', reveal shows it: ' + revShown + ', listening: ' + listen + ', multiple choice (4 options, right answer marks Known): ' + choice);
 
+      els.btnHelp.click();
+      var helpOk = !els.helpView.hidden && els.helpView.querySelectorAll('.help-sec').length >= 6;
+      els.btnShowTour.click();
+      var tourOpen = els.helpView.hidden && !els.tourView.hidden && els.tourTitle.textContent === TOUR[0].title;
+      for (var ts = 1; ts < TOUR.length; ts++) els.btnTourNext.click();
+      var lastStep = els.btnTourNext.textContent === 'Start learning' && els.tourTitle.textContent === TOUR[TOUR.length - 1].title;
+      els.btnTourBack.click();
+      var back = els.tourTitle.textContent === TOUR[TOUR.length - 2].title;
+      els.btnTourSkip.click();
+      var tourClosed = els.tourView.hidden && state.seenTour === true;
+      add('Help sheet and quick tour', helpOk && tourOpen && lastStep && back && tourClosed,
+        'help opens: ' + helpOk + ', tour opens from help: ' + tourOpen + ', steps through ' + TOUR.length + ' screens: ' + lastStep + ', back works: ' + back + ', skip closes: ' + tourClosed);
+
       add('Progress overview renders', pvOk && els.progressView.hidden, 'Ring, ' + lvRows + ' level bars, 14-day chart and ' + cells + ' word squares (' + known2 + ' known).');
 
       els.btnList.click();
@@ -2423,6 +2629,9 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
       closeOverlay(els.progressView);
       closeOverlay(els.summaryView);
       closeOverlay(els.settingsView);
+      closeOverlay(els.helpView);
+      els.tourView.hidden = !tourWasOpen;
+      state.seenTour = seenTourSnap;
       confirmCallback = null;
       els.searchInput.value = searchSnap;
       listFilter = filterSnap;
@@ -2487,6 +2696,17 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
     on('btnEndAll', 'click', function () { setMode('all'); });
     on('btnList', 'click', openList);
     on('btnSettings', 'click', function () { openOverlay(els.settingsView, els.btnCloseSettings); });
+    on('btnHelp', 'click', function () { openOverlay(els.helpView, els.btnCloseHelp); els.helpView.querySelector('.help-body').scrollTop = 0; });
+    on('btnCloseHelp', 'click', function () { closeOverlay(els.helpView); });
+    on('btnShowTour', 'click', function () { closeOverlay(els.helpView); openTour(); });
+    on('btnTourNext', 'click', function () {
+      if (tourStep >= TOUR.length - 1) { closeTour(); return; }
+      tourStep++;
+      showTourStep();
+    });
+    on('btnTourBack', 'click', function () { if (tourStep > 0) { tourStep--; showTourStep(); } });
+    on('btnTourSkip', 'click', closeTour);
+    on('tourView', 'click', function (e) { if (e.target === els.tourView) closeTour(); });
     on('btnCloseSettings', 'click', function () { closeOverlay(els.settingsView); });
     on('btnProgress', 'click', openProgress);
     on('todayPill', 'click', openProgress);
@@ -2525,7 +2745,7 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
     });
     on('btnRunCheck', 'click', runSelfCheck);
     on('btnCloseDiag', 'click', function () { closeOverlay(els.diagView); });
-    ['listView', 'diagView', 'confirmDialog', 'progressView', 'summaryView', 'settingsView'].forEach(function (id) {
+    ['listView', 'diagView', 'confirmDialog', 'progressView', 'summaryView', 'settingsView', 'helpView'].forEach(function (id) {
       on(id, 'click', function (e) {
         if (e.target !== els[id]) return;
         if (id === 'confirmDialog') confirmCallback = null;
@@ -2617,6 +2837,7 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
     updateFootnote();
     if (!storageOK) toast('This browser is blocking local storage, so your progress will not be kept after the page is closed.', 7000);
     window.__appStarted = true;
+    if (!state.seenTour) setTimeout(function () { if (!anyOverlayOpen()) openTour(); }, 350);
     window.__mandarinApp = { runSelfCheck: runSelfCheck, state: state, cards: function () { return cards; } };
   }
 
