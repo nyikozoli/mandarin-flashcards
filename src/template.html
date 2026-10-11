@@ -840,6 +840,7 @@ label.btn { cursor: pointer; }
             <option value="hanzi">汉字 only (pinyin hidden)</option>
             <option value="tone">Which tone? (listen)</option>
             <option value="cloze">Fill the gap (sentence)</option>
+            <option value="pairs">Similar words (look and sound alike)</option>
           </optgroup>
           <optgroup label="Sentences">
             <option value="s-zh">Sentences → meaning</option>
@@ -1180,6 +1181,7 @@ label.btn { cursor: pointer; }
           <dt>汉字 only</dt><dd>Only the characters show; pinyin, tone colours and audio appear when you tap the card. Use it for words you can say but cannot read yet. A word card's back also has <b>Practice these sentences</b>, which opens just that word's example sentences in the current style.</dd>
           <dt>Build the sentence</dt><dd>Sentences only. The translation shows, with the sentence's words shuffled below it: tap them in order (tap a placed word, or press Backspace, to take it back). A right order counts as Known toward recall. Another order can still be correct Chinese, so a mismatch shows the sentence and you mark it yourself.</dd>
           <dt>Typing the answer</dt><dd>In Meaning → 汉字 (words) you can type the pinyin and press Enter: tone numbers (xue2sheng) or tone marks (xuésheng) both work, and neutral tones can be left out. A right answer counts as Known. <kbd>T</kbd> jumps to the box.</dd>
+          <dt>Similar words</dt><dd>Words only. The meaning shows (🔊 plays the word); pick the right one among words that look or sound alike, such as 买 mǎi “buy” and 卖 mài “sell”, 他 / 她 / 它, or 大 / 太. Only the about 135 words that have such a twin are in this deck; it counts toward reading.</dd>
           <dt>Fill the gap</dt><dd>One of the word's example sentences with the word blanked out, and its translation. Pick the word that fits from four of the same length; keys 1–4 pick. Words only; it counts toward reading.</dd>
           <dt>Which tone?</dt><dd>Hear the word, then pick the tone of its first syllable from the four written forms; keys 1–4 pick tones 1–4. Words only. The 21 words whose first syllable is neutral, or changes tone when it is spoken (你好, 可以), come up as normal cards.</dd>
           <dt>Tap a word</dt><dd>In any example sentence, and on sentence cards, the words from HSK 1–3 have a dotted underline. Tap one to see its pinyin and meaning; tap elsewhere or press Esc to close it. On a word card the word itself is highlighted instead.</dd>
@@ -1491,7 +1493,7 @@ label.btn { cursor: pointer; }
     if (els.card) els.card.classList.toggle('sentence', isSent());
   }
   // Styles that exist for one deck only, and the style of the same skill to use on the other deck.
-  var DECK_ONLY = { tone: ['words', 'listen'], cloze: ['words', 'choice'], build: ['sentences', 'reverse'] };
+  var DECK_ONLY = { tone: ['words', 'listen'], cloze: ['words', 'choice'], build: ['sentences', 'reverse'], pairs: ['words', 'choice'] };
   function fixStyleForDeck() { var o = DECK_ONLY[state.practice]; if (o && o[0] !== state.deckType) state.practice = o[1]; }
   // Opens a short sentence deck with just this word's example sentences, in the current practice
   // style (so “汉字 only” gives character-reading practice). Picking a study mode goes back to the full deck.
@@ -2324,7 +2326,7 @@ label.btn { cursor: pointer; }
   /* ---------- levels, activity and the progress view ---------- */
   var LEVELS = ['1', '2', '3'];
   var GOALS = [10, 20, 30, 50, 100];
-  function inLevel(c) { return (state.level === 'all' || String(c.lv) === state.level) && inTopic(c); }
+  function inLevel(c) { return (state.level === 'all' || String(c.lv) === state.level) && inTopic(c) && inPractice(c); }
   function countsFor(lv) {
     var k = 0, l = 0, t = 0;
     cards.forEach(function (c) {
@@ -2806,7 +2808,7 @@ label.btn { cursor: pointer; }
   // Snapshot format. 2 added `skills`. The server refuses uploads older than the stored format, and this copy refuses
   // to apply progress written by a newer one, so neither side drops what it does not understand.
   var FORMAT = 3;
-  var SKILL_OF = { zh: 'read', hanzi: 'read', choice: 'read', cloze: 'read', reverse: 'recall', build: 'recall', listen: 'listen', tone: 'listen' };
+  var SKILL_OF = { zh: 'read', hanzi: 'read', choice: 'read', cloze: 'read', pairs: 'read', reverse: 'recall', build: 'recall', listen: 'listen', tone: 'listen' };
   function skillOf(p) { return SKILL_OF[p] || 'read'; }
   function emptyMarks() { return { status: {}, srs: {}, misses: {} }; }
   function stashSkill() { state.marks[state.skill] = { status: state.status, srs: state.srs, misses: state.misses }; }
@@ -3117,9 +3119,9 @@ label.btn { cursor: pointer; }
   }
 
   /* ---------- practice modes ---------- */
-  var PRACTICE = { zh: 'Chinese → meaning', reverse: 'Meaning → Chinese', listen: 'Listening', choice: 'Multiple choice', hanzi: 'Characters only', tone: 'Which tone?', cloze: 'Fill the gap', build: 'Build the sentence' };
+  var PRACTICE = { zh: 'Chinese → meaning', reverse: 'Meaning → Chinese', listen: 'Listening', choice: 'Multiple choice', hanzi: 'Characters only', tone: 'Which tone?', cloze: 'Fill the gap', build: 'Build the sentence', pairs: 'Similar words' };
   // Styles answered by picking one of the chips in #choiceBox (keys 1–4).
-  var CHOICE_STYLES = { choice: true, tone: true, cloze: true };
+  var CHOICE_STYLES = { choice: true, tone: true, cloze: true, pairs: true };
   var choiceDone = false;
   // The syllable the tone quiz is asking about on the current card; null when the card has no quiz.
   var toneQ = null;
@@ -3127,6 +3129,8 @@ label.btn { cursor: pointer; }
   var clozeQ = null;
   // The sentence-building puzzle on the current card ({ tiles, order, target, done }); null when the card has none.
   var buildQ = null;
+  // The similar-words question on the current card ({ opts }); null when the card has none.
+  var similarQ = null;
   // True while the card's Chinese face is hidden because it is the answer.
   var faceHidden = false;
   var TONE_CONTOUR = { 1: 'Level', 2: 'Rising', 3: 'Dipping', 4: 'Falling' };
@@ -3243,8 +3247,35 @@ label.btn { cursor: pointer; }
     var pos = state.pos;
     setTimeout(function () { if (state.pos === pos && !busy) act('known'); }, 900);
   }
+  // Words that are easy to mix up with this one: the same syllables in other tones (买 mǎi / 卖 mài, 他 / 她 / 它),
+  // and a few characters that differ by a stroke. Look-alikes come first; at most three.
+  var LOOK_ALIKE = [['买', '卖'], ['大', '太'], ['白', '百'], ['在', '再'], ['找', '我'], ['小', '少'], ['米', '来'], ['看', '着']];
+  var similarMap = null;
+  function similarOf(c) {
+    if (c.sentence) return [];
+    if (!similarMap) {
+      similarMap = {};
+      var bySound = {}, lex = getLexicon().map;
+      wordCards.forEach(function (w) {
+        var k = stripTone(w.py).toLowerCase().replace(/[\s'’·-]/g, '');
+        (bySound[k] = bySound[k] || []).push(w);
+      });
+      wordCards.forEach(function (w) {
+        var out = [];
+        LOOK_ALIKE.forEach(function (pair) {
+          if (pair.indexOf(w.zh) === -1) return;
+          pair.forEach(function (z) { if (z !== w.zh && lex[z] && out.indexOf(lex[z]) === -1) out.push(lex[z]); });
+        });
+        bySound[stripTone(w.py).toLowerCase().replace(/[\s'’·-]/g, '')].forEach(function (x) { if (x !== w && out.indexOf(x) === -1) out.push(x); });
+        similarMap[w.zh] = out.slice(0, 3);
+      });
+    }
+    return similarMap[c.zh] || [];
+  }
+  // In the similar-words style the deck holds only words that have a look-alike or a sound-alike.
+  function inPractice(c) { return state.practice !== 'pairs' || !!c.sentence || similarOf(c).length > 0; }
   // Chips that show words (characters and pinyin) rather than meanings.
-  function buildWordChoices(right, opts) {
+  function buildWordChoices(right, opts, noPinyin) {
     els.choiceBox.textContent = '';
     opts.forEach(function (o, k) {
       var b = el('button', 'choice');
@@ -3257,7 +3288,7 @@ label.btn { cursor: pointer; }
       var py = el('span', 'choice-pyl', o.py);
       py.setAttribute('lang', 'zh-Latn-pinyin');
       tx.appendChild(zh);
-      tx.appendChild(py);
+      if (!noPinyin) tx.appendChild(py);
       b.appendChild(tx);
       els.choiceBox.appendChild(b);
     });
@@ -3298,7 +3329,7 @@ label.btn { cursor: pointer; }
     var right = cards[currentIndex()];
     announce(ok ? 'Correct.' : state.practice === 'tone'
       ? 'Not quite. ' + right.zh + ' starts with ' + toneQ.text + ', tone ' + toneQ.tone + '.'
-      : state.practice === 'cloze' ? 'Not quite. The answer is ' + right.zh + ', ' + right.py + '.'
+      : state.practice === 'cloze' || state.practice === 'pairs' ? 'Not quite. The answer is ' + right.zh + ', ' + right.py + '.'
       : 'Not quite. The answer is: ' + shortText(right.en) + '.');
     if (testing) { act(ok ? 'known' : 'learning'); return; }
     var pos = state.pos;
@@ -3309,7 +3340,8 @@ label.btn { cursor: pointer; }
     toneQ = p === 'tone' ? toneQuizTarget(c) : null;
     clozeQ = p === 'cloze' ? clozeTarget(c) : null;
     buildQ = p === 'build' ? buildTarget(c) : null;
-    faceHidden = p === 'reverse' || p === 'listen' || !!clozeQ || !!buildQ;
+    similarQ = p === 'pairs' && similarOf(c).length ? { opts: shuffled([c].concat(similarOf(c))) } : null;
+    faceHidden = p === 'reverse' || p === 'listen' || !!clozeQ || !!buildQ || !!similarQ;
     els.card.classList.toggle('hide-face', faceHidden);
     // Characters only, the tone quiz and faded pinyin: the reading is the answer, so pinyin, tone colours and audio wait for the reveal.
     readingHidden = p === 'hanzi' || !!toneQ || (p === 'zh' && state.fadePinyin && wellKnown(c)) || (p === 'choice' && !state.choicePinyin);
@@ -3363,6 +3395,15 @@ label.btn { cursor: pointer; }
       var gapHu = el('p', 'prompt-sub', clozeQ.ex.hu);
       gapHu.setAttribute('lang', 'hu');
       els.cardPrompt.appendChild(gapHu);
+    } else if (similarQ) {
+      els.cardPrompt.appendChild(el('p', 'prompt-q', 'Which one means this?'));
+      els.cardPrompt.appendChild(el('p', 'prompt-en', shortText(c.en)));
+      var sHu = el('p', 'prompt-hu', shortText(c.hu));
+      sHu.setAttribute('lang', 'hu');
+      els.cardPrompt.appendChild(sHu);
+      var sb = el('button', 'listen-btn similar-play', '🔊 Hear it');
+      sb.type = 'button';
+      els.cardPrompt.appendChild(sb);
     } else if (buildQ) {
       els.cardPrompt.appendChild(el('p', 'prompt-q', 'Put the words in order:'));
       els.cardPrompt.appendChild(el('p', 'prompt-sub', c.en));
@@ -3377,10 +3418,11 @@ label.btn { cursor: pointer; }
       els.cardPrompt.appendChild(bBank);
       drawBuild();
     }
-    els.choiceBox.hidden = !(p === 'choice' || toneQ || clozeQ);
+    els.choiceBox.hidden = !(p === 'choice' || toneQ || clozeQ || similarQ);
     if (p === 'choice') buildChoices(c);
     else if (toneQ) buildToneChoices(toneQ);
     else if (clozeQ) buildWordChoices(c, clozeQ.options);
+    else if (similarQ) buildWordChoices(c, similarQ.opts, true);
     else els.choiceBox.textContent = '';
   }
 
@@ -4277,11 +4319,12 @@ label.btn { cursor: pointer; }
     els.revealHint.setAttribute('aria-expanded', state.revealed ? 'true' : 'false');
     els.revealHint.setAttribute('aria-label', state.revealed ? 'Hide the answer' : 'Show the answer');
     var p = state.practice;
-    els.cardPrompt.hidden = state.revealed || !(p === 'reverse' || p === 'listen' || toneQ || clozeQ || buildQ);
+    els.cardPrompt.hidden = state.revealed || !(p === 'reverse' || p === 'listen' || toneQ || clozeQ || buildQ || similarQ);
     els.revealHint.textContent = state.revealed
       ? 'Tap the card to hide the meaning · swipe → know · ← learning'
       : p === 'tone'
         ? (toneQ ? 'Listen, then pick the tone of the first syllable (keys 1–4)' : 'Tap the card to show the meaning')
+        : p === 'pairs' ? (similarQ ? 'Read the meaning (and hear it), then pick the right word (keys 1–4)' : 'Tap the card to show the meaning')
         : p === 'build' ? (buildQ ? 'Tap the words in order; tap a placed word to take it back (Backspace)' : 'Tap the card to show the meaning')
         : p === 'cloze' ? (clozeQ ? 'Pick the word that fills the gap (keys 1–4)' : 'Tap the card to show the meaning')
         : p === 'zh' && readingHidden ? 'You know this one well: read it, then tap the card to check the pinyin'
@@ -4393,6 +4436,7 @@ label.btn { cursor: pointer; }
         state.practice === 'listen' ? 'Listen to the ' + noun(1) + '.' :
         toneQ ? 'Listen to ' + c.zh + ', then pick the tone of the first syllable.' :
         buildQ ? 'Put the words in order: ' + c.en :
+        similarQ ? 'Which word means: ' + shortText(c.en) + '?' :
         clozeQ ? 'Which word fills the gap? ' + clozeQ.blanked.replace(/＿+/g, ' blank ') + ' ' + clozeQ.ex.en :
         c.zh + (readingHidden ? '.' : ', ' + c.py + '.')));
     }
@@ -4971,7 +5015,10 @@ label.btn { cursor: pointer; }
   function studyCard(i) {
     var p = state.deck.indexOf(i);
     if (p === -1) {
-      if (!inLevel(cards[i])) { state.level = 'all'; state.topic = 'all'; updateTopicBtn(); }
+      if (!inLevel(cards[i])) {
+        state.level = 'all'; state.topic = 'all'; updateTopicBtn();
+        if (!inPractice(cards[i])) { state.practice = 'choice'; syncPracticeSelect(); }
+      }
       state.mode = 'all';
       state.deck = buildDeck('all');
       state.shuffled = false;
@@ -5699,6 +5746,33 @@ label.btn { cursor: pointer; }
       })();
       add('Typing the pinyin', typeRes.ok, typeRes.d);
 
+      var simRes = (function () {
+        var mai = getLexicon().map['买'], sell = getLexicon().map['卖'];
+        var pair = !!mai && similarOf(mai).indexOf(sell) !== -1 && similarOf(getLexicon().map['他']).length >= 2;
+        els.optPractice.value = 'pairs';
+        els.optPractice.dispatchEvent(new Event('change'));
+        var deckOk = state.deck.length > 50 && state.deck.length < wordCards.length && state.deck.every(function (i) { return similarOf(cards[i]).length > 0; });
+        var mi = wordCards.indexOf(mai);
+        state.pos = state.deck.indexOf(mi); state.revealed = false; render(false);
+        var chips = els.choiceBox.querySelectorAll('.choice');
+        var shown = els.card.classList.contains('hide-face') && els.cardPrompt.textContent.indexOf(shortText(mai.en)) !== -1 && chips.length >= 2 &&
+          !els.choiceBox.querySelector('.choice-pyl') && Array.prototype.some.call(chips, function (b) { return b.textContent.indexOf('卖') !== -1; });
+        els.choiceBox.querySelector('[data-ok="1"]').click();
+        var graded = state.status['买'] === 'known';
+        delete state.status['买']; delete state.srs['买'];
+        useDeckType('sentences');
+        var fallback = state.practice === 'choice';
+        useDeckType('words');
+        state.practice = 'pairs'; setMode('all');
+        els.optPractice.value = 'zh';
+        els.optPractice.dispatchEvent(new Event('change'));
+        var back = state.deck.length === wordCards.length;
+        return { ok: pair && deckOk && shown && graded && fallback && back,
+          d: '买 / 卖 and 他 / 她 / 它 found: ' + pair + ', deck holds only words with a twin (' + state.deck.length + ' after leaving): ' + deckOk +
+            ', meaning shown with character-only chips: ' + shown + ', right answer marks Known: ' + graded + ', sentences fall back: ' + fallback + ', full deck after leaving: ' + back };
+      })();
+      add('Similar words', simRes.ok, simRes.d);
+
       var newer = parseImport(JSON.stringify({ version: 1, format: FORMAT + 1, status: {} }));
       var current = parseImport(JSON.stringify({ version: 1, format: FORMAT, status: {} }));
       add('Progress from a newer app version is refused', !!newer.error && !current.error && progressSnapshot().format === FORMAT,
@@ -6284,15 +6358,17 @@ label.btn { cursor: pointer; }
     on('modeDue', 'click', function () { setMode('due'); });
     on('modeHard', 'click', function () { setMode('hard'); });
     on('optPractice', 'change', function () {
-      var v = els.optPractice.value, type = v.indexOf('s-') === 0 ? 'sentences' : 'words';
+      var v = els.optPractice.value, type = v.indexOf('s-') === 0 ? 'sentences' : 'words', prevPractice = state.practice;
       var p = type === 'sentences' ? v.slice(2) : v;
       state.practice = PRACTICE[p] ? p : 'zh';
       state.revealed = state.autoReveal && state.practice === 'zh';
       stopSpeech();
       var skillChanged = useSkill(skillOf(state.practice));
+      // Similar words studies a smaller deck, so entering or leaving it rebuilds the deck.
+      var pairsChanged = (prevPractice === 'pairs') !== (state.practice === 'pairs');
       if (type !== state.deckType) switchDeck(type, skillChanged);
       // A Due, Learning or Hardest deck was built from the previous skill's marks.
-      else if (skillChanged && state.mode !== 'all') setMode(state.mode);
+      else if ((skillChanged && state.mode !== 'all') || pairsChanged) setMode(state.mode);
       else { render(true); save(); }
       if (skillChanged && !testing) {
         toast(SKILLS[state.skill] + ' has its own progress: ' + counts().known + ' known, ' + dueCount(state.level) + ' due.', 4500);
