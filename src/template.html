@@ -150,6 +150,13 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .s-learning { background: var(--learn); }
 .s-unmarked { background: #6b7489; }
 .pv-section { margin-top: 20px; }
+.pv-fc { list-style: none; margin: 4px 0 0; padding: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; align-items: end; }
+.pv-fc-day { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.pv-fc-num { font-size: 13px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+.pv-fc-day.none .pv-fc-num { color: var(--muted); font-weight: 500; }
+.pv-fc-bar { display: block; width: 100%; max-width: 30px; border-radius: 4px 4px 0 0; background: var(--learn); }
+.pv-fc-day.none .pv-fc-bar { background: var(--line); }
+.pv-fc-label { font-size: 12px; color: var(--muted); }
 .pv-section h3 { margin: 0 0 2px; font-size: 16px; }
 .pv-sub { margin: 0 0 10px; font-size: 12.5px; color: var(--muted); }
 .pv-goal { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
@@ -2114,6 +2121,24 @@ label.btn { cursor: pointer; }
     goal.appendChild(gRow);
     body.appendChild(goal);
 
+    // Coming reviews for the current skill and deck, so a heavy day is visible in advance.
+    var fc = forecast(7), fcMax = Math.max.apply(null, fc.map(function (f) { return f.n; }).concat([1]));
+    var fcSec = section('Coming reviews', SKILLS[state.skill] + ', next 7 days. Today includes anything overdue.');
+    var fcList = el('ol', 'pv-fc');
+    fc.forEach(function (f) {
+      var li = el('li', 'pv-fc-day' + (f.n ? '' : ' none'));
+      li.appendChild(el('span', 'pv-fc-num', String(f.n)));
+      var bar = el('span', 'pv-fc-bar');
+      bar.style.height = Math.max(f.n ? 6 : 2, Math.round(64 * f.n / fcMax)) + 'px';
+      bar.setAttribute('aria-hidden', 'true');
+      li.appendChild(bar);
+      li.appendChild(el('span', 'pv-fc-label', f.label));
+      li.setAttribute('aria-label', f.label + ': ' + f.n + ' ' + noun(f.n));
+      fcList.appendChild(li);
+    });
+    fcSec.appendChild(fcList);
+    body.appendChild(fcSec);
+
     // By level
     var lvSec = section('By HSK level', 'Tap a level to study it.');
     LEVELS.forEach(function (lv) {
@@ -2250,6 +2275,23 @@ label.btn { cursor: pointer; }
     var r = state.srs[c.zh], cur = r ? r.b : 0;
     if (grade === 'hard') return Math.max(1, cur);
     return Math.min(SRS_DAYS.length - 1, cur + (grade === 'easy' ? 2 : 1));
+  }
+  var WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  // Cards of the active skill and deck due on each of the next n days; today also counts overdue cards.
+  function forecast(n) {
+    var days = [];
+    for (var i = 0; i < n; i++) {
+      var d = new Date();
+      d.setDate(d.getDate() + i);
+      days.push({ key: dayKey(d), label: i === 0 ? 'Today' : WEEKDAYS[d.getDay()], n: 0 });
+    }
+    cards.forEach(function (c) {
+      var r = state.srs[c.zh];
+      if (!r) return;
+      if (r.d <= days[0].key) { days[0].n++; return; }
+      for (var k = 1; k < n; k++) if (r.d === days[k].key) { days[k].n++; return; }
+    });
+    return days;
   }
   function fmtWait(days) { return days < 1 ? 'today' : days < 30 ? days + ' d' : Math.round(days / 30) + ' mo'; }
   function applySrs(c, kind, grade) {
@@ -3904,6 +3946,22 @@ label.btn { cursor: pointer; }
             ', longest wait 120 days: ' + capped + ', hidden in multiple choice: ' + hiddenInQuiz };
       })();
       add('Hard, Good and Easy set the next review', gradeRes.ok, gradeRes.d);
+
+      var fcRes = (function () {
+        var w = wordCards[0], v = wordCards[1];
+        var sv = [state.srs[w.zh], state.srs[v.zh]];
+        state.srs[w.zh] = { b: 1, d: addDays(-2) };
+        state.srs[v.zh] = { b: 2, d: addDays(3) };
+        var f = forecast(7);
+        var today0 = f[0].n >= 1, day3 = f[3].n >= 1 && f[0].key === dayKey() && f.length === 7;
+        openProgress();
+        var drawn = els.pvBody.querySelectorAll('.pv-fc-day').length === 7;
+        closeOverlay(els.progressView);
+        if (sv[0]) state.srs[w.zh] = sv[0]; else delete state.srs[w.zh];
+        if (sv[1]) state.srs[v.zh] = sv[1]; else delete state.srs[v.zh];
+        return { ok: today0 && day3 && drawn, d: 'overdue counts today: ' + today0 + ', a review in 3 days lands on day 4: ' + day3 + ', 7 bars drawn: ' + drawn };
+      })();
+      add('Coming reviews forecast', fcRes.ok, fcRes.d);
 
       var newer = parseImport(JSON.stringify({ version: 1, format: FORMAT + 1, status: {} }));
       var current = parseImport(JSON.stringify({ version: 1, format: FORMAT, status: {} }));
