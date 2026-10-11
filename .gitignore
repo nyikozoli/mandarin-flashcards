@@ -1,11 +1,23 @@
-# A Python 3.15 runtime install landed here (site/Python/) and is untracked.
-# This repo is the GitHub Pages web root -- everything committed is published.
-# Keep the runtime and any local secrets out of it.
-Python/
+# Build output. CI builds dist/site and deploys it to GitHub Pages; nothing in dist/ is committed.
+dist/
 
-# Supabase CLI local state
-.supabase/
+# Secrets: never in this repository, which is public. They live outside it
+# (C:\Users\nyiko\.secrets\mandarin-hsk\ on the author's machine); these patterns are a backstop.
+.supabase-*
 *-db-password
 *-service-key
+*.pem
 .env
 .env.*
+
+# Supabase CLI local state (project ref, pooler URL, branch data)
+supabase/.temp/
+supabase/.branches/
+.supabase/
+
+# Local tooling and caches
+.local/
+.validation/
+node_modules/
+.claude/allow-main-commits
+.claude/settings.local.json

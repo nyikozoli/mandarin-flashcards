@@ -1,0 +1,125 @@
+Build me a polished, fully functional offline Mandarin flashcard web app as ONE self-contained HTML file.
+
+Important: Do not give me a mock-up, partial code, placeholder data, or an untested solution. Generate the actual downloadable .html file and verify that it works before delivering it.
+
+## Goal
+
+I want to study the 300 most useful beginner Mandarin Chinese words in a Tinder-like flashcard interface.
+
+Every card must include:
+
+1. Simplified Chinese characters
+2. Pinyin with tone marks
+3. English meaning
+4. Hungarian meaning
+5. One or two short, natural example sentences in Chinese
+6. English translation for each sentence
+7. Hungarian translation for each sentence
+8. A “Read aloud” button that speaks the Chinese word and example sentence(s)
+
+## Vocabulary requirements
+
+- Include exactly 300 real, useful beginner Mandarin words.
+- Prefer a coherent beginner / high-frequency vocabulary set roughly comparable to HSK 1-level vocabulary.
+- Do not use duplicate headwords.
+- Use Simplified Chinese.
+- Check every pinyin spelling and tone mark.
+- Keep English and Hungarian translations natural and accurate.
+- Use practical example sentences at beginner level.
+- Avoid machine-like or grammatically incorrect Chinese examples.
+- For measure words, particles, grammar words, and similar entries, explain their function clearly in English and Hungarian instead of forcing an unnatural one-word translation.
+- The content must be embedded directly in the HTML, so it works without internet access.
+
+## Interaction design
+
+Create a mobile-first “Tinder-style” card app.
+
+### Card actions
+
+- Swipe right = “I know this”
+- Swipe left = “Still learning”
+- Provide visible buttons as well:
+  - “← Still learning”
+  - “Skip”
+  - “I know it →”
+- Keyboard shortcuts:
+  - Right Arrow = I know it
+  - Left Arrow = Still learning
+  - Space = skip / next card
+  - S = speak the current card
+- Tapping/clicking the card should hide/reveal meanings and translations.
+- The Chinese word and pinyin must remain visible when the answer is hidden.
+
+### Progress tracking
+
+- Show:
+  - Current card number, e.g. “Card 14 / 300”
+  - Number marked “Known”
+  - Number marked “Learning”
+  - A progress bar
+- Persist status in browser localStorage, so I do not lose my progress after closing/reopening the page.
+- Add:
+  - Shuffle button
+  - Reset progress button, with confirmation
+  - “Study learning cards only” mode
+  - “Study unmarked cards only” mode
+  - “All cards” mode
+  - A searchable list view of all 300 words, including each word’s status
+- In list view, allow selecting a specific card to study.
+
+### Text-to-speech
+
+- Use the browser’s native Web Speech API / speechSynthesis.
+- Speak in Mandarin Chinese using `zh-CN`.
+- Prefer an available Chinese voice if the browser provides one.
+- Speak the word first, pause briefly, then speak the example sentence(s).
+- If speech synthesis is not supported, show a clear, non-blocking message instead of failing silently.
+
+## Visual design
+
+- Dark, clean, modern interface.
+- Optimized for both desktop and mobile.
+- Large Chinese characters.
+- Easy-to-read pinyin, English, Hungarian, and examples.
+- High contrast and accessible button labels.
+- No external libraries, frameworks, CDNs, images, fonts, API calls, or external files.
+- Must work when opened locally by double-clicking the `.html` file.
+- Make buttons large enough for phone use.
+- Add subtle swipe animations, but do not make the app dependent on animation.
+
+## Technical requirements
+
+- Deliver ONE `.html` file only.
+- Include all CSS and JavaScript inline.
+- Include all 300 vocabulary items as valid JSON or a valid JavaScript array.
+- Make sure no apostrophes, quotes, newlines, accented Hungarian letters, Chinese characters, or punctuation break the data structure.
+- Use UTF-8 and include `<meta charset="UTF-8">`.
+- Do not use template syntax that can conflict with data values.
+- Ensure every DOM element referenced by JavaScript exists.
+- Avoid any JavaScript syntax error.
+- Do not leave blank cards if data fails to load.
+- Add a visible startup validation:
+  - If the list does not contain exactly 300 cards, display an error message stating the actual number.
+  - If the app cannot initialize, show the JavaScript error visibly on the page, not only in the browser console.
+- Include a small diagnostic section or “Run self-check” button that verifies:
+  - 300 cards exist
+  - Every card has Chinese, pinyin, English, Hungarian, at least one Chinese example, English translation, and Hungarian translation
+  - No duplicate Chinese headwords exist
+  - Core buttons are attached and working
+
+## Testing requirement
+
+Before giving me the file:
+
+1. Validate the HTML structure.
+2. Validate the JavaScript syntax.
+3. Confirm the vocabulary array contains exactly 300 entries.
+4. Confirm every entry contains all required fields.
+5. Confirm the first card renders on initial load.
+6. Confirm the controls work: known, learning, skip, shuffle, reset, filtering, list view, search, card reveal, and speech button.
+7. Do not claim it has been tested unless you actually tested it.
+
+
+If you cannot create and attach a working file in this environment, say so before writing code. Do not pretend that a file was created or tested.
+
+After creating the file, inspect the final generated HTML itself—not merely the source template—to ensure the vocabulary JSON is present and JavaScript has no malformed data. If possible, open or render the file and confirm that the first word, the action buttons, and the progress counter appear visibly.

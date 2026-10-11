@@ -1,0 +1,67 @@
+# Mandarin HSK flashcards
+
+Offline flashcard web app: 598 HSK 1–3 words and 777 example sentences, with pinyin, English and Hungarian, read-aloud, spaced repetition, progress tracking and optional Supabase cloud sync. The original requirements are in `docs/prd.txt`; most are hard constraints (single file, no external resources, works by double-click, visible startup validation and self-check). Cloud sync is a deliberate exception, and only in the GitHub Pages build (see below).
+
+This repository is **public** (`nyikozoli/mandarin-flashcards`). Never commit secrets. They live outside the repo in `C:\Users\nyiko\.secrets\mandarin-hsk\`; `.gitignore` is only a backstop.
+
+## Layout
+
+| Path | What |
+|---|---|
+| `src/template.html` | The whole app: markup, CSS, JS. |
+| `src/sync-config.json` | Supabase URL, public anon key and magic-link return URL. The anon key is public by design. |
+| `src/pwa/` | Service worker, manifest and icons for the Pages build. |
+| `data/` | Word data (`hsk12/`, `hsk3/`) and the official HSK lists (`lists/`). |
+| `scripts/` | `build.js`, `verify.js`, `check.js` + individual checks, `fix-hsk3.js`, `validate.py`. |
+| `supabase/` | `config.toml` and `migrations/`: the `progress` table, its row-level security and `upsert_progress`. |
+| `.github/workflows/pages.yml` | CI: `npm run check`, `npm run build`, deploy `dist/site` to GitHub Pages. |
+| `dist/` | Build output, git-ignored: `mandarin-flashcards.html`, `artifact.html`, `site/`. Never edit. |
+
+`npm run build` regenerates everything in `dist/` and fails if `scripts/verify.js` rejects an output. `npm run check` runs the data checks. README.md has the data formats, pinyin conventions and the sync/security model.
+
+## How the app is put together (`src/template.html`)
+
+- **Structure:** the JS is one IIFE, split into sections marked `/* ---------- name ---------- */`. The build fills `__VOCAB_JSON__`, `__EXPECTED_TOTAL__`, `__EXPECTED_LEVELS__`, `__SYNC_CONFIG__` (null except in the Pages build) and `<!--__SITE_HEAD__-->`.
+- **State:** everything lives in `state`. `progressSnapshot()` is the single list of persisted fields: `save()` stores it, and export and sync send it minus `DEVICE_ONLY`. `restore(saved)` reads it back, so a new persisted field needs an entry in both.
+- **Decks:** `wordCards`, plus `sentCards` built from them at startup. `cards` points at the active one; switch only through `useDeckType()`. Text that differs between words and sentences goes in `DECKS`, read through `deck()` and `noun()`.
+- **Panels:** every overlay id is listed in `OVERLAYS`. Open and close them only with `openOverlay()` / `closeOverlay()`, which also lock the page behind (`inert`). `askConfirm(title, text, ok, cb, altLabel, altCb)` is the confirm dialog, with an optional second action.
+- **Sync:**
+  - Writes go only through the `upsert_progress` RPC, a compare-and-set on `updated_at`. A refusal opens the conflict dialog; the client never merges or silently overwrites.
+  - `ensureSession()` signs out only when the auth server rejects the refresh token (400/401). A network error or a 5xx keeps the session.
+- **Element ids:** any id used from JS must be in `REQUIRED_IDS`; wired controls also go in `CORE_BUTTONS`. `verify.js` and the self-check enforce this.
+- **Self-check:**
+  - `runSelfCheck()` → `functionalTest()` clicks through every feature with `testing = true`, which turns off animation, saving, toasts and speech. It snapshots state and restores it afterwards.
+  - `syncSelfTest()` then runs the sync code against a fake `fetch`. Because it is asynchronous, `runSelfCheck()` returns `{ failed, results, done }`, and `done` resolves with the final results.
+  - Add a test for every new feature and keep all checks passing.
+
+## Verify a change
+
+1. `npm run check` and `npm run build` must pass.
+2. Open `dist/mandarin-flashcards.html` and run `await window.__mandarinApp.runSelfCheck().done`, or use Settings → Run self-check. Every check must pass.
+   - In the Claude preview pane, "Progress storage" fails, because `file://` pages open as `data:` URLs without localStorage. That one is expected.
+   - To test the Pages build, serve the repo root over http (pick a port other than 8765) and open `/dist/site/`.
+3. For layout changes, check a 375px and a 320px wide viewport. Nothing may scroll sideways.
+4. For a migration, test it in a throwaway Postgres container before `supabase db push`. The local `postgres:16-alpine` image works with a stub `auth` schema: `auth.users` and an `auth.uid()` that reads `request.jwt.claim.sub`.
+
+## Content rules
+
+- Pinyin: citation tones, neutral tones unmarked, tone changes written only for 一 and 不.
+- English uses American spelling. Hungarian must be natural, with correct accents and definite/indefinite verb forms.
+- Every example sentence must contain its headword.
+- No external scripts, fonts or images. Network calls are allowed only to the Supabase project, and only in the Pages build.
+
+## Publishing
+
+- **GitHub Pages:**
+  - Push to `main` and CI deploys `dist/site` in about a minute: https://nyikozoli.github.io/mandarin-flashcards/
+  - Pushes that touch only Markdown, `docs/` or `supabase/` skip CI.
+  - The user's rules: push only when asked, at most once per 15 minutes. The local, untracked `.claude/allow-main-commits` marker allows commits to `main`.
+  - The service worker caches by build id, so users see an update on their second launch after it.
+- **Database:** `supabase db push` applies new migrations to the live project. It changes production, so ask first. Never edit a migration that is already applied; add a new one.
+- **Claude link:** https://claude.ai/artifact/TwdGezEZ5JM7CjDNN5vtv1. Publish `dist/artifact.html` with the Artifact tool, passing that `url`. The viewer blocks downloads, so export there offers copy only.
+
+## Environment notes
+
+- Windows. When writing files from Python, use `newline='\n'`; CRLF output broke a build step once.
+- Port 8765 may be taken by an unrelated local server; use another port for test servers.
+- `.local/` (git-ignored) holds a Python runtime that used to sit in the old `site/` folder.

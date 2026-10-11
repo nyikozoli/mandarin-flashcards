@@ -1,0 +1,3 @@
+# Keep LF everywhere: the build and patch tools expect it, and CRLF once broke a build step.
+* text=auto eol=lf
+*.png binary
