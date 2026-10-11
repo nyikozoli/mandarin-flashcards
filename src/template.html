@@ -427,7 +427,8 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   .today-pill > span:not(.streak) { display: none; }
   .pet-mini .pet-art { width: 36px; height: 36px; }
 }
-.act-key { font-size: 11px; font-weight: 700; line-height: 1.3; padding: 0 6px; border: 1px solid currentColor; border-radius: 5px; opacity: .55; }
+/* The arrow key sits on the outer edge of its button, as a key cap you can read at a glance. */
+.act-key { flex: none; display: grid; place-items: center; min-width: 30px; height: 28px; padding: 0 6px; font-size: 18px; font-weight: 800; line-height: 1; border: 1.5px solid currentColor; border-bottom-width: 3px; border-radius: 7px; opacity: .85; }
 @media (hover: none) { .act-key { display: none; } }
 .act.learn { background: rgba(240, 176, 63, .1); border: 1.5px solid rgba(240, 176, 63, .55); color: var(--learn); }
 .act.learn .act-seal { border: 2px solid var(--learn); color: var(--learn); }
@@ -958,9 +959,9 @@ label.btn { cursor: pointer; }
   </main>
 
   <nav class="actions" aria-label="Answer">
-    <button type="button" class="act learn" id="btnLearning" aria-label="Still learning (Left arrow)"><span class="act-seal" lang="zh-CN" aria-hidden="true">学</span><span class="act-text"><span class="act-label">Still learning</span><span class="act-key" aria-hidden="true">←</span></span></button>
+    <button type="button" class="act learn" id="btnLearning" aria-label="Still learning (Left arrow)"><span class="act-key" aria-hidden="true">←</span><span class="act-seal" lang="zh-CN" aria-hidden="true">学</span><span class="act-text"><span class="act-label">Still learning</span></span></button>
     <button type="button" class="act skip" id="btnSkip" aria-label="Skip to the next card (Space)"><svg class="act-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15a8 8 0 0 1 14.6-4.5M19 5v5.5h-5.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="act-label">Skip</span></button>
-    <button type="button" class="act know" id="btnKnown" aria-label="I know it (Right arrow)"><span class="act-seal" lang="zh-CN" aria-hidden="true">会</span><span class="act-text"><span class="act-label">I know it</span><span class="act-key" aria-hidden="true">→</span></span></button>
+    <button type="button" class="act know" id="btnKnown" aria-label="I know it (Right arrow)"><span class="act-seal" lang="zh-CN" aria-hidden="true">会</span><span class="act-text"><span class="act-label">I know it</span></span><span class="act-key" aria-hidden="true">→</span></button>
   </nav>
   <p class="kbd-hint"><span><kbd>Space</kbd> skip</span><span><kbd>S</kbd> speak</span><span><kbd>↑</kbd><kbd>↓</kbd> flip</span><span><kbd>1</kbd>–<kbd>4</kbd> choose</span><span><kbd>H</kbd> <kbd>E</kbd> hard, easy</span><span><kbd>T</kbd> type</span><span>more in Help</span></p>
 
