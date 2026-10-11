@@ -139,6 +139,7 @@
     on('todayPill', 'click', function () { openProgress('today'); });
     on('btnTopic', 'click', openTopics);
     on('btnNews', 'click', openNews);
+    on('footnote', 'click', function (e) { if (e.target.closest && e.target.closest('[data-news]')) openNews(); });
     on('btnNewsSee', 'click', openNews);
     on('btnNewsClose', 'click', markNewsSeen);
     on('btnCloseNews', 'click', function () { closeOverlay(els.newsView); });

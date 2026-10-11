@@ -682,10 +682,16 @@
         els.btnNews.click();
         var fromSettings = !els.newsView.hidden;
         closeOverlay(els.newsView);
+        updateFootnote();
+        var foot = els.footnote.querySelector('[data-news]');
+        if (foot) foot.click();
+        var fromFooter = !!foot && !els.newsView.hidden && foot.textContent.indexOf(latest.version) !== -1;
+        closeOverlay(els.newsView);
+        fromSettings = fromSettings && fromFooter;
         var wellFormed = EXTRA.news.every(function (r) { return r.version && r.title && r.groups.length && r.groups.every(function (g) { return g.items.length; }); });
         return { ok: notice && sheet && seen && fromSettings && wellFormed,
           d: 'notice for ' + latest.version + ': ' + notice + ', sheet lists ' + EXTRA.news.length + ' releases: ' + sheet + ', opening marks it seen: ' + seen +
-            ', Settings opens it: ' + fromSettings + ', entries well-formed: ' + wellFormed };
+            ', Settings and the footer open it: ' + fromSettings + ', entries well-formed: ' + wellFormed };
       })();
       add('What\'s new', newsRes.ok, newsRes.d);
 

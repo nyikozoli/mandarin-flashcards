@@ -117,3 +117,7 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
   .cmp-ago { text-align: right; }
   .cmp-counts { grid-column: 1 / -1; margin-top: 2px !important; }
 }
+
+/* What's new link in the footer: its own line, with a full-size tap target. */
+.foot-links { display: block; }
+.foot-news { display: inline-flex; align-items: center; min-height: 44px; padding: 0 8px; font-size: 13px; font-weight: 600; }

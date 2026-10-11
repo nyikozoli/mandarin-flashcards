@@ -298,6 +298,16 @@
     var synced = syncEnabled() && !!sync.session;
     els.footnote.appendChild(document.createTextNode(' · works offline · ' + (!storageOK ? 'progress cannot be saved (storage blocked)'
       : synced ? 'progress is saved in this browser and synced to your account' : 'progress is saved in this browser')));
+    // A permanent way back to the release notes, after the one-time notice is gone.
+    var n = latestNews();
+    if (n) {
+      var links = el('span', 'foot-links');
+      var b = el('button', 'linkish foot-news', 'What’s new in ' + n.version);
+      b.type = 'button';
+      b.setAttribute('data-news', '1');
+      links.appendChild(b);
+      els.footnote.appendChild(links);
+    }
   }
 
   /* ---------- swipe ---------- */
