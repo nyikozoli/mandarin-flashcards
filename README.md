@@ -80,6 +80,11 @@ Row-level security is what makes the anon key safe to publish:
 
 **Not production-ready yet:** magic-link email uses Supabase's built-in mail server, which allows only a few emails per hour. Configure `[auth.email.smtp]` in `supabase/config.toml` with your own SMTP provider before others depend on signing in.
 
+## Reading help
+
+- **Tap a word:** in example sentences and on sentence cards, every HSK 1–3 word is tappable and shows its pinyin, meaning and level. Sentences are split by longest match against the app's own word list, which covers about 95% of the characters in the sentences.
+- **Fading pinyin** (Settings, off by default): in Chinese → meaning, a card whose next review is a week or more away hides its pinyin until you tap it. `docs/prd.txt` asks for pinyin to stay visible, so this is opt-in.
+
 ## Pinyin conventions
 
 - Citation tones with tone marks.

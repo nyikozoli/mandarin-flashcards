@@ -496,6 +496,20 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
 .card.sentence .hanzi { flex-wrap: wrap; gap: 0; padding: 10px 4px 0; font-family: var(--zh-font); font-size: clamp(28px, 7.4vw, 42px); line-height: 1.4; }
 .card.sentence .hanzi .cell { width: auto; height: auto; background: none; font-family: var(--zh-font); }
 .card.sentence .pinyin { font-size: clamp(17px, 4.4vw, 21px); }
+/* Tap-for-definition: each known word in a sentence is a button. A faint dotted rule shows what can be tapped. */
+button.w { font: inherit; color: inherit; background: none; border: 0; border-bottom: 1px dotted rgba(241, 236, 226, .38); border-radius: 3px 3px 0 0; padding: 0; margin: 0; cursor: pointer; line-height: inherit; }
+.hanzi button.w { display: inline-flex; border-bottom-width: 2px; }
+button.w:hover { background: rgba(241, 236, 226, .07); }
+button.w[aria-expanded="true"] { background: rgba(224, 74, 47, .24); border-bottom-color: var(--cinnabar); }
+.w-head { font-weight: inherit; color: var(--pinyin); }
+.word-pop { position: fixed; z-index: 60; width: min(320px, calc(100vw - 24px)); display: grid; gap: 6px; padding: 12px 14px 14px; background: var(--surface2); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 14px 34px rgba(4, 7, 10, .55); }
+.wp-head { display: flex; align-items: baseline; gap: 10px; padding-right: 48px; }
+.wp-zh { font-family: var(--zh-font); font-size: 30px; line-height: 1.2; color: var(--paper); }
+.wp-lv { font-size: 12.5px; color: var(--muted); white-space: nowrap; }
+.wp-py { margin: 0; font-size: 18px; color: var(--pinyin); }
+.word-pop .ex-line { margin: 0; }
+.wp-close { position: absolute; top: 8px; right: 8px; }
+.wp-speak { justify-self: start; margin-top: 4px; }
 .ex-practice { align-self: flex-start; }
 .ex-caption { margin: 0 0 -2px; font-size: 12.5px; font-weight: 700; color: var(--muted); }
 .deck-sentences .word-row { grid-template-columns: 34px minmax(0, 1.2fr) minmax(0, 1fr) auto; }
@@ -699,6 +713,7 @@ label.btn { cursor: pointer; }
         <label class="switch"><input type="checkbox" id="optAutoReveal"><span>Always show meanings</span></label>
         <label class="switch"><input type="checkbox" id="optTones"><span>Tone colours <span class="tone-key" aria-hidden="true"><span class="t1">mā</span> <span class="t2">má</span> <span class="t3">mǎ</span> <span class="t4">mà</span> <span class="t5">ma</span></span></span></label>
         <label class="switch"><input type="checkbox" id="optAutoplay"><span>Read each new card aloud</span></label>
+        <label class="switch"><input type="checkbox" id="optFadePinyin"><span>Hide pinyin on cards I know well (until I tap)</span></label>
         <label class="switch"><input type="checkbox" id="optVibrate"><span>Vibrate on answers</span></label>
       </section>
       <section class="set-group">
@@ -863,6 +878,8 @@ label.btn { cursor: pointer; }
           <dt>Multiple choice</dt><dd>Pick the right meaning from four. A right answer counts as Known.</dd>
           <dt>汉字 only</dt><dd>Only the characters show; pinyin, tone colours and audio appear when you tap the card. Use it for words you can say but cannot read yet. A word card's back also has <b>Practice these sentences</b>, which opens just that word's example sentences in the current style.</dd>
           <dt>Which tone?</dt><dd>Hear the word, then pick the tone of its first syllable from the four written forms; keys 1–4 pick tones 1–4. Words only. The 21 words whose first syllable is neutral, or changes tone when it is spoken (你好, 可以), come up as normal cards.</dd>
+          <dt>Tap a word</dt><dd>In any example sentence, and on sentence cards, the words from HSK 1–3 have a dotted underline. Tap one to see its pinyin and meaning; tap elsewhere or press Esc to close it. On a word card the word itself is highlighted instead.</dd>
+          <dt>Fading pinyin</dt><dd>Settings → <b>Hide pinyin on cards I know well</b>. In Chinese → meaning, a card whose next review is a week or more away shows only its characters until you tap it, so the pinyin fades as you learn. Off by default.</dd>
           <dt>Sentences</dt><dd>The same four styles for the 777 example sentences, in the lower half of the practice menu. Each sentence is a card of its own with its own progress, and its back shows the word it comes from.</dd>
         </dl>
       </section>
@@ -962,6 +979,15 @@ label.btn { cursor: pointer; }
 
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
+<div id="wordPop" class="word-pop" role="dialog" aria-labelledby="wordPopZh" hidden>
+  <div class="wp-head"><span id="wordPopZh" class="wp-zh" lang="zh-CN"></span><span id="wordPopLv" class="wp-lv"></span></div>
+  <p id="wordPopPy" class="wp-py" lang="zh-Latn-pinyin"></p>
+  <p class="ex-line"><span class="tag en">EN</span><span id="wordPopEn"></span></p>
+  <p class="ex-line" lang="hu"><span class="tag hu">HU</span><span id="wordPopHu"></span></p>
+  <button type="button" class="btn small wp-speak" id="btnWordPopSpeak">🔊 Read aloud</button>
+  <button type="button" class="close-btn wp-close" id="btnWordPopClose" aria-label="Close the word">✕</button>
+</div>
+
 <script id="vocab-data" type="application/json">__VOCAB_JSON__</script>
 <script>
 (function () {
@@ -976,7 +1002,7 @@ label.btn { cursor: pointer; }
   var EXPECTED_LEVELS = __EXPECTED_LEVELS__;
   var MODE_NAMES = { all: 'All cards', due: 'Due for review', learning: 'Learning only', unmarked: 'Unmarked only', hard: 'Hardest words' };
   var STATUS_NAMES = { known: 'Known', learning: 'Learning', unmarked: 'Unmarked' };
-  var REQUIRED_IDS = ['app', 'errorBanner', 'errorList', 'modeAll', 'modeLearning', 'modeUnmarked', 'countAll', 'countLearningMode',
+  var REQUIRED_IDS = ['optFadePinyin', 'wordPop', 'wordPopZh', 'wordPopLv', 'wordPopPy', 'wordPopEn', 'wordPopHu', 'btnWordPopSpeak', 'btnWordPopClose', 'app', 'errorBanner', 'errorList', 'modeAll', 'modeLearning', 'modeUnmarked', 'countAll', 'countLearningMode',
     'countUnmarkedMode', 'btnShuffle', 'btnUndo', 'btnReset', 'btnSelfCheck', 'btnList', 'cardCounter', 'knownCount', 'learningCount',
     'unmarkedCount', 'progressBar', 'progKnown', 'progLearning', 'progressLabel', 'stage', 'card', 'cardNumber', 'cardStatus', 'cardHanzi',
     'cardPinyin', 'btnSpeak', 'speakLabel', 'cardAnswer', 'cardEn', 'cardHu', 'cardExamples', 'revealHint', 'deckEnd', 'endEmoji', 'endTitle',
@@ -985,7 +1011,7 @@ label.btn { cursor: pointer; }
     'confirmText', 'confirmCancel', 'confirmAlt', 'confirmOk', 'diagView', 'btnCloseDiag', 'diagSummary', 'diagResults', 'btnRunCheck', 'toast', 'vocab-data',
     'syncGroup', 'syncEmailRow', 'syncEmail', 'syncLinkRow', 'syncEmailNote', 'btnSignIn', 'syncAccountRow', 'syncAccount', 'btnSignOut',
     'syncDatesRow', 'syncDates', 'btnSyncNow', 'syncStatus'];
-  var CORE_BUTTONS = ['btnExport', 'btnImport', 'btnApplyImport', 'revealHint', 'btnHelp', 'btnTourNext', 'btnSettings', 'btnKnown', 'btnLearning', 'btnSkip', 'btnSpeak', 'cardExamples', 'modeDue', 'modeHard', 'optPractice', 'choiceBox', 'cardPrompt', 'btnProgress', 'levelAll', 'level1', 'level2', 'level3', 'card', 'btnShuffle', 'btnUndo', 'btnReset', 'btnSelfCheck',
+  var CORE_BUTTONS = ['optFadePinyin', 'btnWordPopSpeak', 'btnWordPopClose', 'btnExport', 'btnImport', 'btnApplyImport', 'revealHint', 'btnHelp', 'btnTourNext', 'btnSettings', 'btnKnown', 'btnLearning', 'btnSkip', 'btnSpeak', 'cardExamples', 'modeDue', 'modeHard', 'optPractice', 'choiceBox', 'cardPrompt', 'btnProgress', 'levelAll', 'level1', 'level2', 'level3', 'card', 'btnShuffle', 'btnUndo', 'btnReset', 'btnSelfCheck',
     'btnList', 'btnCloseList', 'modeAll', 'modeLearning', 'modeUnmarked', 'searchInput', 'confirmOk', 'confirmCancel', 'confirmAlt', 'btnSignIn', 'btnSignOut', 'btnSyncNow'];
 
   var $ = function (id) { return document.getElementById(id); };
@@ -993,7 +1019,7 @@ label.btn { cursor: pointer; }
   var bound = {};
   var cards = [], wordCards = [], sentCards = [];
   var state = { status: {}, mode: 'all', deck: [], pos: 0, shuffled: false, revealed: false, autoReveal: false, rate: 0.85, voice: '', badVoices: [], voicesTested: false, level: 'all', activity: {}, goal: 20, warmup: true, deckType: 'words',
-    srs: {}, misses: {}, milestones: [], practice: 'zh', toneColors: true, autoplay: false, vibrate: true, seenTour: false };
+    srs: {}, misses: {}, milestones: [], practice: 'zh', toneColors: true, fadePinyin: false, autoplay: false, vibrate: true, seenTour: false };
   var undoStack = [];
   var busy = false;
   var testing = false;
@@ -1155,6 +1181,7 @@ label.btn { cursor: pointer; }
     els.optAutoReveal.checked = state.autoReveal;
     els.optTones.checked = state.toneColors;
     els.optAutoplay.checked = state.autoplay;
+    els.optFadePinyin.checked = state.fadePinyin;
     els.optVibrate.checked = state.vibrate;
     els.optWarmup.checked = state.warmup;
     syncPracticeSelect();
@@ -1729,6 +1756,7 @@ label.btn { cursor: pointer; }
       milestones: state.milestones,
       practice: state.practice,
       toneColors: state.toneColors,
+      fadePinyin: state.fadePinyin,
       autoplay: state.autoplay,
       vibrate: state.vibrate,
       seenTour: state.seenTour,
@@ -1775,7 +1803,7 @@ label.btn { cursor: pointer; }
     if (saved && (saved.level === 'all' || LEVELS.indexOf(saved.level) !== -1)) state.level = saved.level;
     if (saved && GOALS.indexOf(saved.goal) !== -1) state.goal = saved.goal;
     if (saved && typeof saved.warmup === 'boolean') state.warmup = saved.warmup;
-    ['toneColors', 'autoplay', 'vibrate', 'seenTour'].forEach(function (k) { if (saved && typeof saved[k] === 'boolean') state[k] = saved[k]; });
+    ['toneColors', 'fadePinyin', 'autoplay', 'vibrate', 'seenTour'].forEach(function (k) { if (saved && typeof saved[k] === 'boolean') state[k] = saved[k]; });
     if (saved && PRACTICE[saved.practice]) state.practice = saved.practice;
     dropToneQuiz();
     if (saved && Array.isArray(saved.milestones)) state.milestones = saved.milestones.filter(function (m) { return typeof m === 'string'; }).slice(-500);
@@ -2212,7 +2240,7 @@ label.btn { cursor: pointer; }
   }
   // Colours each character with the tone of its syllable; 儿 used as erhua shares the previous syllable.
   // Each character sits in its own 米字格 cell and takes the tone colour of its syllable; 儿 as erhua shares the previous one.
-  function renderHanzi(node, zh, py) {
+  function renderHanzi(node, zh, py, tappable) {
     node.textContent = '';
     var tones = pinyinTokens(py).filter(function (t) { return t.tone; }).map(function (t) { return t.tone; });
     var chars = Array.from(zh), parts = [], ti = 0, prev = 0;
@@ -2225,9 +2253,17 @@ label.btn { cursor: pointer; }
       parts.push([ch, t]);
     }
     var useTones = state.toneColors && ti === tones.length && !parts.some(function (p) { return isHan(p[0]) && !p[1]; });
-    parts.forEach(function (p) {
-      if (!isHan(p[0])) { node.appendChild(document.createTextNode(p[0])); return; }
-      node.appendChild(el('span', 'cell' + (useTones ? ' t' + p[1] : ''), p[0]));
+    var put = function (into, p) {
+      if (!isHan(p[0])) { into.appendChild(document.createTextNode(p[0])); return; }
+      into.appendChild(el('span', 'cell' + (useTones ? ' t' + p[1] : ''), p[0]));
+    };
+    if (!tappable) { parts.forEach(function (p) { put(node, p); }); return; }
+    var at = 0;
+    segment(zh).forEach(function (sg) {
+      var into = sg.word ? wordButton(sg.word) : node;
+      for (var k = 0; k < sg.len; k++) put(into, parts[at + k]);
+      at += sg.len;
+      if (sg.word) node.appendChild(into);
     });
   }
   // The four marks each vowel can take; PLAIN_VOWEL reverses it, so a tone can be moved or taken off.
@@ -2265,12 +2301,121 @@ label.btn { cursor: pointer; }
     return syls[0];
   }
 
+  /* ---------- word lookup in sentences ---------- */
+  // The app's own word list is the dictionary: longest match first, so 学生 wins over 学. Characters that are not part
+  // of any HSK 1–3 word stay plain text.
+  var lexicon = null;
+  function getLexicon() {
+    if (lexicon) return lexicon;
+    lexicon = { map: {}, max: 1 };
+    wordCards.forEach(function (w) { lexicon.map[w.zh] = w; lexicon.max = Math.max(lexicon.max, charLen(w.zh)); });
+    return lexicon;
+  }
+  // Splits a sentence into runs of { text, word, len }; word is the card for a known word, null for anything else.
+  function segment(zh) {
+    var lex = getLexicon(), chars = Array.from(zh), out = [], i = 0;
+    while (i < chars.length) {
+      var hit = null, len = 0;
+      if (isHan(chars[i])) {
+        for (var L = Math.min(lex.max, chars.length - i); L > 0 && !hit; L--) {
+          var cand = chars.slice(i, i + L).join('');
+          if (lex.map[cand]) { hit = lex.map[cand]; len = L; }
+        }
+      }
+      if (hit) { out.push({ text: hit.zh, word: hit, len: len }); i += len; continue; }
+      var last = out[out.length - 1];
+      if (last && !last.word) { last.text += chars[i]; last.len++; } else out.push({ text: chars[i], word: null, len: 1 });
+      i++;
+    }
+    return out;
+  }
+  function wordButton(w) {
+    var b = el('button', 'w');
+    b.type = 'button';
+    b.setAttribute('data-w', w.zh);
+    b.setAttribute('aria-haspopup', 'dialog');
+    b.setAttribute('aria-expanded', 'false');
+    return b;
+  }
+  // An example sentence with tappable words. The card's own word is highlighted rather than tappable.
+  function renderSentence(node, zh, headword) {
+    node.textContent = '';
+    segment(zh).forEach(function (sg) {
+      if (!sg.word) { node.appendChild(document.createTextNode(sg.text)); return; }
+      if (sg.word.zh === headword) { node.appendChild(el('b', 'w-head', sg.text)); return; }
+      var b = wordButton(sg.word);
+      b.textContent = sg.text;
+      node.appendChild(b);
+    });
+  }
+  var popAnchor = null, popWord = null;
+  function openWordPop(anchor) {
+    var w = getLexicon().map[anchor.getAttribute('data-w')];
+    if (!w) return;
+    closeWordPop(false);
+    popAnchor = anchor;
+    popWord = w;
+    renderHanzi(els.wordPopZh, w.zh, w.py);
+    renderPinyin(els.wordPopPy, w.py);
+    els.wordPopLv.textContent = 'HSK ' + w.lv;
+    els.wordPopEn.textContent = w.en;
+    els.wordPopHu.textContent = w.hu;
+    els.wordPop.hidden = false;
+    anchor.setAttribute('aria-expanded', 'true');
+    placeWordPop(anchor);
+    if (!testing && focusedByKeyboard(anchor)) { try { els.btnWordPopClose.focus({ preventScroll: true }); } catch (e) { /* ignore */ } }
+  }
+  function closeWordPop(refocus) {
+    if (els.wordPop.hidden) return;
+    els.wordPop.hidden = true;
+    var a = popAnchor;
+    popAnchor = popWord = null;
+    if (!a) return;
+    a.setAttribute('aria-expanded', 'false');
+    if (refocus && !testing && document.contains(a)) { try { a.focus({ preventScroll: true }); } catch (e) { /* ignore */ } }
+  }
+  // Below the word when it fits, above it otherwise, always inside the viewport.
+  function placeWordPop(anchor) {
+    var pop = els.wordPop, m = 12, r = anchor.getBoundingClientRect();
+    pop.style.left = '0px';
+    pop.style.top = '0px';
+    var w = pop.offsetWidth, h = pop.offsetHeight;
+    var vw = document.documentElement.clientWidth || window.innerWidth, vh = window.innerHeight;
+    var top = r.bottom + 8;
+    if (top + h > vh - m && r.top - 8 - h >= m) top = r.top - 8 - h;
+    pop.style.left = Math.max(m, Math.min(vw - w - m, r.left + r.width / 2 - w / 2)) + 'px';
+    pop.style.top = Math.max(m, Math.min(vh - h - m, top)) + 'px';
+  }
+  function bindWordLookup() {
+    document.addEventListener('click', function (e) {
+      var b = e.target.closest ? e.target.closest('button.w') : null;
+      if (!b) return;
+      if (b === popAnchor) closeWordPop(false); else openWordPop(b);
+    });
+    // A tap outside closes the word. On the card it only closes it, so the card does not also flip.
+    document.addEventListener('click', function (e) {
+      if (els.wordPop.hidden || els.wordPop.contains(e.target)) return;
+      if (e.target.closest && e.target.closest('button.w')) return;
+      closeWordPop(false);
+      if (els.card.contains(e.target)) { e.stopPropagation(); e.preventDefault(); }
+    }, true);
+    window.addEventListener('resize', function () { closeWordPop(false); });
+    window.addEventListener('scroll', function () { closeWordPop(false); }, true);
+    on('btnWordPopClose', 'click', function () { closeWordPop(true); });
+    on('btnWordPopSpeak', 'click', function () { if (popWord) speakParts([popWord.zh], els.btnWordPopSpeak); });
+  }
+
   /* ---------- practice modes ---------- */
   var PRACTICE = { zh: 'Chinese → meaning', reverse: 'Meaning → Chinese', listen: 'Listening', choice: 'Multiple choice', hanzi: 'Characters only', tone: 'Which tone?' };
   var choiceDone = false;
   // The syllable the tone quiz is asking about on the current card; null when the card has no quiz.
   var toneQ = null;
   var TONE_CONTOUR = { 1: 'Level', 2: 'Rising', 3: 'Dipping', 4: 'Falling' };
+  // True while the current card hides its reading (pinyin, tone colours, audio) until the reveal.
+  var readingHidden = false;
+  // Fading pinyin: a card whose next review is a week or more away (SRS box 3+) is read from the characters alone.
+  var FADE_BOX = 3;
+  function wellKnown(c) { var r = state.srs[c.zh]; return !!r && r.b >= FADE_BOX; }
   function shortText(s) {
     var t = String(s).split(';')[0].replace(/\s*\([^)]*\)/g, '').trim() || String(s);
     return t.length > 60 ? t.slice(0, 57) + '…' : t;
@@ -2342,8 +2487,9 @@ label.btn { cursor: pointer; }
     var p = state.practice;
     toneQ = p === 'tone' ? toneQuizTarget(c) : null;
     els.card.classList.toggle('hide-face', p === 'reverse' || p === 'listen');
-    // Characters only, and the tone quiz: the reading is the answer, so pinyin, tone colours and audio wait for the reveal.
-    els.card.classList.toggle('hide-reading', p === 'hanzi' || !!toneQ);
+    // Characters only, the tone quiz and faded pinyin: the reading is the answer, so pinyin, tone colours and audio wait for the reveal.
+    readingHidden = p === 'hanzi' || !!toneQ || (p === 'zh' && state.fadePinyin && wellKnown(c));
+    els.card.classList.toggle('hide-reading', readingHidden);
     els.card.classList.toggle('tone-mode', !!toneQ);
     els.cardPrompt.textContent = '';
     els.choiceBox.classList.toggle('tone-grid', !!toneQ);
@@ -2580,6 +2726,7 @@ label.btn { cursor: pointer; }
       ? 'Tap the card to hide the meaning · swipe → know · ← learning'
       : p === 'tone'
         ? (toneQ ? 'Listen, then pick the tone of the first syllable (keys 1–4)' : 'Tap the card to show the meaning')
+        : p === 'zh' && readingHidden ? 'You know this one well: read it, then tap the card to check the pinyin'
         : { zh: 'Tap the card to show the meaning', reverse: 'Say the Chinese word, then tap the card to check',
             listen: 'Listen, then tap the card to see the word', choice: 'Pick the meaning (keys 1–4), or tap the card to reveal',
             hanzi: 'Read the characters aloud, then tap the card to check the pinyin and meaning' }[p];
@@ -2602,7 +2749,8 @@ label.btn { cursor: pointer; }
     els.deckEnd.hidden = true;
     els.card.hidden = false;
     els.cardNumber.textContent = 'HSK ' + c.lv + ' · ' + deck().number + c.n;
-    renderHanzi(els.cardHanzi, c.zh, c.py);
+    closeWordPop(false);
+    renderHanzi(els.cardHanzi, c.zh, c.py, !!c.sentence);
     els.cardHanzi.setAttribute('data-len', String(Math.min(6, charLen(c.zh))));
     renderPinyin(els.cardPinyin, c.py);
     els.cardEn.textContent = c.en;
@@ -2615,8 +2763,9 @@ label.btn { cursor: pointer; }
       sb.setAttribute('data-ex', String(k));
       sb.setAttribute('aria-label', 'Read this sentence aloud');
       sb.title = 'Read this sentence aloud';
-      var zh = el('p', 'ex-zh', e.zh);
+      var zh = el('p', 'ex-zh');
       zh.setAttribute('lang', 'zh-CN');
+      if (c.sentence) zh.textContent = e.zh; else renderSentence(zh, e.zh, c.zh);
       var py = el('p', 'ex-py');
       py.setAttribute('lang', 'zh-Latn-pinyin');
       renderPinyin(py, e.py);
@@ -2642,7 +2791,7 @@ label.btn { cursor: pointer; }
     applyPractice(c);
     var hidesFace = state.practice === 'reverse' || state.practice === 'listen';
     // In these styles the reading is the answer, so a screen reader must not hear it either.
-    var reading = (state.practice === 'hanzi' || toneQ) ? '' : ', ' + c.py;
+    var reading = readingHidden ? '' : ', ' + c.py;
     els.card.setAttribute('aria-label', 'Flashcard ' + (state.pos + 1) + (hidesFace ? '' : ': ' + c.zh + reading));
     setRevealed(state.revealed);
     els.cardCounter.textContent = 'Card ' + (state.pos + 1) + ' / ' + state.deck.length;
@@ -2656,10 +2805,10 @@ label.btn { cursor: pointer; }
       announce('Card ' + (state.pos + 1) + ' of ' + state.deck.length + '. ' + (state.practice === 'reverse' ? 'Meaning: ' + c.en + '.' :
         state.practice === 'listen' ? 'Listen to the ' + noun(1) + '.' :
         toneQ ? 'Listen to ' + c.zh + ', then pick the tone of the first syllable.' :
-        c.zh + (state.practice === 'hanzi' ? '.' : ', ' + c.py + '.')));
+        c.zh + (readingHidden ? '.' : ', ' + c.py + '.')));
     }
     // The tone quiz always speaks: hearing the word is the question.
-    if (animate && !testing && ((state.autoplay && state.practice !== 'hanzi') || state.practice === 'listen' || state.practice === 'tone') && userHasInteracted) {
+    if (animate && !testing && ((state.autoplay && !readingHidden) || state.practice === 'listen' || state.practice === 'tone') && userHasInteracted) {
       var pos = state.pos;
       setTimeout(function () { if (state.pos === pos && currentIndex() !== null) speakParts([c.zh], null); }, 280);
     }
@@ -3059,6 +3208,7 @@ label.btn { cursor: pointer; }
     els.app.inert = open;
   }
   function openOverlay(node, focusEl) {
+    closeWordPop(false);
     if (!anyOverlayOpen()) lastFocus = document.activeElement;
     stopSpeech();
     node.hidden = false;
@@ -3190,6 +3340,11 @@ label.btn { cursor: pointer; }
     if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
     var t = e.target;
     var tag = t && t.tagName;
+    if (!els.wordPop.hidden && (e.key === 'Escape' || e.key === 'Esc')) {
+      e.preventDefault();
+      closeWordPop(true);
+      return;
+    }
     if (anyOverlayOpen()) {
       if (e.key === 'Escape' || e.key === 'Esc') {
         e.preventDefault();
@@ -3412,7 +3567,7 @@ label.btn { cursor: pointer; }
     var snap = {
       status: JSON.parse(JSON.stringify(state.status)), mode: state.mode, deck: state.deck.slice(), pos: state.pos,
       shuffled: state.shuffled, revealed: state.revealed, autoReveal: state.autoReveal, level: state.level,
-      srs: JSON.parse(JSON.stringify(state.srs)), misses: JSON.parse(JSON.stringify(state.misses)), practice: state.practice, toneColors: state.toneColors,
+      srs: JSON.parse(JSON.stringify(state.srs)), misses: JSON.parse(JSON.stringify(state.misses)), practice: state.practice, toneColors: state.toneColors, fadePinyin: state.fadePinyin,
       deckType: state.deckType, activity: JSON.parse(JSON.stringify(state.activity)), milestones: state.milestones.slice(), seenTour: state.seenTour
     };
     var undoSnap = undoStack.slice();
@@ -3436,6 +3591,7 @@ label.btn { cursor: pointer; }
       state.misses = {};
       state.practice = 'zh';
       state.toneColors = true;
+      state.fadePinyin = false;
       state.autoReveal = false;
       state.level = 'all';
       els.modeAll.click();
@@ -3595,6 +3751,58 @@ label.btn { cursor: pointer; }
             ' | ' + wordCards[skip].zh + ' ' + wordCards[skip].py + ' is shown as a normal card: ' + skipped };
       })();
       add('Tone quiz: hear the word, pick the tone of the first syllable', toneRes.ok, toneRes.d);
+
+      var fadeRes = (function () {
+        var deckSnap = state.deck, posSnap = state.pos, w = wordCards[0];
+        var hides = function () { return els.card.classList.contains('hide-reading') && getComputedStyle(els.cardPinyin).visibility === 'hidden'; };
+        state.deck = [0]; state.pos = 0; state.practice = 'zh'; state.revealed = false;
+        state.fadePinyin = true;
+        state.srs[w.zh] = { b: FADE_BOX, d: addDays(SRS_DAYS[FADE_BOX]) }; render(false);
+        var mature = hides();
+        state.srs[w.zh] = { b: FADE_BOX - 1, d: addDays(SRS_DAYS[FADE_BOX - 1]) }; render(false);
+        var young = !hides();
+        state.fadePinyin = false;
+        state.srs[w.zh] = { b: FADE_BOX, d: addDays(SRS_DAYS[FADE_BOX]) }; render(false);
+        var off = !hides();
+        delete state.srs[w.zh];
+        state.deck = deckSnap; state.pos = posSnap; render(false);
+        return { ok: mature && young && off, d: 'well-known card hides its pinyin: ' + mature + ', newer card shows it: ' + young + ', setting off shows it: ' + off };
+      })();
+      add('Fading pinyin hides the reading of well-known cards (opt-in)', fadeRes.ok, fadeRes.d);
+
+      var lookRes = (function () {
+        var lossless = sentCards.every(function (sc) { return segment(sc.zh).map(function (g) { return g.text; }).join('') === sc.zh; });
+        var wi = -1;
+        for (var i = 0; i < wordCards.length && wi === -1; i++) {
+          if (segment(wordCards[i].ex[0].zh).some(function (g) { return g.word && g.word.zh !== wordCards[i].zh; })) wi = i;
+        }
+        if (wi === -1) return { ok: false, d: 'no example sentence contains another known word' };
+        var deckSnap = state.deck, posSnap = state.pos;
+        state.deck = [wi]; state.pos = 0; state.revealed = true; render(false);
+        var b = els.cardExamples.querySelector('.ex-zh button.w');
+        var head = !!els.cardExamples.querySelector('.ex-zh .w-head');
+        b.click();
+        var target = getLexicon().map[b.getAttribute('data-w')];
+        var opens = !els.wordPop.hidden && els.wordPopZh.textContent === target.zh && els.wordPopEn.textContent === target.en &&
+          b.getAttribute('aria-expanded') === 'true';
+        els.cardEn.click();
+        var outside = els.wordPop.hidden && state.revealed === true;
+        useDeckType('sentences');
+        state.deck = [0]; state.pos = 0; state.revealed = false; render(false);
+        var fb = els.cardHanzi.querySelector('button.w');
+        var cellsKept = els.cardHanzi.querySelectorAll('.cell').length === Array.from(sentCards[0].zh).filter(isHan).length;
+        if (fb) fb.click();
+        var face = !!fb && !els.wordPop.hidden && state.revealed === false;
+        key('Escape');
+        var esc = els.wordPop.hidden;
+        useDeckType('words');
+        state.deck = deckSnap; state.pos = posSnap; render(false);
+        return { ok: lossless && head && opens && outside && face && cellsKept && esc,
+          d: 'segmentation keeps every sentence intact: ' + lossless + ', headword highlighted: ' + head + ', tapping ' + target.zh + ' shows it: ' + opens +
+            ', a tap elsewhere closes it without flipping the card: ' + outside + ', sentence card words are tappable: ' + face +
+            ', every character keeps its cell: ' + cellsKept + ', Esc closes it: ' + esc };
+      })();
+      add('Tap a word in a sentence to see its meaning', lookRes.ok, lookRes.d);
 
       var wordCard = cards[currentIndex()];
       els.card.click();
@@ -3760,6 +3968,8 @@ label.btn { cursor: pointer; }
       state.misses = snap.misses;
       state.practice = snap.practice;
       state.toneColors = snap.toneColors;
+      state.fadePinyin = snap.fadePinyin;
+      closeWordPop(false);
       state.deck = snap.deck;
       state.pos = snap.pos;
       state.shuffled = snap.shuffled;
@@ -3983,6 +4193,7 @@ label.btn { cursor: pointer; }
       else { render(true); save(); }
     });
     on('optTones', 'change', function () { state.toneColors = els.optTones.checked; render(false); save(); });
+    on('optFadePinyin', 'change', function () { state.fadePinyin = els.optFadePinyin.checked; render(false); save(); });
     on('optAutoplay', 'change', function () { state.autoplay = els.optAutoplay.checked; save(); });
     on('optVibrate', 'change', function () { state.vibrate = els.optVibrate.checked; buzz(15); save(); });
     on('choiceBox', 'click', function (e) {
@@ -4029,6 +4240,7 @@ label.btn { cursor: pointer; }
     wordCards = loadCards();
     sentCards = buildSentences(wordCards);
     cards = wordCards;
+    bindWordLookup();
     var v = validateCards();
     if (v.count !== EXPECTED_COUNT) reportError('Expected ' + EXPECTED_COUNT + ' vocabulary cards but found ' + v.count + '.');
     if (v.missing.length) reportError(v.missing.length + ' card(s) have missing fields, e.g. ' + v.missing[0] + '. Run the self-check for details.');
