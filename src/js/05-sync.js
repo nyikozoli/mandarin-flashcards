@@ -372,13 +372,16 @@
     var keepDevice = function () { doPush('replaced the cloud copy', remote.updated_at); };
     // Both choices are offered; the newer copy is the main button. Newer is not always the
     // one you want (a phone with older but fuller progress), so the other stays one tap away.
+    var copy = function (label, iso, c, newer) {
+      var w = fmtWhen(iso).split(' · ');
+      return { label: label, when: w[0], ago: w[1] || '', counts: c.known + ' known · ' + c.learning + ' learning', newer: newer };
+    };
     askConfirm(
       cloudNewer ? 'The cloud copy is newer' : 'This device is newer',
-      'In the cloud: ' + fmtWhen(remote.updated_at) + ' (' + rc.known + ' known, ' + rc.learning + ' learning). ' +
-      'On this device: ' + fmtWhen(ls) + ' (' + lc.known + ' known, ' + lc.learning + ' learning). ' +
-      'Only one copy can be kept — the other is overwritten and cannot be undone.',
+      'Both copies changed since this device last synced. Keep one; the other is replaced and cannot be undone.',
       cloudNewer ? 'Keep the cloud copy' : 'Keep this device', cloudNewer ? keepCloud : keepDevice,
-      cloudNewer ? 'Keep this device' : 'Keep the cloud copy', cloudNewer ? keepDevice : keepCloud);
+      cloudNewer ? 'Keep this device' : 'Keep the cloud copy', cloudNewer ? keepDevice : keepCloud,
+      { tone: 'primary', compare: [copy('In the cloud', remote.updated_at, rc, cloudNewer), copy('On this device', ls, lc, !cloudNewer)] });
   }
   // Decide between pulling, pushing and asking. Only asks when the cloud copy changed
   // since this device last saw it, or when this device has never synced.

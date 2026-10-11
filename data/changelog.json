@@ -9,7 +9,8 @@
           "name": "",
           "items": [
             "A sync button in the top bar while you are signed in (website): tap to sync now; a dot means changes are waiting to upload.",
-            "On the website, the footer now says when your progress is also synced to your account."
+            "On the website, the footer now says when your progress is also synced to your account.",
+            "The “which copy to keep” sync dialog shows both copies side by side, with clear, evenly laid-out buttons."
           ]
         }
       ]

@@ -126,7 +126,8 @@
         };
         return doPush().then(function () {
           checks['refused upload offers both copies'] = sync.conflict === true && !els.confirmDialog.hidden && !els.confirmAlt.hidden &&
-            /cloud copy/i.test(els.confirmOk.textContent + els.confirmAlt.textContent) && /this device/i.test(els.confirmOk.textContent + els.confirmAlt.textContent);
+            /cloud copy/i.test(els.confirmOk.textContent + els.confirmAlt.textContent) && /this device/i.test(els.confirmOk.textContent + els.confirmAlt.textContent) &&
+            els.confirmCompare.querySelectorAll('.cmp').length === 2 && els.confirmCompare.querySelectorAll('.cmp.newer').length === 1;
           els.confirmCancel.click();
         });
       })

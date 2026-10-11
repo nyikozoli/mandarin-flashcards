@@ -41,10 +41,29 @@
     return ids.length ? els[ids[ids.length - 1]] : null;
   }
   // altLabel/altCb add a second action, for choices like “keep this copy or that one”.
-  function askConfirm(title, text, okLabel, cb, altLabel, altCb) {
+  // extra (optional): { compare: [{ label, when, ago, counts, newer }], tone: 'primary' } shows side-by-side copies
+  // and makes the main button the normal (not red) action.
+  function askConfirm(title, text, okLabel, cb, altLabel, altCb, extra) {
+    extra = extra || {};
     els.confirmTitle.textContent = title;
     els.confirmText.textContent = text;
     els.confirmOk.textContent = okLabel;
+    els.confirmOk.classList.toggle('danger', extra.tone !== 'primary');
+    els.confirmOk.classList.toggle('primary', extra.tone === 'primary');
+    // Three choices stack full width, main action first and Cancel last, so nothing wraps unevenly.
+    els.confirmActions.classList.toggle('stack', !!altLabel);
+    els.confirmCompare.textContent = '';
+    els.confirmCompare.hidden = !extra.compare;
+    (extra.compare || []).forEach(function (x) {
+      var card = el('div', 'cmp' + (x.newer ? ' newer' : ''));
+      var head = el('p', 'cmp-label', x.label);
+      if (x.newer) head.appendChild(el('span', 'cmp-badge', 'newer'));
+      card.appendChild(head);
+      card.appendChild(el('p', 'cmp-when', x.when));
+      if (x.ago) card.appendChild(el('p', 'cmp-ago', x.ago));
+      card.appendChild(el('p', 'cmp-counts', x.counts));
+      els.confirmCompare.appendChild(card);
+    });
     confirmCallback = cb;
     confirmAltCallback = altLabel ? altCb : null;
     els.confirmAlt.hidden = !altLabel;
