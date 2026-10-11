@@ -8,6 +8,7 @@
   },
   "scripts": {
     "build": "node scripts/build.js",
-    "check": "node scripts/check.js"
+    "check": "node scripts/check.js",
+    "selfcheck": "node scripts/selfcheck.js"
   }
 }

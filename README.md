@@ -9,6 +9,7 @@ Offline flashcards for 598 HSK 1–3 words and their 777 example sentences, with
 ```bash
 npm run check     # data checks: fields, duplicates, tone marks, pinyin syllable counts
 npm run build     # writes dist/ and verifies it
+npm run selfcheck # runs the in-app self-check in headless Chrome or Edge (Node 22+)
 ```
 
 No dependencies: Node 18 or newer is all you need. `npm run build` runs `scripts/build.js`, which writes three versions and checks the first two with `scripts/verify.js`:
@@ -110,7 +111,7 @@ node scripts/fix-hsk3.js fixes.json             # apply [headword, old text, new
 
 Settings shows the build date and build id. The build id is a hash of the app and its data, and also names the service worker cache, so it changes exactly when the app does.
 
-The in-app self-check (Settings → Run self-check) tests the data and every control in the browser, including the sync logic against a simulated server.
+CI runs `npm run selfcheck` on every push, against the single file and the site build. The in-app self-check (Settings → Run self-check) tests the data and every control in the browser, including the sync logic against a simulated server.
 
 ### Dictionary and pinyin cross-check (optional)
 

@@ -32,6 +32,12 @@ jobs:
         run: npm run check
       - name: Build and verify
         run: npm run build
+      # The in-app self-check (every feature, plus sync against a simulated server) in headless Chrome,
+      # for the offline file and for the site build.
+      - name: Self-check
+        run: |
+          npm run selfcheck
+          npm run selfcheck -- dist/site/index.html
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:

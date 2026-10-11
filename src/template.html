@@ -1221,6 +1221,9 @@ label.btn { cursor: pointer; }
     if (!p || typeof p !== 'object' || !p.status || typeof p.status !== 'object') {
       return { error: 'This code does not contain Mandarin HSK progress.' };
     }
+    if (typeof p.format === 'number' && p.format > FORMAT) {
+      return { error: 'This progress was saved by a newer version of the app. Reload this page to update it, then import again.' };
+    }
     var m = markCounts(p.status);
     var days = Object.keys(p.activity || {}).sort();
     return { progress: p, known: m.known, learning: m.learning, last: days[days.length - 1] || null };
@@ -1466,7 +1469,7 @@ label.btn { cursor: pointer; }
     return syncApi('/rest/v1/rpc/upsert_progress', {
       method: 'POST',
       keepalive: !!keepalive,
-      body: { p_app: APP_ID, p_version: 1, p_data: data || transferable(), p_expected: expected || null }
+      body: { p_app: APP_ID, p_version: FORMAT, p_data: data || transferable(), p_expected: expected || null }
     }).then(function (res) { return (Array.isArray(res) ? res[0] : res) || null; });
   }
 
@@ -1581,6 +1584,10 @@ label.btn { cursor: pointer; }
   }
   function applyRemote(row) {
     if (!row || !row.data) return;
+    if (typeof row.data.format === 'number' && row.data.format > FORMAT) {
+      setSyncStatus('The cloud copy was saved by a newer version of the app. Reload this page to update it, then sync again.', true);
+      return;
+    }
     // applyImport() ends in save(), which would push the cloud copy straight back.
     sync.applyingRemote = true;
     try { applyImport(row.data); } finally { sync.applyingRemote = false; }
@@ -1751,6 +1758,7 @@ label.btn { cursor: pointer; }
     if (state.deckMemory[other]) mem[other] = state.deckMemory[other];
     return {
       version: 1,
+      format: FORMAT,
       status: read.status,
       mode: state.mode,
       deck: state.deck.map(function (i) { return cards[i].zh; }),
@@ -2249,6 +2257,9 @@ label.btn { cursor: pointer; }
   // active skill's maps, so the rest of the app needs no skill logic; state.marks holds every skill, and stashSkill()
   // writes the active maps back before anything reads another skill.
   var SKILLS = { read: 'Reading', recall: 'Recall', listen: 'Listening' };
+  // Snapshot format. 2 added `skills`. The server refuses uploads older than the stored format, and this copy refuses
+  // to apply progress written by a newer one, so neither side drops what it does not understand.
+  var FORMAT = 2;
   var SKILL_OF = { zh: 'read', hanzi: 'read', choice: 'read', reverse: 'recall', listen: 'listen', tone: 'listen' };
   function skillOf(p) { return SKILL_OF[p] || 'read'; }
   function emptyMarks() { return { status: {}, srs: {}, misses: {} }; }
@@ -3825,6 +3836,10 @@ label.btn { cursor: pointer; }
       var keyOff = els.legendTones.hidden;
       state.toneColors = true; render(false);
       add('Tone colour key next to the progress bar', keyOn && keyOff, 'shown with tone colours on: ' + keyOn + ', hidden when off: ' + keyOff);
+      var newer = parseImport(JSON.stringify({ version: 1, format: FORMAT + 1, status: {} }));
+      var current = parseImport(JSON.stringify({ version: 1, format: FORMAT, status: {} }));
+      add('Progress from a newer app version is refused', !!newer.error && !current.error && progressSnapshot().format === FORMAT,
+        'newer format refused: ' + !!newer.error + ', current format accepted: ' + !current.error + ', snapshots say format ' + FORMAT);
       var ver = document.querySelector('.app-version');
       add('Version shown in Settings', !!ver && /^Version \d{4}-\d\d-\d\d, build [0-9a-f]{10}$/.test(ver.textContent), ver ? ver.textContent : 'missing');
 

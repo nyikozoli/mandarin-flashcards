@@ -14,7 +14,7 @@ This repository is **public** (`nyikozoli/mandarin-flashcards`). Never commit se
 | `data/` | Word data (`hsk12/`, `hsk3/`) and the official HSK lists (`lists/`). |
 | `scripts/` | `build.js`, `verify.js`, `check.js` + individual checks, `fix-hsk3.js`, `validate.py`. |
 | `supabase/` | `config.toml` and `migrations/`: the `progress` table, its row-level security and `upsert_progress`. |
-| `.github/workflows/pages.yml` | CI: `npm run check`, `npm run build`, deploy `dist/site` to GitHub Pages. |
+| `.github/workflows/pages.yml` | CI: `npm run check`, `npm run build`, `npm run selfcheck` (both builds), deploy `dist/site` to GitHub Pages. |
 | `dist/` | Build output, git-ignored: `mandarin-flashcards.html`, `artifact.html`, `site/`. Never edit. |
 
 `npm run build` regenerates everything in `dist/` and fails if `scripts/verify.js` rejects an output. `npm run check` runs the data checks. README.md has the data formats, pinyin conventions and the sync/security model.
@@ -43,7 +43,7 @@ This repository is **public** (`nyikozoli/mandarin-flashcards`). Never commit se
 ## Verify a change
 
 1. `npm run check` and `npm run build` must pass.
-2. Open `dist/mandarin-flashcards.html` and run `await window.__mandarinApp.runSelfCheck().done`, or use Settings → Run self-check. Every check must pass.
+2. `npm run selfcheck` runs the in-app self-check in headless Chrome or Edge (Node 22+; `CHROME_PATH` to pick a browser) and fails on any failed check. CI runs it on the single file and on `dist/site/index.html`. To look at it yourself, open `dist/mandarin-flashcards.html` and run `await window.__mandarinApp.runSelfCheck().done`, or use Settings → Run self-check. Every check must pass.
    - In the Claude preview pane, "Progress storage" fails, because `file://` pages open as `data:` URLs without localStorage. That one is expected.
    - To test the Pages build, serve the repo root over http (pick a port other than 8765) and open `/dist/site/`.
 3. For layout changes, check a 375px and a 320px wide viewport. Nothing may scroll sideways.
