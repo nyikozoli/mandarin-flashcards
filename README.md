@@ -91,6 +91,16 @@ Reading (Chinese → meaning, 汉字 only, multiple choice), recall (meaning →
 - **Multiple choice without pinyin** (Settings, on by default): turn off "Show pinyin in multiple choice" to see only the characters until you answer.
 - **Fading pinyin** (Settings, off by default): in Chinese → meaning, a card whose next review is a week or more away hides its pinyin until you tap it. `docs/prd.txt` asks for pinyin to stay visible, so this is opt-in.
 
+## Topics, frequency and hints
+
+| File | What | How it was made |
+|---|---|---|
+| `data/topics.json` | One of 16 topics per word | Tagged by rule (most specific topic wins; function words → grammar), then reviewed |
+| `data/freq.json` | Frequency rank and share of running text per word, share per character | Extracted from [wordfreq](https://github.com/rspeer/wordfreq) 3.1.1. **This file is CC BY-SA 4.0**, as an adaptation of wordfreq's data. |
+| `data/hints.json` | Memory hints for 180 characters (picture, combined meaning, or meaning + sound part) | Written from the Shuowen and mainstream modern etymology, then fact-checked by an independent review; contested readings are marked "Traditionally" |
+
+The build adds rank, frequency and topic to each card and puts the topic list, character frequencies and hints in a second JSON block (`extra-data`). All three files are optional: without them the related features hide.
+
 ## Pinyin conventions
 
 - Citation tones with tone marks.

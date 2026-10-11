@@ -623,6 +623,14 @@ button.w[aria-expanded="true"] { background: rgba(224, 74, 47, .24); border-bott
 .wp-close { position: absolute; top: 8px; right: 8px; }
 .wp-speak { justify-self: start; margin-top: 4px; }
 .ex-practice { align-self: flex-start; }
+.hints { display: flex; flex-direction: column; gap: 8px; margin: 4px 0 12px; }
+.hint-row { display: flex; gap: 12px; align-items: flex-start; padding: 8px 10px; border-radius: 12px; border: 1px dashed var(--line); }
+.hint-ch { flex: none; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 8px; background: var(--surface2); color: var(--paper); font-family: var(--kai-font); font-size: 26px; }
+.hint-text { min-width: 0; }
+.hint-text p { margin: 0; }
+.hint-parts { font-weight: 700; font-size: 14px; }
+.hint-en { font-size: 13.5px; color: var(--soft); }
+.hint-hu { font-size: 12.5px; color: var(--muted); }
 /* Hard / Good / Easy: shown on the revealed answer in the self-graded styles; each says when the card comes back. */
 .grade-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 14px; }
 .grade-q { flex: 1 1 100%; color: var(--muted); font-size: 13px; }
@@ -813,6 +821,7 @@ label.btn { cursor: pointer; }
         </div>
         <div class="meaning"><span class="tag en">EN</span><p id="cardEn"></p></div>
         <div class="meaning"><span class="tag hu">HU</span><p id="cardHu" lang="hu"></p></div>
+        <div id="cardHints" class="hints" hidden></div>
         <div id="cardExamples" class="examples"></div>
       </div>
       <button type="button" id="revealHint" class="hint" aria-expanded="false" aria-controls="cardAnswer">Tap the card to show the meaning</button>
@@ -1051,6 +1060,7 @@ label.btn { cursor: pointer; }
           <dt>Word of the day</dt><dd>Each day a useful word you do not know yet appears above the card. “Study it” opens it; ✕ hides it until tomorrow.</dd>
           <dt>Daily quests</dt><dd>Three small goals each day, shown in the progress view. Each finished quest gives 30 XP; all three give 50 XP more and a 🧊 streak freeze. You can save two, and a saved freeze keeps your streak alive over a missed day. Every Monday a short recap of last week appears.</dd>
           <dt>Seals and challenges</dt><dd>The progress view collects 20 red seals (印章) for milestones such as 100 words, a 7-day streak or a passed exam, each worth 50 XP. Its challenges are a 60-second blitz (as many meanings as you can) and a 20-question exam per HSK level (pass at 80%). Challenges never change your review schedule.</dd>
+          <dt>Character hints</dt><dd>The back of a word card explains its characters where a well-established explanation exists (about 180 characters): a picture (山 mountain peaks), a combination of meanings (休 a person resting by a tree), or a meaning part plus a sound part (妈 = 女 woman + 马 mǎ for the sound).</dd>
           <dt>Topics</dt><dd>The button under the level row picks a topic (food, travel, time…). Every study mode then works inside it, and a topic's seal turns red when you know all its words.</dd>
           <dt>What you can read</dt><dd>The progress view counts the example sentences whose HSK words you all know, shows how much of everyday Chinese text your words cover, and suggests the next word to learn. Word frequencies come from <i>wordfreq</i> by Robyn Speer and contributors (CC BY-SA 4.0).</dd>
           <dt>XP, ranks, combo</dt><dd>Every answer earns XP (10 for a known card, 3 for one you are still learning, more during a combo). XP raises your rank from 新手 Newcomer to 大师 Master. Three or more right answers in a row show a 连 combo counter on the card.</dd>
@@ -1179,7 +1189,7 @@ label.btn { cursor: pointer; }
   var EXPECTED_LEVELS = __EXPECTED_LEVELS__;
   var MODE_NAMES = { all: 'All cards', due: 'Due for review', learning: 'Learning only', unmarked: 'Unmarked only', hard: 'Hardest words' };
   var STATUS_NAMES = { known: 'Known', learning: 'Learning', unmarked: 'Unmarked' };
-  var REQUIRED_IDS = ['quizView', 'quizTitle', 'quizBody', 'btnCloseQuiz', 'wotd', 'wotdZh', 'wotdPy', 'wotdEn', 'wotdHint', 'btnWotdStudy', 'btnWotdClose', 'extra-data', 'btnTopic', 'topicBtnZh', 'topicBtnName', 'topicView', 'btnCloseTopic', 'topicGrid', 'cardRank', 'comboTag', 'gradeRow', 'legendTones', 'optChoicePinyin', 'progressTitle', 'optFadePinyin', 'wordPop', 'wordPopZh', 'wordPopLv', 'wordPopPy', 'wordPopEn', 'wordPopHu', 'btnWordPopSpeak', 'btnWordPopClose', 'app', 'errorBanner', 'errorList', 'modeAll', 'modeLearning', 'modeUnmarked', 'countAll', 'countLearningMode',
+  var REQUIRED_IDS = ['cardHints', 'quizView', 'quizTitle', 'quizBody', 'btnCloseQuiz', 'wotd', 'wotdZh', 'wotdPy', 'wotdEn', 'wotdHint', 'btnWotdStudy', 'btnWotdClose', 'extra-data', 'btnTopic', 'topicBtnZh', 'topicBtnName', 'topicView', 'btnCloseTopic', 'topicGrid', 'cardRank', 'comboTag', 'gradeRow', 'legendTones', 'optChoicePinyin', 'progressTitle', 'optFadePinyin', 'wordPop', 'wordPopZh', 'wordPopLv', 'wordPopPy', 'wordPopEn', 'wordPopHu', 'btnWordPopSpeak', 'btnWordPopClose', 'app', 'errorBanner', 'errorList', 'modeAll', 'modeLearning', 'modeUnmarked', 'countAll', 'countLearningMode',
     'countUnmarkedMode', 'btnShuffle', 'btnUndo', 'btnReset', 'btnSelfCheck', 'btnList', 'cardCounter', 'knownCount', 'learningCount',
     'unmarkedCount', 'progressBar', 'progKnown', 'progLearning', 'progressLabel', 'stage', 'card', 'cardNumber', 'cardStatus', 'cardHanzi',
     'cardPinyin', 'btnSpeak', 'speakLabel', 'cardAnswer', 'cardEn', 'cardHu', 'cardExamples', 'revealHint', 'deckEnd', 'endEmoji', 'endTitle',
@@ -2596,7 +2606,7 @@ label.btn { cursor: pointer; }
 
   /* ---------- spaced repetition, hardest words ---------- */
   // Leitner boxes: a word answered “I know it” (Good) moves up a box and comes back after 1, 3, 7, 14, 30, 60, then 120 days.
-  // Easy moves up two boxes; Hard keeps the box (at least box 1), so the word comes back after the same wait.
+  // Easy moves up two boxes; Hard keeps the box, so the word comes back after the same wait (a new word: again today).
   // “Still learning” sends it back to box 0, due again today.
   var SRS_DAYS = [0, 1, 3, 7, 14, 30, 60, 120];
   function addDays(n) { var d = new Date(); d.setDate(d.getDate() + n); return dayKey(d); }
@@ -2613,7 +2623,7 @@ label.btn { cursor: pointer; }
   }
   function nextBox(c, grade) {
     var r = state.srs[c.zh], cur = r ? r.b : 0;
-    if (grade === 'hard') return Math.max(1, cur);
+    if (grade === 'hard') return cur;
     return Math.min(SRS_DAYS.length - 1, cur + (grade === 'easy' ? 2 : 1));
   }
   var WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -3994,6 +4004,26 @@ label.btn { cursor: pointer; }
     else showCard(cards[i], animate);
   }
 
+  // Memory hints for the word's characters, on the back of word cards.
+  function renderHints(c) {
+    var list = c.sentence ? [] : hintsFor(c);
+    els.cardHints.hidden = !list.length;
+    els.cardHints.textContent = '';
+    list.forEach(function (h) {
+      var row = el('div', 'hint-row');
+      var ch = el('span', 'hint-ch', h.ch);
+      ch.setAttribute('lang', 'zh-CN');
+      row.appendChild(ch);
+      var tx = el('div', 'hint-text');
+      tx.appendChild(el('p', 'hint-parts', h.parts));
+      tx.appendChild(el('p', 'hint-en', h.en));
+      var hu = el('p', 'hint-hu', h.hu);
+      hu.setAttribute('lang', 'hu');
+      tx.appendChild(hu);
+      row.appendChild(tx);
+      els.cardHints.appendChild(row);
+    });
+  }
   function showCard(c, animate) {
     els.deckEnd.hidden = true;
     els.card.hidden = false;
@@ -4009,6 +4039,7 @@ label.btn { cursor: pointer; }
     renderPinyin(els.cardPinyin, c.py);
     els.cardEn.textContent = c.en;
     els.cardHu.textContent = c.hu;
+    renderHints(c);
     els.cardExamples.textContent = '';
     c.ex.forEach(function (e, k) {
       var box = el('div', 'ex');
@@ -5290,6 +5321,23 @@ label.btn { cursor: pointer; }
             ', exam mixes ' + JSON.stringify(types) + ': ' + mixed + ', 17 of 20 passes at 85%: ' + passed + ', seals and challenges drawn: ' + drawn };
       })();
       add('Seals, blitz and level exams', gameRes.ok, gameRes.d);
+
+      var hintRes = (function () {
+        var keys = Object.keys(EXTRA.hints);
+        if (!keys.length) return { ok: true, d: 'no hint data in this build' };
+        var wi = -1;
+        wordCards.forEach(function (w, i) { if (wi === -1 && hintsFor(w).length) wi = i; });
+        var deckSnap = state.deck, posSnap = state.pos;
+        state.deck = [wi]; state.pos = 0; state.revealed = true; render(false);
+        var shown = !els.cardHints.hidden && els.cardHints.querySelectorAll('.hint-row').length === hintsFor(wordCards[wi]).length;
+        var valid = keys.every(function (k) { var h = EXTRA.hints[k]; return charLen(k) === 1 && /^(picture|idea|parts)$/.test(h.kind) && h.parts && h.en && h.hu; });
+        useDeckType('sentences'); state.deck = [0]; state.pos = 0; render(false);
+        var none = els.cardHints.hidden;
+        useDeckType('words');
+        state.deck = deckSnap; state.pos = posSnap; state.revealed = false; render(false);
+        return { ok: shown && valid && none, d: keys.length + ' hints, all well-formed: ' + valid + ', shown on ' + wordCards[wi].zh + ': ' + shown + ', not on sentence cards: ' + none };
+      })();
+      add('Character hints', hintRes.ok, hintRes.d);
 
       var newer = parseImport(JSON.stringify({ version: 1, format: FORMAT + 1, status: {} }));
       var current = parseImport(JSON.stringify({ version: 1, format: FORMAT, status: {} }));
