@@ -86,7 +86,7 @@
     var p = state.practice;
     els.cardPrompt.hidden = state.revealed || !(p === 'reverse' || p === 'listen' || toneQ || clozeQ || buildQ || similarQ);
     els.revealHint.textContent = state.revealed
-      ? 'Tap the card to hide the meaning · swipe → know · ← learning'
+      ? 'Tap the characters to hide the meaning · swipe → know · ← learning'
       : p === 'tone'
         ? (toneQ ? 'Listen, then pick the tone of the first syllable (keys 1–4)' : 'Tap the card to show the meaning')
         : p === 'pairs' ? (similarQ ? 'Read the meaning (and hear it), then pick the right word (keys 1–4)' : 'Tap the card to show the meaning')
@@ -353,6 +353,8 @@
     on('card', 'click', function (e) {
       if (suppressClick) { suppressClick = false; return; }
       if (e.target.closest && e.target.closest('button, input, form')) return;
+      // Once the answer shows, taps inside it (meanings, hints, examples) leave it open; the card's top half hides it.
+      if (state.revealed && els.cardAnswer.contains(e.target)) return;
       var sel = window.getSelection && window.getSelection();
       if (sel && String(sel).length > 0 && els.cardAnswer.contains(sel.anchorNode)) return;
       toggleReveal();

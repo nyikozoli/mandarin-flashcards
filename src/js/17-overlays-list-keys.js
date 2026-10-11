@@ -229,9 +229,16 @@
 
   /* ---------- keyboard ---------- */
   function onKeyDown(e) {
-    if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
     var t = e.target;
     var tag = t && t.tagName;
+    var typing = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (t && t.isContentEditable);
+    // Undo: Z, or Ctrl+Z / ⌘Z (outside text fields, which keep their own undo).
+    if (!e.defaultPrevented && !e.altKey && !e.shiftKey && (e.key === 'z' || e.key === 'Z') && !typing && !anyOverlayOpen()) {
+      e.preventDefault();
+      undo();
+      return;
+    }
+    if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
     if (!els.wordPop.hidden && (e.key === 'Escape' || e.key === 'Esc')) {
       e.preventDefault();
       closeWordPop(true);

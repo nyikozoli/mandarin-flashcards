@@ -128,7 +128,7 @@
         <button type="button" class="icon-btn small" id="btnShuffle" aria-label="Shuffle the current deck" title="Shuffle">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h3.5c2.5 0 4 1.5 5.5 5s3 5 5.5 5H21M3 17h3.5c1.4 0 2.5-.5 3.4-1.5M14.1 8.5C15 7.5 16.1 7 17.5 7H21M18 4l3 3-3 3M18 14l3 3-3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
-        <button type="button" class="icon-btn small" id="btnUndo" aria-label="Undo the last answer" title="Undo">
+        <button type="button" class="icon-btn small" id="btnUndo" aria-label="Undo the last answer (Z)" title="Undo (Z)">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
       </div>
@@ -209,7 +209,7 @@
     <button type="button" class="act skip" id="btnSkip" aria-label="Skip to the next card (Space)"><svg class="act-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15a8 8 0 0 1 14.6-4.5M19 5v5.5h-5.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="act-label" data-lbl>Skip</span></button>
     <button type="button" class="act know" id="btnKnown" aria-label="I know it (Right arrow)"><span class="act-seal" lang="zh-CN" aria-hidden="true">会</span><span class="act-text"><span class="act-label" data-lbl>I know it</span></span><span class="act-key" aria-hidden="true">→</span></button>
   </nav>
-  <p class="kbd-hint"><span><kbd>Space</kbd> skip</span><span><kbd>S</kbd> speak</span><span><kbd>↑</kbd><kbd>↓</kbd> flip</span><span><kbd>1</kbd>–<kbd>4</kbd> choose</span><span><kbd>H</kbd> <kbd>E</kbd> hard, easy</span><span><kbd>T</kbd> type</span><span>more in Help</span></p>
+  <p class="kbd-hint"><span><kbd>Space</kbd> skip</span><span><kbd>S</kbd> speak</span><span><kbd>↑</kbd><kbd>↓</kbd> flip</span><span><kbd>1</kbd>–<kbd>4</kbd> choose</span><span><kbd>H</kbd> <kbd>E</kbd> hard, easy</span><span><kbd>T</kbd> type</span><span><kbd>Z</kbd> undo</span><span>more in Help</span></p>
 
   <footer>
     <p class="footnote" id="footnote">Works offline. Progress is saved in this browser.</p>
@@ -438,7 +438,7 @@
       <section class="help-sec">
         <h3>Study a card</h3>
         <ul>
-          <li><b>Tap the card</b> to show or hide the meanings and example sentences.</li>
+          <li><b>Tap the card</b> to show the meanings and example sentences; tap the characters at the top to hide them again. Taps on the meanings themselves leave them open.</li>
           <li><b>Swipe right</b> or press <b>I know it</b> when you know the word. <b>Swipe left</b> or press <b>Still learning</b> when you don't. <b>Skip</b> moves on without marking.</li>
           <li><b>Read aloud</b> speaks the word, then its example sentences. The small speaker on each sentence plays just that sentence.</li>
           <li>Made a mistake? The <b>undo</b> arrow next to the card counter takes back the last answer.</li>
@@ -517,7 +517,7 @@
       <section class="help-sec">
         <h3>Keyboard</h3>
         <p>In the mode and level buttons, the arrow keys move the selection instead.</p>
-        <p class="help-keys"><kbd>→</kbd> I know it <kbd>←</kbd> Still learning <kbd>Space</kbd> Skip <kbd>S</kbd> Read aloud <kbd>↑</kbd> <kbd>↓</kbd> Show or hide <kbd>1</kbd>–<kbd>4</kbd> Choose an answer <kbd>H</kbd> Hard <kbd>E</kbd> Easy <kbd>Esc</kbd> Close a panel</p>
+        <p class="help-keys"><kbd>→</kbd> I know it <kbd>←</kbd> Still learning <kbd>Space</kbd> Skip <kbd>S</kbd> Read aloud <kbd>↑</kbd> <kbd>↓</kbd> Show or hide <kbd>1</kbd>–<kbd>4</kbd> Choose an answer <kbd>H</kbd> Hard <kbd>E</kbd> Easy <kbd>T</kbd> Type the pinyin <kbd>Z</kbd> or <kbd>Ctrl</kbd>+<kbd>Z</kbd> Undo <kbd>Esc</kbd> Close a panel</p>
       </section>
 
       <section class="help-sec">

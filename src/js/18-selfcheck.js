@@ -731,6 +731,45 @@
 
       var newer = parseImport(JSON.stringify({ version: 1, format: FORMAT + 1, status: {} }));
       var current = parseImport(JSON.stringify({ version: 1, format: FORMAT, status: {} }));
+      var tapRes2 = (function () {
+        var deckSnap = state.deck.slice(), posSnap = state.pos;
+        state.practice = 'zh'; state.deck = [0]; state.pos = 0; state.revealed = false; render(false);
+        els.cardHanzi.click();
+        var opens = state.revealed === true;
+        els.cardEn.click();
+        var stays = state.revealed === true;
+        els.cardHanzi.click();
+        var closes = state.revealed === false;
+        state.deck = deckSnap; state.pos = posSnap; render(false);
+        return { ok: opens && stays && closes, d: 'tap shows the answer: ' + opens + ', a tap on the meanings keeps it open: ' + stays + ', a tap on the characters hides it: ' + closes };
+      })();
+      add('Tapping the answer keeps it open', tapRes2.ok, tapRes2.d);
+
+      var undoRes = (function () {
+        var deckSnap = state.deck.slice(), posSnap = state.pos;
+        state.practice = 'zh'; state.deck = [0, 1, 2]; state.pos = 0; render(false);
+        var w = cards[0], had = state.status[w.zh];
+        key('ArrowRight');
+        var answered = state.pos === 1 && state.status[w.zh] === 'known';
+        key('z');
+        var plain = state.pos === 0 && state.status[w.zh] === had;
+        key('ArrowRight');
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'z', ctrlKey: true, bubbles: true, cancelable: true }));
+        var ctrl = state.pos === 0 && state.status[w.zh] === had;
+        var box = document.createElement('input');
+        document.body.appendChild(box);
+        key('ArrowRight');
+        box.dispatchEvent(new KeyboardEvent('keydown', { key: 'z', bubbles: true, cancelable: true }));
+        var fieldKept = state.pos === 1;
+        box.parentNode.removeChild(box);
+        key('z');
+        if (had) state.status[w.zh] = had; else delete state.status[w.zh];
+        delete state.srs[w.zh];
+        state.deck = deckSnap; state.pos = posSnap; render(false);
+        return { ok: answered && plain && ctrl && fieldKept, d: 'Z undoes: ' + plain + ', Ctrl+Z undoes: ' + ctrl + ', typing z in a text field does not: ' + fieldKept };
+      })();
+      add('Undo shortcut', undoRes.ok, undoRes.d);
+
       var syncTopRes = (function () {
         var s0 = { session: sync.session, dirty: sync.dirty, busy: sync.busy };
         sync.session = null; renderSyncTop();
