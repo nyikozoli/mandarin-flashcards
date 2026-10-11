@@ -70,14 +70,37 @@ cards = cards.map((c) => {
   return Object.assign({ lv }, c);
 });
 
+// Optional extras, each added to the cards or the extra-data block when its file exists:
+//   data/freq.json    frequency rank (rk) and share per million words (fq) from wordfreq, CC BY-SA 4.0
+//   data/topics.json  one topic per word (tp) and the topic list
+//   data/hints.json   memory hints for single characters
+const optJson = (p) => (fs.existsSync(p) ? JSON.parse(read(p)) : null);
+const FREQ = optJson(dataPath('freq.json'));
+const TOPICS = optJson(dataPath('topics.json'));
+const HINTS = optJson(dataPath('hints.json'));
+cards = cards.map((c) => {
+  const o = Object.assign({}, c);
+  const f = FREQ && FREQ.words[c.zh];
+  if (f && f[0]) o.rk = f[0];
+  if (f && f[1]) o.fq = f[1];
+  if (TOPICS) {
+    const t = TOPICS.words[c.zh];
+    if (!t || !TOPICS.topics.some((x) => x.id === t)) throw new Error('No valid topic for ' + c.zh);
+    o.tp = t;
+  }
+  return o;
+});
+
 const expected = { 1: L1.length + EXTRAS.length, 2: L2.length, 3: L3.length };
 const total = expected[1] + expected[2] + expected[3];
-const json = JSON.stringify(cards).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026')
+const safeJson = (v) => JSON.stringify(v).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026')
   .replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
+const json = safeJson(cards);
+const extraJson = safeJson({ chars: FREQ ? FREQ.chars : {}, topics: TOPICS ? TOPICS.topics : [], hints: HINTS ? HINTS.hints : {} });
 
 // ---------- html ----------
 const template = read(rel('template.html')).replace(/\r\n/g, '\n');
-const buildId = crypto.createHash('sha1').update(template).update(json).digest('hex').slice(0, 10);
+const buildId = crypto.createHash('sha1').update(template).update(json).update(extraJson).digest('hex').slice(0, 10);
 // Shown in Settings, so you can tell which version a device runs. The build id is a content hash
 // and also names the service worker cache, so it changes exactly when the app does.
 const buildDate = new Date().toISOString().slice(0, 10);
@@ -86,6 +109,7 @@ function render(siteHead, syncConfig) {
   const parts = template.split('__VOCAB_JSON__');
   if (parts.length !== 2) throw new Error('Expected one __VOCAB_JSON__ placeholder, found ' + (parts.length - 1));
   let html = parts[0] + json + parts[1];
+  html = html.replace('__EXTRA_JSON__', function () { return extraJson; });
   // Function replacement, so a `$` anywhere in the injected config cannot be read as a
   // String.replace pattern ($&, $1, …).
   html = html.replace('__EXPECTED_TOTAL__', String(total))
@@ -94,7 +118,7 @@ function render(siteHead, syncConfig) {
     .replace('<!--__SITE_HEAD__-->', siteHead)
     .replace('__BUILD_DATE__', buildDate)
     .replace('__BUILD_ID__', buildId);
-  if (/__EXPECTED_|__SITE_HEAD__|__VOCAB_JSON__|__SYNC_CONFIG__|__BUILD_/.test(html)) throw new Error('Unreplaced placeholder in template');
+  if (/__EXPECTED_|__SITE_HEAD__|__VOCAB_JSON__|__SYNC_CONFIG__|__BUILD_|__EXTRA_JSON__/.test(html)) throw new Error('Unreplaced placeholder in template');
   return html;
 }
 

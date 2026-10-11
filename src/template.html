@@ -164,6 +164,40 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .s-learning { background: var(--learn); }
 .s-unmarked { background: #6b7489; }
 .pv-section { margin-top: 20px; }
+.topic-btn { margin-top: 8px; width: 100%; min-height: 40px; display: flex; align-items: center; gap: 10px; padding: 4px 12px 4px 6px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--text); font-weight: 650; font-size: 14px; text-align: left; }
+.topic-btn-zh { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 7px; background: var(--cinnabar); color: var(--paper); font-family: var(--kai-font); font-size: 19px; }
+.topic-btn-more { margin-left: auto; color: var(--muted); }
+.tp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.tp-tile { display: flex; gap: 10px; align-items: center; text-align: left; padding: 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface2); color: var(--text); min-width: 0; }
+.tp-tile[aria-pressed="true"] { border-color: var(--paper); box-shadow: inset 0 0 0 1px var(--paper); }
+.tp-seal { flex: none; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 8px; border: 2px solid var(--line); color: var(--soft); font-family: var(--kai-font); font-size: 24px; }
+.tp-seal.done { border-color: var(--cinnabar); background: var(--cinnabar); color: var(--paper); }
+.tp-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.tp-name { font-weight: 700; font-size: 14px; }
+.tp-hu { font-size: 12px; color: var(--muted); }
+.tp-bar { display: block; height: 6px; border-radius: 999px; background: var(--bg); overflow: hidden; margin-top: 3px; }
+.tp-fill { display: block; height: 100%; background: var(--known); }
+.tp-count { font-size: 12px; color: var(--soft); font-variant-numeric: tabular-nums; }
+.meta-left { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; }
+.rank-tag { padding: 2px 8px; border-radius: 999px; background: var(--surface3); color: var(--soft); font-size: 11.5px; font-weight: 600; }
+.combo-tag { padding: 2px 8px; border-radius: 999px; background: var(--cinnabar); color: var(--paper); font-size: 12px; font-weight: 800; }
+.rp-big { display: flex; align-items: baseline; gap: 10px; margin: 6px 0 8px; }
+.rp-num { font-size: 40px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; color: var(--known); }
+.rp-of { color: var(--soft); font-size: 14px; }
+.rp-bar { display: block; }
+.rp-line { margin: 10px 0 0; color: var(--soft); font-size: 14px; line-height: 1.5; }
+.rp-line b { color: var(--text); }
+.rp-next { margin-top: 12px; padding: 10px 12px; border-radius: 12px; border: 1px dashed var(--line); }
+.rp-next p { margin: 0; }
+.rp-next-q { font-size: 12.5px; color: var(--muted); }
+.rp-next-zh { font-family: var(--zh-font); font-size: 22px; margin: 4px 0 2px !important; color: var(--paper); }
+.rp-next-en { font-size: 13.5px; color: var(--soft); }
+.rp-words { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.linkish { background: none; border: 0; padding: 0; color: var(--pinyin); font: inherit; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.st-rank { display: flex; gap: 12px; align-items: center; margin: 6px 0 12px; }
+.st-seal { flex: none; min-width: 56px; height: 56px; padding: 0 8px; display: grid; place-items: center; border-radius: 10px; background: var(--cinnabar); color: var(--paper); font-family: var(--kai-font); font-size: 22px; letter-spacing: .04em; }
+.st-rank-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.st-rank-text .pv-goalbar { display: block; }
 .pv-fc { list-style: none; margin: 4px 0 0; padding: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; align-items: end; }
 .pv-fc-day { display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .pv-fc-num { font-size: 13px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
@@ -658,6 +692,7 @@ label.btn { cursor: pointer; }
         </select>
       </label>
     </div>
+    <button type="button" class="topic-btn" id="btnTopic" aria-haspopup="dialog" hidden><span class="topic-btn-zh" id="topicBtnZh" lang="zh-CN" aria-hidden="true">全</span><span id="topicBtnName">All topics</span><span class="topic-btn-more" aria-hidden="true">▾</span></button>
   </nav>
 
   <section class="stats" aria-label="Progress">
@@ -692,7 +727,7 @@ label.btn { cursor: pointer; }
       <div class="stamp stamp-know" aria-hidden="true"><span lang="zh-CN">会</span><small>I know it</small></div>
       <div class="stamp stamp-learn" aria-hidden="true"><span lang="zh-CN">学</span><small>Learning</small></div>
       <div class="card-meta">
-        <span id="cardNumber">#1</span>
+        <span class="meta-left"><span id="cardNumber">#1</span><span id="cardRank" class="rank-tag" hidden></span><span id="comboTag" class="combo-tag" hidden></span></span>
         <span id="cardStatus" class="status-tag">New</span>
       </div>
       <div id="cardPrompt" class="prompt" hidden></div>
@@ -857,6 +892,19 @@ label.btn { cursor: pointer; }
   </div>
 </div>
 
+<div id="topicView" class="overlay" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="topicTitle">
+    <div class="sheet-head">
+      <h2 id="topicTitle">Topics</h2>
+      <button type="button" class="close-btn" id="btnCloseTopic" aria-label="Close topics">✕</button>
+    </div>
+    <div class="pv-body">
+      <p class="pv-sub">Study one area at a time. A topic's seal turns red when you know all of its words.</p>
+      <div class="tp-grid" id="topicGrid"></div>
+    </div>
+  </div>
+</div>
+
 <div id="progressView" class="overlay" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="progressTitle">
     <div class="sheet-head">
@@ -923,6 +971,9 @@ label.btn { cursor: pointer; }
           <dt>Fill the gap</dt><dd>One of the word's example sentences with the word blanked out, and its translation. Pick the word that fits from four of the same length; keys 1–4 pick. Words only; it counts toward reading.</dd>
           <dt>Which tone?</dt><dd>Hear the word, then pick the tone of its first syllable from the four written forms; keys 1–4 pick tones 1–4. Words only. The 21 words whose first syllable is neutral, or changes tone when it is spoken (你好, 可以), come up as normal cards.</dd>
           <dt>Tap a word</dt><dd>In any example sentence, and on sentence cards, the words from HSK 1–3 have a dotted underline. Tap one to see its pinyin and meaning; tap elsewhere or press Esc to close it. On a word card the word itself is highlighted instead.</dd>
+          <dt>Topics</dt><dd>The button under the level row picks a topic (food, travel, time…). Every study mode then works inside it, and a topic's seal turns red when you know all its words.</dd>
+          <dt>What you can read</dt><dd>The progress view counts the example sentences whose HSK words you all know, shows how much of everyday Chinese text your words cover, and suggests the next word to learn. Word frequencies come from <i>wordfreq</i> by Robyn Speer and contributors (CC BY-SA 4.0).</dd>
+          <dt>XP, ranks, combo</dt><dd>Every answer earns XP (10 for a known card, 3 for one you are still learning, more during a combo). XP raises your rank from 新手 Newcomer to 大师 Master. Three or more right answers in a row show a 连 combo counter on the card.</dd>
           <dt>Progress per skill</dt><dd>Reading (Chinese → meaning, 汉字 only, multiple choice), recall (meaning → Chinese) and listening (listening, which tone) each keep their own Known and Learning marks and their own Due list, so a word you can read is not marked as one you can say or hear. Words and sentences also keep their own place in the deck.</dd>
           <dt>Fading pinyin</dt><dd>Settings → <b>Hide pinyin on cards I know well</b>. In Chinese → meaning, a card whose next review is a week or more away shows only its characters until you tap it, so the pinyin fades as you learn. Off by default.</dd>
           <dt>Sentences</dt><dd>The same four styles for the 777 example sentences, in the lower half of the practice menu. Each sentence is a card of its own with its own progress, and its back shows the word it comes from.</dd>
@@ -1034,6 +1085,7 @@ label.btn { cursor: pointer; }
 </div>
 
 <script id="vocab-data" type="application/json">__VOCAB_JSON__</script>
+<script id="extra-data" type="application/json">__EXTRA_JSON__</script>
 <script>
 (function () {
   'use strict';
@@ -1047,7 +1099,7 @@ label.btn { cursor: pointer; }
   var EXPECTED_LEVELS = __EXPECTED_LEVELS__;
   var MODE_NAMES = { all: 'All cards', due: 'Due for review', learning: 'Learning only', unmarked: 'Unmarked only', hard: 'Hardest words' };
   var STATUS_NAMES = { known: 'Known', learning: 'Learning', unmarked: 'Unmarked' };
-  var REQUIRED_IDS = ['gradeRow', 'legendTones', 'optChoicePinyin', 'progressTitle', 'optFadePinyin', 'wordPop', 'wordPopZh', 'wordPopLv', 'wordPopPy', 'wordPopEn', 'wordPopHu', 'btnWordPopSpeak', 'btnWordPopClose', 'app', 'errorBanner', 'errorList', 'modeAll', 'modeLearning', 'modeUnmarked', 'countAll', 'countLearningMode',
+  var REQUIRED_IDS = ['extra-data', 'btnTopic', 'topicBtnZh', 'topicBtnName', 'topicView', 'btnCloseTopic', 'topicGrid', 'cardRank', 'comboTag', 'gradeRow', 'legendTones', 'optChoicePinyin', 'progressTitle', 'optFadePinyin', 'wordPop', 'wordPopZh', 'wordPopLv', 'wordPopPy', 'wordPopEn', 'wordPopHu', 'btnWordPopSpeak', 'btnWordPopClose', 'app', 'errorBanner', 'errorList', 'modeAll', 'modeLearning', 'modeUnmarked', 'countAll', 'countLearningMode',
     'countUnmarkedMode', 'btnShuffle', 'btnUndo', 'btnReset', 'btnSelfCheck', 'btnList', 'cardCounter', 'knownCount', 'learningCount',
     'unmarkedCount', 'progressBar', 'progKnown', 'progLearning', 'progressLabel', 'stage', 'card', 'cardNumber', 'cardStatus', 'cardHanzi',
     'cardPinyin', 'btnSpeak', 'speakLabel', 'cardAnswer', 'cardEn', 'cardHu', 'cardExamples', 'revealHint', 'deckEnd', 'endEmoji', 'endTitle',
@@ -1056,7 +1108,7 @@ label.btn { cursor: pointer; }
     'confirmText', 'confirmCancel', 'confirmAlt', 'confirmOk', 'diagView', 'btnCloseDiag', 'diagSummary', 'diagResults', 'btnRunCheck', 'toast', 'vocab-data',
     'syncGroup', 'syncEmailRow', 'syncEmail', 'syncLinkRow', 'syncEmailNote', 'btnSignIn', 'syncAccountRow', 'syncAccount', 'btnSignOut',
     'syncDatesRow', 'syncDates', 'btnSyncNow', 'syncStatus'];
-  var CORE_BUTTONS = ['gradeRow', 'optChoicePinyin', 'optFadePinyin', 'btnWordPopSpeak', 'btnWordPopClose', 'btnExport', 'btnImport', 'btnApplyImport', 'revealHint', 'btnHelp', 'btnTourNext', 'btnSettings', 'btnKnown', 'btnLearning', 'btnSkip', 'btnSpeak', 'cardExamples', 'modeDue', 'modeHard', 'optPractice', 'choiceBox', 'cardPrompt', 'btnProgress', 'levelAll', 'level1', 'level2', 'level3', 'card', 'btnShuffle', 'btnUndo', 'btnReset', 'btnSelfCheck',
+  var CORE_BUTTONS = ['btnTopic', 'btnCloseTopic', 'topicGrid', 'pvBody', 'gradeRow', 'optChoicePinyin', 'optFadePinyin', 'btnWordPopSpeak', 'btnWordPopClose', 'btnExport', 'btnImport', 'btnApplyImport', 'revealHint', 'btnHelp', 'btnTourNext', 'btnSettings', 'btnKnown', 'btnLearning', 'btnSkip', 'btnSpeak', 'cardExamples', 'modeDue', 'modeHard', 'optPractice', 'choiceBox', 'cardPrompt', 'btnProgress', 'levelAll', 'level1', 'level2', 'level3', 'card', 'btnShuffle', 'btnUndo', 'btnReset', 'btnSelfCheck',
     'btnList', 'btnCloseList', 'modeAll', 'modeLearning', 'modeUnmarked', 'searchInput', 'confirmOk', 'confirmCancel', 'confirmAlt', 'btnSignIn', 'btnSignOut', 'btnSyncNow'];
 
   var $ = function (id) { return document.getElementById(id); };
@@ -1064,7 +1116,7 @@ label.btn { cursor: pointer; }
   var bound = {};
   var cards = [], wordCards = [], sentCards = [];
   var state = { status: {}, mode: 'all', deck: [], pos: 0, shuffled: false, revealed: false, autoReveal: false, rate: 0.85, voice: '', badVoices: [], voicesTested: false, level: 'all', activity: {}, goal: 20, warmup: true, deckType: 'words',
-    srs: {}, misses: {}, skill: 'read', marks: {}, deckMemory: {}, milestones: [], practice: 'zh', toneColors: true, fadePinyin: false, choicePinyin: true,
+    srs: {}, misses: {}, skill: 'read', marks: {}, deckMemory: {}, topic: 'all', xp: 0, bestCombo: 0, learned: {}, milestones: [], practice: 'zh', toneColors: true, fadePinyin: false, choicePinyin: true,
     autoplay: false, vibrate: true, seenTour: false };
   var undoStack = [];
   var busy = false;
@@ -1130,11 +1182,33 @@ label.btn { cursor: pointer; }
       var c = {
         n: i + 1,
         zh: str(d.zh), py: str(d.py), en: str(d.en), hu: str(d.hu), lv: parseInt(d.lv, 10) || 0,
+        rk: parseInt(d.rk, 10) || 0, fq: Number(d.fq) || 0, tp: str(d.tp),
         ex: Array.isArray(d.ex) ? d.ex.map(function (e) { e = e || {}; return { zh: str(e.zh), py: str(e.py), en: str(e.en), hu: str(e.hu) }; }) : []
       };
       indexCard(c);
       return c;
     });
+  }
+
+  /* ---------- extras: character frequency, topics, hints ---------- */
+  var EXTRA = { chars: {}, topics: [], hints: {} };
+  function loadExtra() {
+    var node = $('extra-data');
+    try {
+      var d = JSON.parse(node.textContent);
+      EXTRA = { chars: d.chars || {}, topics: Array.isArray(d.topics) ? d.topics : [], hints: d.hints || {} };
+    } catch (e) { /* optional data: the app works without it */ }
+  }
+  function topicById(id) {
+    for (var i = 0; i < EXTRA.topics.length; i++) if (EXTRA.topics[i].id === id) return EXTRA.topics[i];
+    return null;
+  }
+  // A sentence belongs to the topics of the words it was written for.
+  function inTopic(c) {
+    if (state.topic === 'all') return true;
+    if (!c.sentence) return c.tp === state.topic;
+    var lex = getLexicon().map;
+    return c.ex.some(function (w) { var x = lex[w.zh]; return !!x && x.tp === state.topic; });
   }
 
   function validateCards() {
@@ -1817,6 +1891,10 @@ label.btn { cursor: pointer; }
       misses: read.misses,
       skills: { recall: marksOf('recall'), listen: marksOf('listen') },
       deckMemory: mem,
+      topic: state.topic,
+      xp: state.xp,
+      bestCombo: state.bestCombo,
+      learned: state.learned,
       milestones: state.milestones,
       practice: state.practice,
       toneColors: state.toneColors,
@@ -1901,6 +1979,18 @@ label.btn { cursor: pointer; }
         if (/^\d{4}-\d{2}-\d{2}$/.test(k) && a && typeof a === 'object') state.activity[k] = { k: Math.max(0, parseInt(a.k, 10) || 0), l: Math.max(0, parseInt(a.l, 10) || 0) };
       });
     }
+    state.topic = saved && typeof saved.topic === 'string' && topicById(saved.topic) ? saved.topic : 'all';
+    state.bestCombo = saved ? clampInt(saved.bestCombo, 0, 100000) : 0;
+    state.learned = {};
+    if (saved && saved.learned && typeof saved.learned === 'object') {
+      Object.keys(saved.learned).forEach(function (k) {
+        var d = saved.learned[k];
+        if (hasAny(k) && typeof d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d)) state.learned[k] = d;
+      });
+    }
+    // Older progress has no XP: start from the answers already given.
+    state.xp = saved && typeof saved.xp === 'number' && saved.xp >= 0 ? Math.floor(saved.xp)
+      : Object.keys(state.activity).reduce(function (n, k) { return n + state.activity[k].k * 10 + state.activity[k].l * 3; }, 0);
     state.mode = saved && MODE_NAMES[saved.mode] ? saved.mode : 'all';
     var deck = [];
     if (saved && Array.isArray(saved.deck)) {
@@ -1982,11 +2072,12 @@ label.btn { cursor: pointer; }
   /* ---------- levels, activity and the progress view ---------- */
   var LEVELS = ['1', '2', '3'];
   var GOALS = [10, 20, 30, 50, 100];
-  function inLevel(c) { return state.level === 'all' || String(c.lv) === state.level; }
+  function inLevel(c) { return (state.level === 'all' || String(c.lv) === state.level) && inTopic(c); }
   function countsFor(lv) {
     var k = 0, l = 0, t = 0;
     cards.forEach(function (c) {
       if (lv !== 'all' && String(c.lv) !== lv) return;
+      if (!inTopic(c)) return;
       t++;
       var s = state.status[c.zh];
       if (s === 'known') k++;
@@ -2002,8 +2093,11 @@ label.btn { cursor: pointer; }
   function pad2(n) { return (n < 10 ? '0' : '') + n; }
   function dayKey(d) { d = d || new Date(); return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
   function dayAnswers(k) { var a = state.activity[k]; return a ? (a.k || 0) + (a.l || 0) : 0; }
-  function recordAnswer(kind) {
+  function recordAnswer(kind, c) {
     if (testing || (kind !== 'known' && kind !== 'learning')) return;
+    if (kind === 'known' && c && state.skill === 'read' && !state.learned[c.zh]) state.learned[c.zh] = dayKey();
+    bumpCombo(kind);
+    gainXp(kind === 'known' ? 10 + Math.min(5, Math.floor(combo / 5)) : 3);
     var key = dayKey();
     var a = state.activity[key] || (state.activity[key] = { k: 0, l: 0 });
     var before = a.k + a.l;
@@ -2094,6 +2188,113 @@ label.btn { cursor: pointer; }
     return bar;
   }
 
+  function readingSection() {
+    var sec = section('What you can read', 'Based on the words you know in reading practice.');
+    var rd = readability(), cv = coverage();
+    var big = el('div', 'rp-big');
+    big.appendChild(el('span', 'rp-num', String(rd.n)));
+    big.appendChild(el('span', 'rp-of', 'of ' + rd.total + ' example sentences you can read in full'));
+    sec.appendChild(big);
+    var bar = el('span', 'pv-goalbar rp-bar');
+    var fill = el('span', 'pv-goalfill done');
+    fill.style.width = pct(rd.n, rd.total) + '%';
+    bar.appendChild(fill);
+    sec.appendChild(bar);
+    if (cv.has) {
+      var cov = el('p', 'rp-line');
+      cov.appendChild(el('b', null, fmtPct(cv.words)));
+      cov.appendChild(document.createTextNode(' of the words in everyday Chinese text are words you know, and '));
+      cov.appendChild(el('b', null, fmtPct(cv.chars)));
+      cov.appendChild(document.createTextNode(' of its characters. All 598 words would give ' + fmtPct(cv.wordsMax) + ' and ' + fmtPct(cv.charsMax) + '.'));
+      sec.appendChild(cov);
+    }
+    if (rd.next) {
+      var nx = el('div', 'rp-next');
+      var zh = el('p', 'rp-next-zh', rd.next.s.zh);
+      zh.setAttribute('lang', 'zh-CN');
+      nx.appendChild(el('p', 'rp-next-q', 'Closest sentence to unlock: learn ' + rd.next.miss.length + ' more word' + (rd.next.miss.length === 1 ? '' : 's')));
+      nx.appendChild(zh);
+      nx.appendChild(el('p', 'rp-next-en', rd.next.s.en));
+      var btns = el('div', 'rp-words');
+      rd.next.miss.forEach(function (w) {
+        var b = el('button', 'btn small rp-word', 'Study ' + w.zh);
+        b.type = 'button';
+        b.setAttribute('data-study', w.zh);
+        btns.appendChild(b);
+      });
+      nx.appendChild(btns);
+      sec.appendChild(nx);
+    }
+    var nu = nextUsefulWord();
+    if (nu) {
+      var line = el('p', 'rp-line');
+      line.appendChild(document.createTextNode('Most useful word you do not know yet: '));
+      var b = el('button', 'linkish', nu.zh + ' ' + nu.py);
+      b.type = 'button';
+      b.setAttribute('data-study', nu.zh);
+      line.appendChild(b);
+      line.appendChild(document.createTextNode(' (' + shortText(nu.en) + ', the ' + nu.rk + ordinal(nu.rk) + ' most used word).'));
+      sec.appendChild(line);
+    }
+    return sec;
+  }
+  function statsSection() {
+    var sec = section('Your stats');
+    var r = rankOf(state.xp), nextR = RANKS[r + 1];
+    var rankRow = el('div', 'st-rank');
+    var seal = el('span', 'st-seal', RANKS[r][1]);
+    seal.setAttribute('lang', 'zh-CN');
+    rankRow.appendChild(seal);
+    var rt = el('div', 'st-rank-text');
+    rt.appendChild(el('b', null, RANKS[r][2] + ' · ' + state.xp.toLocaleString('en-US') + ' XP'));
+    var xbar = el('span', 'pv-goalbar');
+    var xfill = el('span', 'pv-goalfill');
+    xfill.style.width = (nextR ? pct(state.xp - RANKS[r][0], nextR[0] - RANKS[r][0]) : 100) + '%';
+    xbar.appendChild(xfill);
+    rt.appendChild(xbar);
+    rt.appendChild(el('span', 'pv-tile-sub', nextR ? (nextR[0] - state.xp).toLocaleString('en-US') + ' XP to ' + nextR[1] + ' ' + nextR[2] : 'Top rank reached'));
+    rankRow.appendChild(rt);
+    sec.appendChild(rankRow);
+    var keys = Object.keys(state.activity), k = 0, l = 0, days = 0, k7 = 0, l7 = 0, from7 = addDays(-6);
+    keys.forEach(function (d) {
+      var a = state.activity[d];
+      k += a.k; l += a.l;
+      if (a.k + a.l > 0) days++;
+      if (d >= from7) { k7 += a.k; l7 += a.l; }
+    });
+    var hardest = null;
+    Object.keys(state.misses).forEach(function (z) { if (!hardest || state.misses[z] > state.misses[hardest]) hardest = z; });
+    var tiles = el('div', 'pv-tiles st-tiles');
+    [['Answers', (k + l).toLocaleString('en-US'), 'all time'], ['Accuracy', k + l ? Math.round(k / (k + l) * 100) + '%' : '–', 'last 7 days: ' + (k7 + l7 ? Math.round(k7 / (k7 + l7) * 100) + '%' : '–')],
+     ['Study days', days, 'longest streak ' + longestStreak()], ['Best combo', state.bestCombo, 'right in a row'],
+     ['This week', learnedSince(7), 'new words known'], ['Per study day', days ? Math.round((k + l) / days) : 0, 'cards on average']].forEach(function (t) {
+      var tile = el('div', 'pv-tile');
+      tile.appendChild(el('span', 'pv-tile-label', t[0]));
+      tile.appendChild(el('span', 'pv-tile-num', String(t[1])));
+      tile.appendChild(el('span', 'pv-tile-sub', t[2]));
+      tiles.appendChild(tile);
+    });
+    sec.appendChild(tiles);
+    if (hardest) {
+      var h = el('p', 'rp-line');
+      h.appendChild(document.createTextNode('Toughest card so far: '));
+      var hb = el('button', 'linkish', hardest);
+      hb.type = 'button';
+      hb.setAttribute('lang', 'zh-CN');
+      if (getLexicon().map[hardest]) hb.setAttribute('data-study', hardest); else hb.disabled = true;
+      h.appendChild(hb);
+      h.appendChild(document.createTextNode(', missed ' + state.misses[hardest] + ' time' + (state.misses[hardest] === 1 ? '' : 's') + '.'));
+      sec.appendChild(h);
+    }
+    return sec;
+  }
+  function topicSection() {
+    var sec = section('By topic', 'Words known per topic. Tap one to study it.');
+    var grid = el('div', 'tp-grid compact');
+    EXTRA.topics.forEach(function (t) { grid.appendChild(topicTile(t, 'tp-tile')); });
+    sec.appendChild(grid);
+    return sec;
+  }
   function renderProgress() {
     var body = els.pvBody;
     body.textContent = '';
@@ -2119,6 +2320,9 @@ label.btn { cursor: pointer; }
       ', listening ' + knownIn('listen') + '. The practice style you pick decides which one you are training.'));
     body.appendChild(hero);
     body.appendChild(legend());
+    body.appendChild(readingSection());
+    body.appendChild(statsSection());
+    if (EXTRA.topics.length) body.appendChild(topicSection());
 
     // Daily goal
     var goal = section('Daily goal');
@@ -2282,7 +2486,7 @@ label.btn { cursor: pointer; }
   function isDue(c, today) { var r = state.srs[c.zh]; return !!r && r.d <= (today || dayKey()); }
   function dueCount(lv) {
     var today = dayKey();
-    return cards.filter(function (c) { return (lv === 'all' || String(c.lv) === lv) && isDue(c, today); }).length;
+    return cards.filter(function (c) { return (lv === 'all' || String(c.lv) === lv) && inTopic(c) && isDue(c, today); }).length;
   }
   function hardList() {
     return cards.map(function (c, i) { return i; })
@@ -2341,7 +2545,7 @@ label.btn { cursor: pointer; }
   var SKILLS = { read: 'Reading', recall: 'Recall', listen: 'Listening' };
   // Snapshot format. 2 added `skills`. The server refuses uploads older than the stored format, and this copy refuses
   // to apply progress written by a newer one, so neither side drops what it does not understand.
-  var FORMAT = 2;
+  var FORMAT = 3;
   var SKILL_OF = { zh: 'read', hanzi: 'read', choice: 'read', cloze: 'read', reverse: 'recall', build: 'recall', listen: 'listen', tone: 'listen' };
   function skillOf(p) { return SKILL_OF[p] || 'read'; }
   function emptyMarks() { return { status: {}, srs: {}, misses: {} }; }
@@ -2847,6 +3051,89 @@ label.btn { cursor: pointer; }
     else els.choiceBox.textContent = '';
   }
 
+  /* ---------- reading power ---------- */
+  function ordinal(n) { var t = n % 100; return t >= 11 && t <= 13 ? 'th' : ['th', 'st', 'nd', 'rd'][n % 10] || 'th'; }
+  var segCache = {};
+  function sentenceWords(zh) {
+    if (!segCache[zh]) {
+      var seen = [];
+      segment(zh).forEach(function (g) { if (g.word && seen.indexOf(g.word) === -1) seen.push(g.word); });
+      segCache[zh] = seen;
+    }
+    return segCache[zh];
+  }
+  // Sentences whose HSK words you all know (reading skill); names and other non-HSK words do not count against you.
+  // `next` is the sentence that needs the fewest more words.
+  function readability() {
+    var st = marksOf('read').status, n = 0, best = null;
+    sentCards.forEach(function (sc) {
+      var miss = sentenceWords(sc.zh).filter(function (w) { return st[w.zh] !== 'known'; });
+      if (!miss.length) { n++; return; }
+      if (!best || miss.length < best.miss.length || (miss.length === best.miss.length && sc.zh.length < best.s.zh.length)) best = { s: sc, miss: miss };
+    });
+    return { n: n, total: sentCards.length, next: best };
+  }
+  // Share of running Chinese text made up of your known words, and of their characters (wordfreq frequencies).
+  function coverage() {
+    var st = marksOf('read').status, w = 0, wAll = 0, mine = {}, all = {}, c = 0, cAll = 0;
+    wordCards.forEach(function (x) {
+      wAll += x.fq;
+      Array.from(x.zh).forEach(function (ch) { all[ch] = true; });
+      if (st[x.zh] !== 'known') return;
+      w += x.fq;
+      Array.from(x.zh).forEach(function (ch) { mine[ch] = true; });
+    });
+    Object.keys(all).forEach(function (ch) { cAll += EXTRA.chars[ch] || 0; if (mine[ch]) c += EXTRA.chars[ch] || 0; });
+    return { words: w / 1e6, wordsMax: wAll / 1e6, chars: c / 1e6, charsMax: cAll / 1e6, has: wAll > 0 };
+  }
+  // The most frequent word you do not know yet (reading skill).
+  function nextUsefulWord() {
+    var st = marksOf('read').status, best = null;
+    wordCards.forEach(function (w) { if (w.rk && st[w.zh] !== 'known' && (!best || w.rk < best.rk)) best = w; });
+    return best;
+  }
+  function fmtPct(x) { return (x >= 0.1 ? Math.round(x * 100) : Math.round(x * 1000) / 10) + '%'; }
+
+  /* ---------- XP, ranks and combo ---------- */
+  var RANKS = [[0, '新手', 'Newcomer'], [300, '学生', 'Student'], [1000, '好学生', 'Good student'], [2500, '学者', 'Scholar'],
+    [5000, '老师', 'Teacher'], [10000, '专家', 'Expert'], [20000, '大师', 'Master']];
+  function rankOf(xp) { var r = 0; RANKS.forEach(function (x, i) { if (xp >= x[0]) r = i; }); return r; }
+  function gainXp(n) {
+    var before = rankOf(state.xp);
+    state.xp += n;
+    session.xp += n;
+    var after = rankOf(state.xp);
+    if (after > before) celebrate('rank-' + after, '🎖 New rank: ' + RANKS[after][1] + ' · ' + RANKS[after][2] + '!');
+  }
+  var combo = 0;
+  var COMBO_CHEERS = { 10: '连 10! Ten in a row.', 25: '连 25! You are on fire.', 50: '连 50! Unstoppable.', 100: '连 100! Legendary run.' };
+  function bumpCombo(kind) {
+    combo = kind === 'known' ? combo + 1 : 0;
+    if (combo > state.bestCombo) state.bestCombo = combo;
+    if (COMBO_CHEERS[combo] && !testing) { toast(COMBO_CHEERS[combo], 2500); buzz([15, 30, 15]); }
+    renderCombo();
+  }
+  function renderCombo() {
+    els.comboTag.hidden = combo < 3;
+    els.comboTag.textContent = '连 ×' + combo;
+    els.comboTag.title = combo + ' right in a row';
+  }
+  function longestStreak() {
+    var days = Object.keys(state.activity).filter(function (k) { return dayAnswers(k) > 0; }).sort(), best = 0, run = 0, prev = null;
+    days.forEach(function (k) {
+      var d = new Date(k + 'T12:00:00');
+      run = prev && Math.round((d - prev) / 864e5) === 1 ? run + 1 : 1;
+      best = Math.max(best, run);
+      prev = d;
+    });
+    return best;
+  }
+  function learnedSince(days) {
+    var from = addDays(-days + 1), n = 0;
+    wordCards.forEach(function (w) { var d = state.learned[w.zh]; if (d && d >= from) n++; });
+    return n;
+  }
+
   /* ---------- feedback: vibration, confetti, milestones, session summary ---------- */
   function buzz(pattern) {
     if (!state.vibrate || testing || !navigator.vibrate) return;
@@ -2905,7 +3192,7 @@ label.btn { cursor: pointer; }
       if (c.total && c.known === c.total) celebrate(deck().milestone + sk + 'level-' + lv, '🎓 HSK ' + lv + ' complete' + by + ': you know all ' + c.total + ' ' + noun(c.total) + '!');
     });
   }
-  var session = { n: 0, k: 0, l: 0, t0: Date.now() };
+  var session = { n: 0, k: 0, l: 0, xp: 0, t0: Date.now() };
   function afterAnswer(kind) {
     if (testing || kind === 'skip') return;
     session.n++;
@@ -2931,9 +3218,11 @@ label.btn { cursor: pointer; }
       row.appendChild(tile);
     });
     b.appendChild(row);
+    var rd = readability(), rk = RANKS[rankOf(state.xp)];
+    b.appendChild(el('p', 'sum-line', '+' + session.xp + ' XP · ' + rk[1] + ' ' + rk[2] + ' · you can read ' + rd.n + ' of ' + rd.total + ' sentences'));
     b.appendChild(el('p', 'sum-line', today >= state.goal ? '🎯 Daily goal done (' + today + '/' + state.goal + ') · 🔥 ' + streak() + '-day streak'
       : '🎯 ' + today + ' / ' + state.goal + ' today – ' + (state.goal - today) + ' more to reach your goal · 🔥 ' + streak() + '-day streak'));
-    session = { n: 0, k: 0, l: 0, t0: Date.now() };
+    session = { n: 0, k: 0, l: 0, xp: 0, t0: Date.now() };
     openOverlay(els.summaryView, els.btnSummaryClose);
   }
 
@@ -2999,7 +3288,7 @@ label.btn { cursor: pointer; }
     if (kind === 'known' || kind === 'learning') {
       state.status[c.zh] = kind;
       applySrs(c, kind, grade);
-      if (!testing) recordAnswer(kind); else entry.kind = 'skip';
+      if (!testing) recordAnswer(kind, c); else entry.kind = 'skip';
     }
     // In the review deck a missed word comes back at the end of the session.
     if (kind === 'learning' && state.mode === 'due' && state.deck.indexOf(i, state.pos + 1) === -1) { state.deck.push(i); entry.requeued = true; }
@@ -3102,6 +3391,11 @@ label.btn { cursor: pointer; }
     els.deckEnd.hidden = true;
     els.card.hidden = false;
     els.cardNumber.textContent = 'HSK ' + c.lv + ' · ' + deck().number + c.n;
+    els.cardRank.hidden = !c.rk;
+    if (c.rk) {
+      els.cardRank.textContent = '#' + c.rk + ' most used';
+      els.cardRank.title = 'The ' + c.rk + ordinal(c.rk) + ' most frequent word in written and spoken Chinese (wordfreq)';
+    }
     closeWordPop(false);
     renderHanzi(els.cardHanzi, c.zh, c.py, !!c.sentence);
     els.cardHanzi.setAttribute('data-len', String(Math.min(6, charLen(c.zh))));
@@ -3550,7 +3844,7 @@ label.btn { cursor: pointer; }
   }
 
   /* ---------- overlays ---------- */
-  var OVERLAYS = ['listView', 'progressView', 'settingsView', 'helpView', 'transferView', 'summaryView', 'tourView', 'diagView', 'confirmDialog'];
+  var OVERLAYS = ['topicView', 'listView', 'progressView', 'settingsView', 'helpView', 'transferView', 'summaryView', 'tourView', 'diagView', 'confirmDialog'];
   var overlayStack = [];
   function anyOverlayOpen() {
     return OVERLAYS.some(function (id) { return !els[id].hidden; });
@@ -3668,10 +3962,74 @@ label.btn { cursor: pointer; }
       chips[k].textContent = (f === 'all' ? 'All' : STATUS_NAMES[f]) + ' (' + (f === 'all' ? n.total : n[f]) + ')';
     }
   }
+  // Opens a word from anywhere (progress view, word of the day), switching to the words deck if needed.
+  function studyWord(zh) {
+    var i = -1;
+    wordCards.forEach(function (w, k) { if (w.zh === zh) i = k; });
+    if (i === -1) return;
+    OVERLAYS.forEach(function (id) { if (id !== 'listView') closeOverlay(els[id]); });
+    if (isSent()) { rememberDeck(); useDeckType('words'); syncPracticeSelect(); }
+    studyCard(i);
+  }
+  function wordsIn(topic) { return wordCards.filter(function (w) { return topic === 'all' || w.tp === topic; }); }
+  function topicKnown(topic) {
+    var n = 0;
+    wordsIn(topic).forEach(function (w) { if (state.status[w.zh] === 'known') n++; });
+    return n;
+  }
+  function updateTopicBtn() {
+    var t = topicById(state.topic);
+    els.btnTopic.hidden = !EXTRA.topics.length;
+    els.topicBtnZh.textContent = t ? t.zh : '全';
+    els.topicBtnName.textContent = t ? t.en : 'All topics';
+    els.btnTopic.setAttribute('aria-label', 'Topic: ' + (t ? t.en : 'all topics') + '. Choose a topic');
+  }
+  function setTopic(id) {
+    state.topic = topicById(id) ? id : 'all';
+    closeOverlay(els.topicView);
+    updateTopicBtn();
+    setMode(state.mode);
+    var t = topicById(state.topic);
+    if (t && !testing) toast('Studying ' + t.en + ': ' + wordsIn(t.id).length + ' words. Choose “All topics” to go back.', 4000);
+  }
+  function topicTile(t, cls) {
+    var id = t ? t.id : 'all', list = wordsIn(id), known = topicKnown(id);
+    var b = el('button', cls);
+    b.type = 'button';
+    b.setAttribute('data-topic', id);
+    b.setAttribute('aria-pressed', state.topic === id ? 'true' : 'false');
+    var seal = el('span', 'tp-seal' + (list.length && known === list.length ? ' done' : ''), t ? t.zh : '全');
+    seal.setAttribute('lang', 'zh-CN');
+    seal.setAttribute('aria-hidden', 'true');
+    b.appendChild(seal);
+    var tx = el('span', 'tp-text');
+    tx.appendChild(el('span', 'tp-name', t ? t.en : 'All topics'));
+    var hu = el('span', 'tp-hu', t ? t.hu : 'Minden téma');
+    hu.setAttribute('lang', 'hu');
+    tx.appendChild(hu);
+    var bar = el('span', 'tp-bar');
+    var fill = el('span', 'tp-fill');
+    fill.style.width = pct(known, list.length) + '%';
+    bar.appendChild(fill);
+    tx.appendChild(bar);
+    tx.appendChild(el('span', 'tp-count', known + ' / ' + list.length + ' known' + (list.length && known === list.length ? ' · complete' : '')));
+    b.appendChild(tx);
+    return b;
+  }
+  function renderTopics() {
+    els.topicGrid.textContent = '';
+    els.topicGrid.appendChild(topicTile(null, 'tp-tile'));
+    EXTRA.topics.forEach(function (t) { els.topicGrid.appendChild(topicTile(t, 'tp-tile')); });
+  }
+  function openTopics() {
+    renderTopics();
+    openOverlay(els.topicView, els.btnCloseTopic);
+  }
+
   function studyCard(i) {
     var p = state.deck.indexOf(i);
     if (p === -1) {
-      if (!inLevel(cards[i])) state.level = 'all';
+      if (!inLevel(cards[i])) { state.level = 'all'; state.topic = 'all'; updateTopicBtn(); }
       state.mode = 'all';
       state.deck = buildDeck('all');
       state.shuffled = false;
@@ -3931,7 +4289,8 @@ label.btn { cursor: pointer; }
       status: JSON.parse(JSON.stringify(state.status)), mode: state.mode, deck: state.deck.slice(), pos: state.pos,
       shuffled: state.shuffled, revealed: state.revealed, autoReveal: state.autoReveal, level: state.level,
       srs: JSON.parse(JSON.stringify(state.srs)), misses: JSON.parse(JSON.stringify(state.misses)), practice: state.practice, toneColors: state.toneColors, fadePinyin: state.fadePinyin,
-      deckType: state.deckType, activity: JSON.parse(JSON.stringify(state.activity)), milestones: state.milestones.slice(), seenTour: state.seenTour
+      deckType: state.deckType, topic: state.topic, xp: state.xp, bestCombo: state.bestCombo, learned: JSON.parse(JSON.stringify(state.learned)),
+      activity: JSON.parse(JSON.stringify(state.activity)), milestones: state.milestones.slice(), seenTour: state.seenTour
     };
     var undoSnap = undoStack.slice();
     var diagWasOpen = !els.diagView.hidden;
@@ -4193,6 +4552,58 @@ label.btn { cursor: pointer; }
             ', tap places a word: ' + placed + ', Backspace takes it back: ' + back + ', sentence hidden meanwhile: ' + hidden + ', words fall back to Meaning → Chinese: ' + fallback };
       })();
       add('Build the sentence', buildRes.ok, buildRes.d);
+
+      var funRes = (function () {
+        var rd0 = readability().n;
+        var sc = sentCards[0];
+        sentenceWords(sc.zh).forEach(function (w) { state.marks.read.status[w.zh] = 'known'; });
+        stashSkill();
+        var rd1 = readability(), cv = coverage();
+        var reads = rd0 === 0 && rd1.n >= 1 && rd1.total === sentCards.length;
+        var covers = !cv.has || (cv.words > 0 && cv.words <= cv.wordsMax && cv.chars >= cv.words && cv.charsMax <= 1);
+        var nu = nextUsefulWord();
+        var useful = !nu || (state.status[nu.zh] !== 'known' && wordCards.every(function (w) { return !w.rk || state.status[w.zh] === 'known' || w.rk >= nu.rk; }));
+        sentenceWords(sc.zh).forEach(function (w) { delete state.marks.read.status[w.zh]; });
+        var ranks = rankOf(0) === 0 && rankOf(299) === 0 && rankOf(300) === 1 && rankOf(25000) === RANKS.length - 1;
+        var xp0 = state.xp;
+        gainXp(7);
+        var xp = state.xp === xp0 + 7;
+        combo = 0;
+        bumpCombo('known'); bumpCombo('known'); bumpCombo('known');
+        var comboOn = !els.comboTag.hidden && els.comboTag.textContent === '连 ×3' && state.bestCombo >= 3;
+        bumpCombo('learning');
+        var comboOff = els.comboTag.hidden && combo === 0;
+        var deckSnap = state.deck, posSnap = state.pos, w0 = wordCards[0];
+        state.deck = [0]; state.pos = 0; render(false);
+        var rankTag = !w0.rk || (!els.cardRank.hidden && els.cardRank.textContent.indexOf('#' + w0.rk) === 0);
+        state.deck = deckSnap; state.pos = posSnap; render(false);
+        openProgress();
+        var drawn = !!els.pvBody.querySelector('.rp-num') && !!els.pvBody.querySelector('.st-rank');
+        closeOverlay(els.progressView);
+        return { ok: reads && covers && useful && ranks && xp && comboOn && comboOff && rankTag && drawn,
+          d: 'readable sentences counted: ' + reads + ', coverage sane: ' + covers + ', most useful word picked: ' + useful + ', ranks: ' + ranks +
+            ', XP adds: ' + xp + ', combo shows at 3: ' + comboOn + ', resets on a miss: ' + comboOff + ', rank badge: ' + rankTag + ', progress sections drawn: ' + drawn };
+      })();
+      add('Reading power, XP, ranks and combo', funRes.ok, funRes.d);
+
+      var topicRes = (function () {
+        if (!EXTRA.topics.length) return { ok: true, d: 'no topic data in this build' };
+        var t = EXTRA.topics[2];
+        els.btnTopic.click();
+        var open = !els.topicView.hidden && els.topicGrid.querySelectorAll('.tp-tile').length === EXTRA.topics.length + 1;
+        els.topicGrid.querySelector('[data-topic="' + t.id + '"]').click();
+        var filtered = els.topicView.hidden && state.deck.length === wordsIn(t.id).length && state.deck.every(function (i) { return cards[i].tp === t.id; });
+        var btn = els.topicBtnName.textContent === t.en;
+        useDeckType('sentences'); setMode('all');
+        var sent = state.deck.length > 0 && state.deck.every(function (i) { return inTopic(cards[i]); }) && state.deck.length < sentCards.length;
+        useDeckType('words');
+        setTopic('all');
+        var back = state.deck.length === wordCards.length;
+        return { ok: open && filtered && btn && sent && back,
+          d: 'topic sheet lists ' + EXTRA.topics.length + ' topics: ' + open + ', picking ' + t.en + ' filters the deck: ' + filtered + ', button shows it: ' + btn +
+            ', sentences follow the topic: ' + sent + ', “All topics” restores the deck: ' + back };
+      })();
+      add('Topics', topicRes.ok, topicRes.d);
 
       var newer = parseImport(JSON.stringify({ version: 1, format: FORMAT + 1, status: {} }));
       var current = parseImport(JSON.stringify({ version: 1, format: FORMAT, status: {} }));
@@ -4516,6 +4927,8 @@ label.btn { cursor: pointer; }
       state.practice = snap.practice;
       state.toneColors = snap.toneColors;
       state.fadePinyin = snap.fadePinyin;
+      state.topic = snap.topic; state.xp = snap.xp; state.bestCombo = snap.bestCombo; state.learned = snap.learned;
+      combo = 0; renderCombo(); updateTopicBtn();
       state.marks = marksSnap;
       state.skill = skillSnap;
       loadSkill();
@@ -4684,6 +5097,18 @@ label.btn { cursor: pointer; }
     on('btnCloseSettings', 'click', function () { closeOverlay(els.settingsView); });
     on('btnProgress', 'click', openProgress);
     on('todayPill', 'click', openProgress);
+    on('btnTopic', 'click', openTopics);
+    on('btnCloseTopic', 'click', function () { closeOverlay(els.topicView); });
+    on('topicGrid', 'click', function (e) {
+      var b = e.target.closest ? e.target.closest('[data-topic]') : null;
+      if (b) setTopic(b.getAttribute('data-topic'));
+    });
+    on('pvBody', 'click', function (e) {
+      var t = e.target.closest ? e.target.closest('[data-topic]') : null;
+      if (t) { closeOverlay(els.progressView); setTopic(t.getAttribute('data-topic')); return; }
+      var w = e.target.closest ? e.target.closest('[data-study]') : null;
+      if (w) studyWord(w.getAttribute('data-study'));
+    });
     on('btnCloseProgress', 'click', function () { closeOverlay(els.progressView); });
     on('pvBody', 'click', function (e) {
       var b = e.target.closest ? e.target.closest('.pv-level') : null;
@@ -4803,6 +5228,7 @@ label.btn { cursor: pointer; }
     });
     wordCards = loadCards();
     sentCards = buildSentences(wordCards);
+    loadExtra();
     cards = wordCards;
     bindWordLookup();
     var v = validateCards();
@@ -4815,6 +5241,8 @@ label.btn { cursor: pointer; }
     migrateSrs();
     syncSettingsUI();
     wire();
+    updateTopicBtn();
+    renderCombo();
     pickVoice();
     render(false);
     updateFootnote();

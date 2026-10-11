@@ -4,16 +4,19 @@ const html=fs.readFileSync(process.argv[2],'utf8'); let fail=0;
 const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m); if(!c) fail++;};
 ok(html.startsWith('<!DOCTYPE html>'),'doctype');
 ok(/<meta charset="UTF-8">/.test(html),'meta charset UTF-8');
-ok(!/__VOCAB_JSON__|__EXPECTED_|__SITE_HEAD__|__SYNC_CONFIG__|__BUILD_/.test(html),'all placeholders replaced');
+ok(!/__VOCAB_JSON__|__EXPECTED_|__SITE_HEAD__|__SYNC_CONFIG__|__BUILD_|__EXTRA_JSON__/.test(html),'all placeholders replaced');
 // The anon key is public by design; the service_role key would be a full database compromise.
 ok(!/service_role|sb_secret_/.test(html),'no service_role secret in output');
 ok(!/(src|href)\s*=\s*["']https?:/i.test(html) && !/@import|url\(\s*["']?https?:/i.test(html),'no external resources');
 // scripts
 const scripts=[...html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/g)];
-ok(scripts.length>=3 && scripts.filter(m=>/application\/json/.test(m[1])).length===1,'script blocks: '+scripts.length+' (one vocabulary JSON block)');
+ok(scripts.length>=4 && scripts.filter(m=>/application\/json/.test(m[1])).length===2,'script blocks: '+scripts.length+' (vocabulary and extra-data JSON blocks)');
 let data=null;
 scripts.forEach((m,i)=>{
-  if(/application\/json/.test(m[1])){ try{data=JSON.parse(m[2]); ok(true,'vocab JSON parses');}catch(e){ok(false,'vocab JSON: '+e.message);} }
+  if(/application\/json/.test(m[1])){
+    const vocab=/id="vocab-data"/.test(m[1]);
+    try{ const d=JSON.parse(m[2]); if(vocab) data=d; ok(true,(vocab?'vocab':'extra-data')+' JSON parses'); }catch(e){ ok(false,'JSON block: '+e.message); }
+  }
   else { try{ new vm.Script(m[2],{filename:'script'+i}); ok(true,'JS syntax ok in script #'+i+' ('+m[2].length+' chars)'); }catch(e){ ok(false,'JS syntax script #'+i+': '+e.message);} }
 });
 const exp=Number((html.match(/var EXPECTED_COUNT = (\d+);/)||[])[1]); ok(Array.isArray(data)&&data.length===exp,'vocab count = '+(data&&data.length)+' (expected '+exp+')');
