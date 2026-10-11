@@ -218,8 +218,8 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .wotd-body #wotdZh { font-family: var(--zh-font); font-size: 19px; color: var(--paper); vertical-align: -1px; }
 .wotd-py { color: var(--pinyin); font-weight: 600; }
 .wotd-en { color: var(--soft); }
-.wotd .btn.small { flex: none; min-height: 34px; padding: 4px 12px; }
-.wotd .icon-btn.small { flex: none; width: 34px; height: 34px; }
+.wotd .btn.small { flex: none; min-height: 40px; padding: 4px 12px; }
+.wotd .icon-btn.small { flex: none; width: 44px; height: 44px; }
 .q-list { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .q-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 12px; background: var(--surface2); border: 1px solid var(--line); }
 .q-item.done { border-color: var(--known); }
@@ -415,11 +415,9 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 @media (max-width: 360px) {
   .brand h1 { font-size: 16px; overflow: hidden; text-overflow: ellipsis; }
   .counter { font-size: 14px; }
-  .deck-tools .icon-btn { width: 34px; }
   .today-pill { padding: 4px 8px; gap: 4px; }
   .stats-row { gap: 3px; }
   .counter-word { display: none; }
-  .deck-tools .icon-btn { width: 30px; }
   .act { flex-direction: column; gap: 3px; padding: 6px 4px; min-height: 64px; font-size: 14px; }
   .act-text { align-items: center; }
   .act-label { text-align: center; }
@@ -427,7 +425,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 }
 @media (max-width: 400px) {
   .today-pill > span:not(.streak) { display: none; }
-  .pet-mini, .pet-mini .pet-art { width: 34px; height: 34px; }
+  .pet-mini .pet-art { width: 36px; height: 36px; }
 }
 .act-key { font-size: 11px; font-weight: 700; line-height: 1.3; padding: 0 6px; border: 1px solid currentColor; border-radius: 5px; opacity: .55; }
 @media (hover: none) { .act-key { display: none; } }
@@ -758,6 +756,22 @@ button.w[aria-expanded="true"] { background: rgba(224, 74, 47, .24); border-bott
 #importFile:focus-visible + label { outline: 3px solid var(--focus); outline-offset: 2px; }
 label.btn { cursor: pointer; }
 .set-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Tap targets: every control in the counter row is at least 44 px; the panda keeps a 40 px picture inside a 44 px button. */
+.deck-tools .icon-btn.small, .pet-mini { width: 44px; height: 44px; }
+.today-pill { min-height: 44px; }
+.pet-mini { border: 0; background: transparent; }
+.pet-mini .pet-art { border-radius: 50%; }
+/* Seal geometry: every seal is a rounded square with corners at about 18% of its size; filled ones carry a thin paper rule. */
+.seal, .tp-seal, .ch-zh, .hint-ch { border-radius: 7px; }
+.act-seal { border-radius: 6px; }
+.wotd-seal, .topic-btn-zh { border-radius: 5px; }
+.seal-mark { border-radius: 9px; }
+.st-seal { border-radius: 10px; }
+.stamp { border-radius: 14px; }
+.seal-stamp-mark { border-radius: 22px; }
+.act.know .act-seal { box-shadow: inset 0 0 0 1.5px var(--known-ink), inset 0 0 0 2.5px rgba(79, 209, 161, .55); }
+@media (max-width: 360px) { .act-seal { border-radius: 5px; } .h1-lang { display: none; } }
 </style>
 <script>
 /* Early error reporter: shows any JavaScript error visibly on the page, even if the main script fails to load. */
@@ -801,7 +815,7 @@ label.btn { cursor: pointer; }
   <header class="topbar">
     <div class="brand">
       <div class="seal" aria-hidden="true" lang="zh-CN">汉</div>
-      <h1>Mandarin HSK <span class="h1-levels">1–3</span></h1>
+      <h1><span class="h1-lang">Mandarin </span>HSK <span class="h1-levels">1–3</span></h1>
     </div>
     <div class="top-actions">
       <button type="button" class="icon-btn" id="btnHelp" aria-label="Open help: how the app works" title="Help">
@@ -829,7 +843,7 @@ label.btn { cursor: pointer; }
       <button type="button" class="mode" id="modeAll" role="radio" aria-checked="true" data-mode="all">All cards <span class="count" id="countAll">0</span></button>
       <button type="button" class="mode" id="modeDue" role="radio" aria-checked="false" data-mode="due">Due <span class="count" id="countDueMode">0</span></button>
       <button type="button" class="mode" id="modeLearning" role="radio" aria-checked="false" data-mode="learning">Learning <span class="count" id="countLearningMode">0</span></button>
-      <button type="button" class="mode" id="modeUnmarked" role="radio" aria-checked="false" data-mode="unmarked">Unmarked <span class="count" id="countUnmarkedMode">0</span></button>
+      <button type="button" class="mode" id="modeUnmarked" role="radio" aria-checked="false" data-mode="unmarked">New <span class="count" id="countUnmarkedMode">0</span></button>
       <button type="button" class="mode" id="modeHard" role="radio" aria-checked="false" data-mode="hard">Hardest <span class="count" id="countHardMode">0</span></button>
     </div>
     <div class="deckbar-row">
@@ -937,7 +951,7 @@ label.btn { cursor: pointer; }
       <div class="end-actions">
         <button type="button" class="btn primary" id="btnEndRestart">Start this deck again</button>
         <button type="button" class="btn" id="btnEndLearning">Study learning cards</button>
-        <button type="button" class="btn" id="btnEndUnmarked">Study unmarked cards</button>
+        <button type="button" class="btn" id="btnEndUnmarked">Study new cards</button>
         <button type="button" class="btn" id="btnEndAll">All cards</button>
       </div>
     </section>
@@ -1046,7 +1060,7 @@ label.btn { cursor: pointer; }
       <button type="button" class="chip" data-filter="all" aria-pressed="true">All</button>
       <button type="button" class="chip" data-filter="known" aria-pressed="false">Known</button>
       <button type="button" class="chip" data-filter="learning" aria-pressed="false">Learning</button>
-      <button type="button" class="chip" data-filter="unmarked" aria-pressed="false">Unmarked</button>
+      <button type="button" class="chip" data-filter="unmarked" aria-pressed="false">New</button>
     </div>
     <div class="chips" id="lvChips" role="group" aria-label="Filter by HSK level">
       <button type="button" class="chip lvchip" data-lv="all" aria-pressed="true">All levels</button>
@@ -1168,7 +1182,7 @@ label.btn { cursor: pointer; }
           <dt>Due</dt><dd>Words that are ready for review today. A word you know comes back after 1, 3, 7, 14, 30, 60 and then 120 days; a word you miss comes back the same day.</dd>
           <dt>Hard, Good, Easy</dt><dd>When the answer is showing, three buttons say how well you knew it, each with when the card comes back. Good is the same as “I know it”. Easy skips a step, Hard keeps the same wait. Keys: <kbd>H</kbd> Hard, <kbd>→</kbd> Good, <kbd>E</kbd> Easy.</dd>
           <dt>Learning</dt><dd>Words you marked “Still learning”.</dd>
-          <dt>Unmarked</dt><dd>Words you have not answered yet.</dd>
+          <dt>New</dt><dd>Cards you have not answered yet.</dd>
           <dt>Hardest</dt><dd>The 20 words you have missed most often.</dd>
         </dl>
         <p>The level buttons (All, 1, 2, 3) narrow every mode to one HSK level.</p>
@@ -1319,8 +1333,8 @@ label.btn { cursor: pointer; }
   var SYNC_CONFIG = __SYNC_CONFIG__;
   var EXPECTED_COUNT = __EXPECTED_TOTAL__;
   var EXPECTED_LEVELS = __EXPECTED_LEVELS__;
-  var MODE_NAMES = { all: 'All cards', due: 'Due for review', learning: 'Learning only', unmarked: 'Unmarked only', hard: 'Hardest words' };
-  var STATUS_NAMES = { known: 'Known', learning: 'Learning', unmarked: 'Unmarked' };
+  var MODE_NAMES = { all: 'All cards', due: 'Due for review', learning: 'Learning only', unmarked: 'New cards only', hard: 'Hardest words' };
+  var STATUS_NAMES = { known: 'Known', learning: 'Learning', unmarked: 'New' };
   var REQUIRED_IDS = ['btnPet', 'petMini', 'petView', 'btnClosePet', 'petBig', 'petName', 'petStageName', 'petMood', 'petFedText', 'petFed', 'petGrowText', 'petGrow', 'petRename', 'petNameInput', 'cardHints', 'quizView', 'quizTitle', 'quizBody', 'btnCloseQuiz', 'wotd', 'wotdZh', 'wotdPy', 'wotdEn', 'wotdHint', 'btnWotdStudy', 'btnWotdClose', 'extra-data', 'btnTopic', 'topicBtnZh', 'topicBtnName', 'topicView', 'btnCloseTopic', 'topicGrid', 'cardRank', 'comboTag', 'gradeRow', 'legendTones', 'optChoicePinyin', 'progressTitle', 'optFadePinyin', 'wordPop', 'wordPopZh', 'wordPopLv', 'wordPopPy', 'wordPopEn', 'wordPopHu', 'btnWordPopSpeak', 'btnWordPopClose', 'app', 'errorBanner', 'errorList', 'modeAll', 'modeLearning', 'modeUnmarked', 'countAll', 'countLearningMode',
     'countUnmarkedMode', 'btnShuffle', 'btnUndo', 'btnReset', 'btnSelfCheck', 'btnList', 'cardCounter', 'knownCount', 'learningCount',
     'unmarkedCount', 'progressBar', 'progKnown', 'progLearning', 'progressLabel', 'stage', 'card', 'cardNumber', 'cardStatus', 'cardHanzi',
@@ -2304,7 +2318,7 @@ label.btn { cursor: pointer; }
     render(true);
     save();
     if (!state.deck.length) {
-      toast({ learning: 'No cards are marked “Still learning” yet.', unmarked: 'No unmarked cards left – great work!',
+      toast({ learning: 'No cards are marked “Still learning” yet.', unmarked: 'No new cards left – great work!',
         due: 'Nothing is due for review right now. 🎉', hard: 'No hard words yet – words you mark “Still learning” collect here.',
         all: 'No cards here.' }[mode]);
     }
@@ -4495,7 +4509,7 @@ label.btn { cursor: pointer; }
       els.cardCounter.textContent = 'Card 0 / 0';
     } else if (!total) {
       els.endEmoji.textContent = state.mode === 'unmarked' ? '🎉' : '📭';
-      els.endTitle.textContent = state.mode === 'learning' ? 'No learning cards' : 'No unmarked cards';
+      els.endTitle.textContent = state.mode === 'learning' ? 'No learning cards' : 'No new cards';
       els.endText.textContent = state.mode === 'learning'
         ? 'You have not marked any card as “Still learning” yet. Study all cards and swipe left on words you want to practise.'
         : 'Every word is already marked as Known or Learning.';
@@ -4504,13 +4518,13 @@ label.btn { cursor: pointer; }
       els.endEmoji.textContent = '🎉';
       els.endTitle.textContent = 'Deck complete';
       els.endText.textContent = 'You went through all ' + total + ' cards (' + MODE_NAMES[state.mode] + '). Known: ' + n.known +
-        ' · Learning: ' + n.learning + ' · Unmarked: ' + n.unmarked + '.';
+        ' · Learning: ' + n.learning + ' · New: ' + n.unmarked + '.';
       els.cardCounter.textContent = 'Done · ' + total + ' / ' + total;
     }
     els.btnEndRestart.hidden = !total;
     els.btnEndLearning.textContent = 'Study learning cards (' + n.learning + ')';
     els.btnEndLearning.disabled = n.learning === 0;
-    els.btnEndUnmarked.textContent = 'Study unmarked cards (' + n.unmarked + ')';
+    els.btnEndUnmarked.textContent = 'Study new cards (' + n.unmarked + ')';
     els.btnEndUnmarked.disabled = n.unmarked === 0;
     els.btnEndAll.textContent = 'All cards (' + cards.length + ')';
     els.btnEndAll.disabled = !cards.length;
@@ -5808,6 +5822,15 @@ label.btn { cursor: pointer; }
             ', meaning shown with character-only chips: ' + shown + ', right answer marks Known: ' + graded + ', sentences fall back: ' + fallback + ', full deck after leaving: ' + back };
       })();
       add('Similar words', simRes.ok, simRes.d);
+
+      var tapRes = (function () {
+        var small = ['btnShuffle', 'btnUndo', 'btnPet', 'todayPill', 'btnWotdClose'].filter(function (id) {
+          var r = els[id].getBoundingClientRect();
+          return r.width && (r.width < 44 || r.height < 44);
+        });
+        return { ok: !small.length, d: small.length ? 'under 44 px: ' + small.join(', ') : 'shuffle, undo, panda, today and the word-of-the-day close button are at least 44 px' };
+      })();
+      add('Tap targets of 44 px', tapRes.ok, tapRes.d);
 
       var tabRes = (function () {
         var vis = function (sel) { var n = els.pvBody.querySelector(sel); return !!n && !n.closest('[data-pane]').hidden; };
