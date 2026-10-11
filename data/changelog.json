@@ -1,6 +1,19 @@
 {
   "releases": [
     {
+      "version": "2.3",
+      "date": "2026-10-12",
+      "title": "Known means remembered",
+      "groups": [
+        {
+          "name": "",
+          "items": [
+            "A right answer (I know it, Hard, Good, Easy, or a right quiz answer) keeps a word in Learning until its next review is a week or more away; then it becomes Known. Words you already marked Known stay Known."
+          ]
+        }
+      ]
+    },
+    {
       "version": "2.2",
       "date": "2026-10-11",
       "title": "Sync button and small fixes",

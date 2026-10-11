@@ -38,6 +38,14 @@
     return days;
   }
   function fmtWait(days) { return days < 1 ? 'today' : days < 30 ? days + ' d' : Math.round(days / 30) + ' mo'; }
+  // A right answer marks a card Known only once its next review is a week or more away (box 3 and up);
+  // until then it stays Learning, so a word has to be remembered a few times before it counts as known.
+  var KNOWN_AFTER_DAYS = 7;
+  function markAfter(c, kind) {
+    if (kind !== 'known') return kind;
+    var r = state.srs[c.zh];
+    return r && SRS_DAYS[r.b] >= KNOWN_AFTER_DAYS ? 'known' : 'learning';
+  }
   function applySrs(c, kind, grade) {
     var r = state.srs[c.zh];
     if (kind === 'known') {

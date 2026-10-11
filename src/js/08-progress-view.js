@@ -24,7 +24,7 @@
   function dayAnswers(k) { var a = state.activity[k]; return a ? (a.k || 0) + (a.l || 0) : 0; }
   function recordAnswer(kind, c, prev) {
     if (testing || (kind !== 'known' && kind !== 'learning')) return;
-    if (kind === 'known' && c && state.skill === 'read' && !state.learned[c.zh]) state.learned[c.zh] = dayKey();
+    if (c && state.status[c.zh] === 'known' && state.skill === 'read' && !state.learned[c.zh]) state.learned[c.zh] = dayKey();
     bumpCombo(kind);
     var earned = kind === 'known' ? 10 + Math.min(5, Math.floor(combo / 5)) : 3;
     gainXp(earned);

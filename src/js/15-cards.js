@@ -9,8 +9,8 @@
     undoStack.push(entry);
     if (undoStack.length > 200) undoStack.shift();
     if (kind === 'known' || kind === 'learning') {
-      state.status[c.zh] = kind;
       applySrs(c, kind, grade);
+      state.status[c.zh] = markAfter(c, kind);
       if (!testing) recordAnswer(kind, c, entry.prev); else entry.kind = 'skip';
     }
     // In the review deck a missed word comes back at the end of the session.

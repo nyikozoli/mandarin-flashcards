@@ -192,6 +192,10 @@
     var filterSnap = listFilter;
     var key = function (k) { document.dispatchEvent(new KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true })); };
     var cardAt = function (p) { return cards[state.deck[p]]; };
+    // A right answer on a new card schedules it forward but keeps it Learning until its next review is a week away.
+    var answeredRight = function (zh) { var r = state.srs[zh]; return state.status[zh] === 'known' || (state.status[zh] === 'learning' && !!r && r.b >= 1 && r.d > dayKey()); };
+    // Puts a card one step before Known, so the next right answer makes it Known.
+    var nearlyKnown = function (zh) { state.srs[zh] = { b: 2, d: dayKey() }; };
     stopSpeech();
     testing = true;
     els.diagView.hidden = true;
@@ -213,6 +217,7 @@
       state.level = 'all';
       els.modeAll.click();
       var c0 = cardAt(0), c1 = cardAt(1), c2 = cardAt(2), c3 = cardAt(3), c4 = cardAt(4), c5 = cardAt(5);
+      nearlyKnown(c0.zh); nearlyKnown(c2.zh);
       add('First card renders', !els.card.hidden && els.cardHanzi.textContent === c0.zh && els.cardPinyin.textContent === c0.py &&
         els.cardCounter.textContent === 'Card 1 / ' + cards.length, 'Showing ' + els.cardHanzi.textContent + ' (' + els.cardPinyin.textContent + '), counter “' + els.cardCounter.textContent + '”.');
 
@@ -318,7 +323,7 @@
       var cur = cards[currentIndex()], posBefore = state.pos, right = -1;
       for (var oi = 0; oi < opts.length; oi++) if (opts[oi].getAttribute('data-ok') === '1') right = oi;
       if (right >= 0) opts[right].click();
-      var choice = opts.length === 4 && right >= 0 && state.status[cur.zh] === 'known' && state.pos === posBefore + 1;
+      var choice = opts.length === 4 && right >= 0 && answeredRight(cur.zh) && state.pos === posBefore + 1;
       state.practice = 'hanzi'; render(false);
       var hidden = getComputedStyle(els.cardPinyin).visibility === 'hidden' && getComputedStyle(els.btnSpeak).visibility === 'hidden' &&
         getComputedStyle(head).display !== 'none';
@@ -341,7 +346,7 @@
         only();
         var shown = !els.gradeRow.hidden && els.gradeRow.querySelector('.easy small').textContent === fmtWait(SRS_DAYS[2]);
         els.gradeRow.querySelector('.easy').click();
-        var easy = state.srs[w.zh] && state.srs[w.zh].b === 2 && state.status[w.zh] === 'known';
+        var easy = state.srs[w.zh] && state.srs[w.zh].b === 2 && state.status[w.zh] === 'learning';
         only();
         els.gradeRow.querySelector('.hard').click();
         var hard = state.srs[w.zh].b === 2 && state.srs[w.zh].d === addDays(SRS_DAYS[2]);
@@ -390,7 +395,7 @@
         var fair = chips.length === 4 && !!right && right.textContent.indexOf(w.zh) !== -1 &&
           Array.prototype.every.call(chips, function (b) { return b === right || prompt.indexOf(b.querySelector('.choice-zh').textContent) === -1; });
         right.click();
-        var graded = state.status[w.zh] === 'known';
+        var graded = answeredRight(w.zh);
         useDeckType('sentences');
         var fallback = state.practice === 'choice';
         useDeckType('words');
@@ -425,7 +430,7 @@
         place(function (k, n) { return n - 1 - k; });
         var wrongShown = state.revealed === true && !state.status[sc.zh];
         place(function (k) { return k; });
-        var graded = state.status[sc.zh] === 'known';
+        var graded = answeredRight(sc.zh);
         state.deck = [si]; state.pos = 0; state.revealed = false; render(false);
         var first = els.cardPrompt.querySelector('.build-bank .build-tile');
         first.click();
@@ -631,7 +636,7 @@
         var wrongShown = !!els.cardPrompt.querySelector('.type-result.wrong') && !state.status['学生'];
         input.value = 'xue2sheng';
         form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-        var graded = state.status['学生'] === 'known';
+        var graded = answeredRight('学生');
         delete state.status['学生']; delete state.srs['学生'];
         state.practice = 'zh';
         state.deck = deckSnap; state.pos = posSnap; render(false);
@@ -653,7 +658,7 @@
         var shown = els.card.classList.contains('hide-face') && els.cardPrompt.textContent.indexOf(shortText(mai.en)) !== -1 && chips.length >= 2 &&
           !els.choiceBox.querySelector('.choice-pyl') && Array.prototype.some.call(chips, function (b) { return b.textContent.indexOf('卖') !== -1; });
         els.choiceBox.querySelector('[data-ok="1"]').click();
-        var graded = state.status['买'] === 'known';
+        var graded = answeredRight('买');
         delete state.status['买']; delete state.srs['买'];
         useDeckType('sentences');
         var fallback = state.practice === 'choice';
@@ -751,12 +756,32 @@
       })();
       add('Tapping the answer keeps it open', tapRes2.ok, tapRes2.d);
 
+      var gradRes = (function () {
+        var deckSnap = state.deck.slice(), posSnap = state.pos, a = cards[0], b = cards[1];
+        state.practice = 'zh';
+        var keep = [a, b].map(function (c) { return [state.status[c.zh], state.srs[c.zh]]; });
+        delete state.status[a.zh]; delete state.srs[a.zh];
+        state.deck = [0, 1]; state.pos = 0; state.revealed = false; render(false);
+        key('ArrowRight');
+        var fresh = state.status[a.zh] === 'learning' && state.srs[a.zh].b === 1;
+        nearlyKnown(b.zh); delete state.status[b.zh];
+        key('ArrowRight');
+        var graduates = state.status[b.zh] === 'known' && SRS_DAYS[state.srs[b.zh].b] >= 7;
+        [a, b].forEach(function (c, i) {
+          if (keep[i][0]) state.status[c.zh] = keep[i][0]; else delete state.status[c.zh];
+          if (keep[i][1]) state.srs[c.zh] = keep[i][1]; else delete state.srs[c.zh];
+        });
+        state.deck = deckSnap; state.pos = posSnap; render(false);
+        return { ok: fresh && graduates, d: 'a new card answered right stays Learning (next review tomorrow): ' + fresh + ', a card whose next review is a week away becomes Known: ' + graduates };
+      })();
+      add('Cards become Known once their next review is a week away', gradRes.ok, gradRes.d);
+
       var undoRes = (function () {
         var deckSnap = state.deck.slice(), posSnap = state.pos;
         state.practice = 'zh'; state.deck = [0, 1, 2]; state.pos = 0; render(false);
         var w = cards[0], had = state.status[w.zh];
         key('ArrowRight');
-        var answered = state.pos === 1 && state.status[w.zh] === 'known';
+        var answered = state.pos === 1 && answeredRight(w.zh);
         key('z');
         var plain = state.pos === 0 && state.status[w.zh] === had;
         key('ArrowRight');
@@ -829,7 +854,7 @@
         var marks = chips.length === 4 && right + 1 === t.tone && chips[right].textContent.indexOf(retone(t.text, right + 1)) !== -1;
         var plays = !!els.cardPrompt.querySelector('.listen-btn');
         if (right >= 0) chips[right].click();
-        var graded = state.status[w.zh] === 'known' && state.pos === 1;
+        var graded = answeredRight(w.zh) && state.pos === 1;
         only(quiz);
         els.card.click();
         var reveals = getComputedStyle(els.cardPinyin).visibility === 'visible';
@@ -902,6 +927,7 @@
         pick('zh');
         els.modeAll.click();
         var w = cards[currentIndex()], wi = cards.indexOf(w);
+        nearlyKnown(w.zh);
         var goTo = function () { state.pos = state.deck.indexOf(wi); render(false); };
         els.btnKnown.click();
         var readKnown = statusOf(w) === 'known';
@@ -987,6 +1013,7 @@
         var switched = state.deckType === 'sentences' && cards === sentCards && state.deck.length === sentCards.length && els.card.classList.contains('sentence');
         var s0 = cards[currentIndex()];
         var shows = els.cardHanzi.textContent === s0.zh && els.cardPinyin.textContent === s0.py && els.cardExamples.textContent.indexOf(s0.ex[0].zh) !== -1;
+        nearlyKnown(s0.zh);
         els.btnKnown.click();
         var marked = state.status[s0.zh] === 'known' && state.pos === 1 && els.knownCount.textContent === '1';
         els.optPractice.value = 'zh';
@@ -1000,6 +1027,7 @@
         state.status = {}; state.srs = {}; state.misses = {};
         els.modeAll.click();
         var a0 = cards[state.deck[0]], a1 = cards[state.deck[1]];
+        nearlyKnown(a0.zh);
         els.btnKnown.click();
         els.btnLearning.click();
         els.btnExport.click();
