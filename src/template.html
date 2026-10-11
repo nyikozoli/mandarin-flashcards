@@ -87,6 +87,13 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .prompt-hu { margin: 0; font-size: 19px; color: var(--soft); }
 .prompt-zh { margin: 0 0 10px; font-family: var(--zh-font); font-size: clamp(24px, 6.6vw, 32px); line-height: 1.45; color: var(--paper); letter-spacing: .02em; }
 .prompt-zh .gap { display: inline-block; height: 1.1em; margin: 0 .12em; vertical-align: -.2em; border-bottom: 3px solid var(--cinnabar); }
+.type-form { display: flex; gap: 8px; justify-content: center; margin: 14px auto 0; max-width: 340px; }
+.type-input { flex: 1; min-width: 0; min-height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface2); color: var(--text); padding: 6px 12px; font: inherit; font-size: 17px; }
+.type-input:focus { outline: 2px solid var(--focus); outline-offset: 1px; }
+.type-result { margin: 8px 0 0; min-height: 1.4em; font-size: 14.5px; color: var(--soft); }
+.type-result.right { color: var(--known); }
+.type-result.wrong { color: var(--learn); }
+.type-result b { font-family: var(--zh-font); font-size: 18px; color: var(--paper); }
 .prompt-sub { margin: 0 0 2px; font-size: 15px; color: var(--soft); }
 .build-line { min-height: 56px; display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; align-items: center; margin: 14px 0 12px; padding: 6px 4px 10px; border-bottom: 2px dashed var(--line); }
 .build-line.right { border-bottom-color: var(--known); }
@@ -937,7 +944,7 @@ label.btn { cursor: pointer; }
     <button type="button" class="act skip" id="btnSkip" aria-label="Skip to the next card (Space)"><svg class="act-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15a8 8 0 0 1 14.6-4.5M19 5v5.5h-5.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="act-label">Skip</span></button>
     <button type="button" class="act know" id="btnKnown" aria-label="I know it (Right arrow)"><span class="act-seal" lang="zh-CN" aria-hidden="true">会</span><span class="act-text"><span class="act-label">I know it</span><span class="act-key" aria-hidden="true">→</span></span></button>
   </nav>
-  <p class="kbd-hint"><span><kbd>Space</kbd> skip</span><span><kbd>S</kbd> speak</span><span><kbd>↑</kbd><kbd>↓</kbd> flip</span><span><kbd>1</kbd>–<kbd>4</kbd> choose</span><span><kbd>H</kbd> <kbd>E</kbd> hard, easy</span><span>more in Help</span></p>
+  <p class="kbd-hint"><span><kbd>Space</kbd> skip</span><span><kbd>S</kbd> speak</span><span><kbd>↑</kbd><kbd>↓</kbd> flip</span><span><kbd>1</kbd>–<kbd>4</kbd> choose</span><span><kbd>H</kbd> <kbd>E</kbd> hard, easy</span><span><kbd>T</kbd> type</span><span>more in Help</span></p>
 
   <footer>
     <p class="footnote" id="footnote">Works offline. Progress is saved in this browser.</p>
@@ -1172,6 +1179,7 @@ label.btn { cursor: pointer; }
           <dt>Multiple choice</dt><dd>Pick the right meaning from four. A right answer counts as Known.</dd>
           <dt>汉字 only</dt><dd>Only the characters show; pinyin, tone colours and audio appear when you tap the card. Use it for words you can say but cannot read yet. A word card's back also has <b>Practice these sentences</b>, which opens just that word's example sentences in the current style.</dd>
           <dt>Build the sentence</dt><dd>Sentences only. The translation shows, with the sentence's words shuffled below it: tap them in order (tap a placed word, or press Backspace, to take it back). A right order counts as Known toward recall. Another order can still be correct Chinese, so a mismatch shows the sentence and you mark it yourself.</dd>
+          <dt>Typing the answer</dt><dd>In Meaning → 汉字 (words) you can type the pinyin and press Enter: tone numbers (xue2sheng) or tone marks (xuésheng) both work, and neutral tones can be left out. A right answer counts as Known. <kbd>T</kbd> jumps to the box.</dd>
           <dt>Fill the gap</dt><dd>One of the word's example sentences with the word blanked out, and its translation. Pick the word that fits from four of the same length; keys 1–4 pick. Words only; it counts toward reading.</dd>
           <dt>Which tone?</dt><dd>Hear the word, then pick the tone of its first syllable from the four written forms; keys 1–4 pick tones 1–4. Words only. The 21 words whose first syllable is neutral, or changes tone when it is spoken (你好, 可以), come up as normal cards.</dd>
           <dt>Tap a word</dt><dd>In any example sentence, and on sentence cards, the words from HSK 1–3 have a dotted underline. Tap one to see its pinyin and meaning; tap elsewhere or press Esc to close it. On a word card the word itself is highlighted instead.</dd>
@@ -3053,6 +3061,61 @@ label.btn { cursor: pointer; }
     on('btnWordPopSpeak', 'click', function () { if (popWord) speakParts([popWord.zh], els.btnWordPopSpeak); });
   }
 
+  /* ---------- typed answers ---------- */
+  // Does the typed pinyin match the card? Accepts tone numbers (xue2sheng, 5 or 0 or nothing for neutral) or tone marks
+  // (xuésheng), any spacing, apostrophes and capitals, v or u: for ü, the tone digit after an erhua r, and the
+  // citation tone of 一 and 不 as well as the changed one that the card shows.
+  function typedMatches(input, c) {
+    var raw = String(input || '').toLowerCase().replace(/u:/g, 'v').replace(/ü/g, 'v').replace(/[\s'’\-·.,]/g, '');
+    if (!raw) return false;
+    var plain = '', marks = [];
+    Array.from(raw).forEach(function (ch) {
+      var v = PLAIN_VOWEL[ch];
+      if (v) { plain += v === 'ü' ? 'v' : v; marks.push(TONE_MARK[v].indexOf(ch) + 1); }
+      else { plain += ch; marks.push(0); }
+    });
+    var toks = pinyinTokens(c.py).filter(function (t) { return t.tone; });
+    var han = Array.from(c.zh).filter(isHan), pos = 0;
+    for (var i = 0; i < toks.length; i++) {
+      var base = stripTone(toks[i].text).toLowerCase().replace(/ü/g, 'v'), tone = 0, k;
+      var digitR = /r$/.test(base) && base.length > 2 && plain.substr(pos, base.length - 1) === base.slice(0, -1) &&
+        /[0-5]/.test(plain.charAt(pos + base.length - 1)) && plain.charAt(pos + base.length) === 'r';
+      if (digitR) {
+        var d0 = Number(plain.charAt(pos + base.length - 1));
+        for (k = pos; k < pos + base.length - 1; k++) if (marks[k]) tone = marks[k];
+        if (!tone) tone = d0 === 0 ? 5 : d0;
+        pos += base.length + 1;
+      } else {
+        if (plain.substr(pos, base.length) !== base) return false;
+        for (k = pos; k < pos + base.length; k++) if (marks[k]) tone = marks[k];
+        pos += base.length;
+        if (/[0-5]/.test(plain.charAt(pos))) { var d = Number(plain.charAt(pos)); if (!tone) tone = d === 0 ? 5 : d; pos++; }
+      }
+      if (!tone) tone = 5;
+      var want = toks[i].tone, ch = han.length === toks.length ? han[i] : '';
+      if (!(tone === want || (ch === '一' && [1, 2, 4].indexOf(tone) !== -1) || (ch === '不' && [2, 4].indexOf(tone) !== -1))) return false;
+    }
+    return pos === plain.length;
+  }
+  function checkTyped(form) {
+    var i = currentIndex(), input = form.querySelector('input'), res = els.cardPrompt.querySelector('.type-result');
+    if (i === null || !input || !input.value.trim() || input.disabled) return;
+    var c = cards[i], ok = typedMatches(input.value, c);
+    res.textContent = '';
+    res.className = 'type-result ' + (ok ? 'right' : 'wrong');
+    res.appendChild(document.createTextNode(ok ? '✓ Right: ' : 'Not quite. It is '));
+    var zh = el('b', null, c.zh);
+    zh.setAttribute('lang', 'zh-CN');
+    res.appendChild(zh);
+    res.appendChild(document.createTextNode(' ' + c.py + (ok ? '' : '. Try again, or mark it yourself.')));
+    buzz(ok ? 12 : [30, 60, 30]);
+    if (!ok) { input.select(); return; }
+    input.disabled = true;
+    if (testing) { act('known'); return; }
+    var pos = state.pos;
+    setTimeout(function () { if (state.pos === pos && !busy) act('known'); }, 800);
+  }
+
   /* ---------- practice modes ---------- */
   var PRACTICE = { zh: 'Chinese → meaning', reverse: 'Meaning → Chinese', listen: 'Listening', choice: 'Multiple choice', hanzi: 'Characters only', tone: 'Which tone?', cloze: 'Fill the gap', build: 'Build the sentence' };
   // Styles answered by picking one of the chips in #choiceBox (keys 1–4).
@@ -3261,6 +3324,24 @@ label.btn { cursor: pointer; }
       els.cardPrompt.appendChild(el('p', 'prompt-q', deck().sayIt));
       els.cardPrompt.appendChild(en);
       els.cardPrompt.appendChild(hu);
+      if (!c.sentence) {
+        var tf = el('form', 'type-form');
+        var ti = el('input', 'type-input');
+        ti.type = 'text';
+        ['autocomplete', 'autocapitalize', 'autocorrect'].forEach(function (a) { ti.setAttribute(a, 'off'); });
+        ti.setAttribute('spellcheck', 'false');
+        ti.setAttribute('enterkeyhint', 'done');
+        ti.setAttribute('aria-label', 'Type the pinyin, with tone numbers or tone marks');
+        ti.placeholder = 'Type the pinyin, e.g. xue2sheng';
+        var tb = el('button', 'btn small', 'Check');
+        tb.type = 'submit';
+        tf.appendChild(ti);
+        tf.appendChild(tb);
+        els.cardPrompt.appendChild(tf);
+        var tr = el('p', 'type-result');
+        tr.setAttribute('role', 'status');
+        els.cardPrompt.appendChild(tr);
+      }
     } else if (p === 'listen' || toneQ) {
       var lb = el('button', 'listen-btn', toneQ ? deck().tonePlay : deck().play);
       lb.type = 'button';
@@ -4204,7 +4285,7 @@ label.btn { cursor: pointer; }
         : p === 'build' ? (buildQ ? 'Tap the words in order; tap a placed word to take it back (Backspace)' : 'Tap the card to show the meaning')
         : p === 'cloze' ? (clozeQ ? 'Pick the word that fills the gap (keys 1–4)' : 'Tap the card to show the meaning')
         : p === 'zh' && readingHidden ? 'You know this one well: read it, then tap the card to check the pinyin'
-        : { zh: 'Tap the card to show the meaning', reverse: 'Say the Chinese word, then tap the card to check',
+        : { zh: 'Tap the card to show the meaning', reverse: isSent() ? 'Say the Chinese sentence, then tap the card to check' : 'Say it, or type the pinyin (T), then tap the card to check',
             listen: 'Listen, then tap the card to see the word', choice: 'Pick the meaning (keys 1–4), or tap the card to reveal',
             hanzi: 'Read the characters aloud, then tap the card to check the pinyin and meaning' }[p];
   }
@@ -4419,7 +4500,7 @@ label.btn { cursor: pointer; }
     var card = els.card;
     on('card', 'pointerdown', function (e) {
       if (busy || (e.button !== undefined && e.button !== 0)) return;
-      if (e.target.closest && e.target.closest('button')) return;
+      if (e.target.closest && e.target.closest('button, input, form')) return;
       drag = { x: e.clientX, y: e.clientY, id: e.pointerId, dx: 0, active: false };
     });
     card.addEventListener('pointermove', function (e) {
@@ -4459,7 +4540,7 @@ label.btn { cursor: pointer; }
     card.addEventListener('pointercancel', function (e) { end(e, true); });
     on('card', 'click', function (e) {
       if (suppressClick) { suppressClick = false; return; }
-      if (e.target.closest && e.target.closest('button')) return;
+      if (e.target.closest && e.target.closest('button, input, form')) return;
       var sel = window.getSelection && window.getSelection();
       if (sel && String(sel).length > 0 && els.cardAnswer.contains(sel.anchorNode)) return;
       toggleReveal();
@@ -4944,6 +5025,11 @@ label.btn { cursor: pointer; }
       case 'ArrowLeft': e.preventDefault(); act('learning'); break;
       case ' ': case 'Spacebar': e.preventDefault(); act('skip'); break;
       case 's': case 'S': e.preventDefault(); speakCurrent(); break;
+      case 't': case 'T': {
+        var typeBox = els.cardPrompt.hidden ? null : els.cardPrompt.querySelector('.type-input');
+        if (typeBox) { e.preventDefault(); typeBox.focus(); }
+        break;
+      }
       case 'h': case 'H': case 'e': case 'E':
         if (!els.gradeRow.hidden) { e.preventDefault(); act('known', /h/i.test(e.key) ? 'hard' : 'easy'); }
         break;
@@ -5588,6 +5674,31 @@ label.btn { cursor: pointer; }
       })();
       add('Panda and answer bar', petRes.ok, petRes.d);
 
+      var typeRes = (function () {
+        var byZh = function (z) { return wordCards.filter(function (w) { return w.zh === z; })[0]; };
+        var cases = [['学生', 'xue2sheng', true], ['学生', 'Xué sheng', true], ['学生', 'xue2 sheng5', true], ['学生', 'xue2sheng0', true],
+          ['学生', 'xue1sheng', false], ['学生', 'xuesheng', false], ['学生', 'xue2shen', false], ['一定', 'yi1ding4', true], ['一定', 'yi2ding4', true],
+          ['一定', 'yi3ding4', false], ['不客气', 'bu4 ke4 qi', true], ['不客气', 'bú kèqi', true], ['女儿', 'nv3er2', true], ["女儿", "nü3'ér", true], ['女儿', 'nv3er4', false]];
+        var bad = cases.filter(function (x) { var w = byZh(x[0]); return !w || typedMatches(x[1], w) !== x[2]; });
+        var deckSnap = state.deck, posSnap = state.pos, wi = wordCards.indexOf(byZh('学生'));
+        state.practice = 'reverse';
+        state.deck = [wi]; state.pos = 0; state.revealed = false; render(false);
+        var form = els.cardPrompt.querySelector('.type-form');
+        var input = form && form.querySelector('input');
+        if (input) { input.value = 'xue1sheng'; form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })); }
+        var wrongShown = !!els.cardPrompt.querySelector('.type-result.wrong') && !state.status['学生'];
+        input.value = 'xue2sheng';
+        form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+        var graded = state.status['学生'] === 'known';
+        delete state.status['学生']; delete state.srs['学生'];
+        state.practice = 'zh';
+        state.deck = deckSnap; state.pos = posSnap; render(false);
+        return { ok: !bad.length && !!form && wrongShown && graded,
+          d: (bad.length ? 'wrong verdicts: ' + bad.map(function (x) { return x[0] + ' ' + x[1]; }).join(', ') : cases.length + ' spellings judged right') +
+            ', wrong answer shows the word without marking: ' + wrongShown + ', right answer marks Known: ' + graded };
+      })();
+      add('Typing the pinyin', typeRes.ok, typeRes.d);
+
       var newer = parseImport(JSON.stringify({ version: 1, format: FORMAT + 1, status: {} }));
       var current = parseImport(JSON.stringify({ version: 1, format: FORMAT, status: {} }));
       add('Progress from a newer app version is refused', !!newer.error && !current.error && progressSnapshot().format === FORMAT,
@@ -6197,6 +6308,10 @@ label.btn { cursor: pointer; }
       if (!b) return;
       e.stopPropagation();
       pickChoice(Array.prototype.indexOf.call(els.choiceBox.children, b));
+    });
+    on('cardPrompt', 'submit', function (e) {
+      e.preventDefault();
+      checkTyped(e.target);
     });
     on('cardPrompt', 'click', function (e) {
       var t = e.target.closest ? e.target.closest('.build-tile') : null;
