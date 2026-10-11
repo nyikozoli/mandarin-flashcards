@@ -24,3 +24,4 @@ node_modules/
 
 # Python runtime that a Windows installer dropped in the repo root
 Python/
+.claude/launch.json

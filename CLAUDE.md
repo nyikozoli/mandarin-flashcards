@@ -47,7 +47,7 @@ This repository is **public** (`nyikozoli/mandarin-flashcards`). Never commit se
 
 1. `npm run check` and `npm run build` must pass.
 2. `npm run selfcheck` runs the in-app self-check in headless Chrome or Edge (Node 22+; `CHROME_PATH` to pick a browser) and fails on any failed check. CI runs it on the single file and on `dist/site/index.html`. To look at it yourself, open `dist/mandarin-flashcards.html` and run `await window.__mandarinApp.runSelfCheck().done`, or use Settings → Run self-check. Every check must pass.
-   - In the Claude preview pane, "Progress storage" fails, because `file://` pages open as `data:` URLs without localStorage. That one is expected.
+   - The Claude browser pane cannot open local files over 512 KB, and the build is now larger. Start the `dist` preview server instead (`.claude/launch.json`, git-ignored: `python -m http.server 8766 --directory dist`) and open http://localhost:8766/mandarin-flashcards.html. Served over http, "Progress storage" passes too.
    - To test the Pages build, serve the repo root over http (pick a port other than 8765) and open `/dist/site/`.
 3. For layout changes, check a 375px and a 320px wide viewport. Nothing may scroll sideways. The installed iPhone app runs under a translucent status bar: keep the `env(safe-area-inset-*)` padding on `.app`, `.overlay` and fixed bars.
 4. For a migration, test it in a throwaway Postgres container before `supabase db push`. The local `postgres:16-alpine` image works with a stub `auth` schema: `auth.users` and an `auth.uid()` that reads `request.jwt.claim.sub`.
