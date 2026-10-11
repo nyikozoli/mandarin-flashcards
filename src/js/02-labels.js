@@ -3,18 +3,18 @@
   // In 中文 only the English stays in the page, visually hidden, so screen readers still read it; the tooltip shows both.
   var LABEL_MODES = { both: '中文 + English', en: 'English', zh: '中文 only' };
   var ZH_LABELS = {
-    'All cards': ['全部', 'quánbù'], 'Due': ['复习', 'fùxí'], 'Learning': ['在学', 'zài xué'], 'New': ['生词', 'shēngcí'], 'Hardest': ['难词', 'náncí'],
+    'All cards': ['全部', 'quánbù'], 'Due': ['复习', 'fùxí'], 'Learning': ['学习中', 'xuéxí zhōng'], 'New': ['新卡片', 'xīn kǎpiàn'], 'Hardest': ['易错', 'yìcuò'],
     'Still learning': ['还在学', 'hái zài xué'], 'Skip': ['跳过', 'tiàoguò'], 'I know it': ['我会了', 'wǒ huì le'],
     'Hard': ['难', 'nán'], 'Good': ['好', 'hǎo'], 'Easy': ['容易', 'róngyì'],
-    'Today': ['今天', 'jīntiān'], 'Progress': ['进度', 'jìndù'], 'Collection': ['收藏', 'shōucáng'], 'Your progress': ['我的进度', 'wǒ de jìndù'],
+    'Today': ['今天', 'jīntiān'], 'Progress': ['进度', 'jìndù'], 'Collection': ['成就', 'chéngjiù'], 'Your progress': ['我的进度', 'wǒ de jìndù'],
     'Today\u2019s quests': ['每日任务', 'měirì rènwu'], 'Daily goal': ['每日目标', 'měirì mùbiāo'], 'Coming reviews': ['复习计划', 'fùxí jìhuà'],
-    'Last 14 days': ['最近两周', 'zuìjìn liǎng zhōu'], 'What you can read': ['你能读懂的', 'nǐ néng dúdǒng de'], 'Your stats': ['统计', 'tǒngjì'],
+    'Last 14 days': ['最近两周', 'zuìjìn liǎng zhōu'], 'What you can read': ['阅读能力', 'yuèdú nénglì'], 'Your stats': ['统计', 'tǒngjì'],
     'Challenges': ['挑战', 'tiǎozhàn'], 'Seals': ['印章', 'yìnzhāng'], 'By topic': ['话题', 'huàtí'], 'By HSK level': ['等级', 'děngjí'],
-    'Settings': ['设置', 'shèzhì'], 'What\'s new': ['新功能', 'xīn gōngnéng'], 'How it works': ['使用说明', 'shǐyòng shuōmíng'], 'Topics': ['话题', 'huàtí'], 'Your panda': ['熊猫', 'xióngmāo'],
-    'All words': ['词表', 'cíbiǎo'], 'All sentences': ['句子表', 'jùzi biǎo'],
-    'Cards': ['卡片', 'kǎpiàn'], 'Voice': ['声音', 'shēngyīn'], 'Sync across devices': ['同步', 'tóngbù'], 'Progress and checks': ['进度和检查', 'jìndù hé jiǎnchá']
+    'Settings': ['设置', 'shèzhì'], 'What\'s new': ['新功能', 'xīn gōngnéng'], 'How it works': ['使用说明', 'shǐyòng shuōmíng'], 'Topics': ['话题', 'huàtí'], 'Your panda': ['我的熊猫', 'wǒ de xióngmāo'],
+    'All words': ['全部词语', 'quánbù cíyǔ'], 'All sentences': ['全部句子', 'quánbù jùzi'],
+    'Cards': ['卡片', 'kǎpiàn'], 'Voice': ['语音', 'yǔyīn'], 'Sync across devices': ['同步', 'tóngbù'], 'Progress and checks': ['进度和自检', 'jìndù hé zìjiǎn']
   };
-  var PRACTICE_ZH = { zh: '认字', reverse: '说中文', listen: '听力', choice: '选择题', hanzi: '只看汉字', tone: '声调', cloze: '填空', pairs: '易混词',
+  var PRACTICE_ZH = { zh: '认字', reverse: '中文怎么说', listen: '听力', choice: '选择题', hanzi: '只看汉字', tone: '听声调', cloze: '填空', pairs: '易混词',
     's-zh': '读句子', 's-reverse': '说句子', 's-listen': '听句子', 's-choice': '句子选择题', 's-hanzi': '只看汉字', 's-build': '组句' };
   var GROUP_ZH = { Words: '词语', Sentences: '句子' };
   // A label unit: the Chinese and the English, stacked in buttons, side by side in headings.
