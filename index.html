@@ -1215,6 +1215,11 @@ label.btn { cursor: pointer; }
   function syncEnabled() {
     return !!(SYNC_CONFIG && SYNC_CONFIG.url && SYNC_CONFIG.anonKey && window.fetch && window.Promise);
   }
+  // fetch rejects with a TypeError when the network is unreachable, and says nothing about
+  // whether the credentials are still good.
+  function isOffline(e) {
+    return (e instanceof TypeError) || (typeof navigator !== 'undefined' && navigator.onLine === false);
+  }
   function syncApi(path, opts) {
     opts = opts || {};
     var headers = { 'apikey': SYNC_CONFIG.anonKey, 'Content-Type': 'application/json' };
@@ -1279,13 +1284,29 @@ label.btn { cursor: pointer; }
     saveSyncState();
     return sync.session;
   }
+  // A stored session that cannot be used again. signOut(true) stays silent so the logout
+  // button keeps its own wording, but here the user has to be told syncing stopped and why.
+  function expireSession() {
+    signOut(true);
+    setSyncStatus('Your sign-in expired. Sign in again to resume syncing.', true);
+  }
   function ensureSession() {
     if (!sync.session) return Promise.resolve(null);
     if (tokenFresh()) return Promise.resolve(sync.session);
-    if (!sync.session.refresh_token) { signOut(true); return Promise.resolve(null); }
+    if (!sync.session.refresh_token) { expireSession(); return Promise.resolve(null); }
     return syncApi('/auth/v1/token?grant_type=refresh_token', { method: 'POST', body: { refresh_token: sync.session.refresh_token } })
       .then(adoptSession)
-      .catch(function () { signOut(true); return null; });
+      .catch(function (e) {
+        // fetch rejects with a TypeError when the network is unreachable. That is not an expired
+        // token: signing out here would throw away a working refresh token just because the
+        // device was offline when the page loaded.
+        if (isOffline(e)) {
+          setSyncStatus('No connection. Your sign-in is kept — syncing resumes when you are back online.');
+          return null;
+        }
+        expireSession();
+        return null;
+      });
   }
   function requestMagicLink(email) {
     var redirect = SYNC_CONFIG.siteUrl || (location.origin + location.pathname);
@@ -1425,15 +1446,12 @@ label.btn { cursor: pointer; }
   function onSyncError(e) {
     sync.busy = false;
     renderSyncUI();
-    // fetch rejects with a TypeError when the network is unreachable; treat that as offline.
-    var offline = (e instanceof TypeError) || (typeof navigator !== 'undefined' && navigator.onLine === false);
-    if (offline) {
+    if (isOffline(e)) {
       setSyncStatus('No connection. Changes stay on this device and upload automatically when it returns.');
       return;
     }
     if (e && (e.status === 401 || e.status === 403)) {
-      setSyncStatus('Your sign-in expired. Sign in again to resume syncing.', true);
-      signOut(true);
+      expireSession();
       return;
     }
     setSyncStatus('Sync failed: ' + (e && e.message ? e.message : e), true);
