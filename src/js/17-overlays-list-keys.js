@@ -87,6 +87,7 @@
     var cur = currentIndex();
     var frag = document.createDocumentFragment();
     var shown = 0;
+    var maps = skillMaps();
     cards.forEach(function (c, i) {
       var s = statusOf(c);
       if (listFilter !== 'all' && s !== listFilter) return;
@@ -112,6 +113,7 @@
       var badges = el('span', 'wr-badges');
       badges.appendChild(el('span', 'badge lv', 'HSK ' + c.lv));
       badges.appendChild(el('span', 'badge' + (s === 'unmarked' ? '' : ' ' + s), STATUS_NAMES[s]));
+      badges.appendChild(skillMarks(c, maps));
       b.appendChild(badges);
       li.appendChild(b);
       frag.appendChild(li);

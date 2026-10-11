@@ -776,6 +776,25 @@
       })();
       add('Cards become Known once their next review is a week away', gradRes.ok, gradRes.d);
 
+      var marksRes = (function () {
+        var deckSnap = state.deck.slice(), posSnap = state.pos, w = cards[0];
+        var keepL = state.marks.listen.status[w.zh];
+        stashSkill();
+        state.marks.listen.status[w.zh] = 'learning';
+        state.deck = [0]; state.pos = 0; render(false);
+        var seals = els.cardSkills.querySelectorAll('.sm');
+        var three = seals.length === 3 && seals[2].classList.contains('sm-learning') && els.cardSkills.querySelector('.sm.active') === seals[0] &&
+          /Listening: Learning/.test(els.cardSkills.firstChild.getAttribute('aria-label'));
+        openList();
+        var inList = els.wordList.querySelectorAll('.skill-marks').length > 0;
+        closeOverlay(els.listView);
+        if (keepL) state.marks.listen.status[w.zh] = keepL; else delete state.marks.listen.status[w.zh];
+        state.deck = deckSnap; state.pos = posSnap; render(false);
+        var panda = !!els.btnPet.closest('.topbar');
+        return { ok: three && inList && panda, d: 'card shows 读 说 听 with listening Learning and reading ringed: ' + three + ', word list shows them: ' + inList + ', panda in the top bar: ' + panda };
+      })();
+      add('Marks for all three skills; panda in the top bar', marksRes.ok, marksRes.d);
+
       var undoRes = (function () {
         var deckSnap = state.deck.slice(), posSnap = state.pos;
         state.practice = 'zh'; state.deck = [0, 1, 2]; state.pos = 0; render(false);

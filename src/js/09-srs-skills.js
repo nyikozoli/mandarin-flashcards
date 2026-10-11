@@ -97,6 +97,26 @@
     undoStack = [];
     return true;
   }
+  // The card's mark in every skill, as three small seals: 读 reading, 说 recall, 听 listening. Green Known, amber
+  // Learning, outlined New; the skill you are practising has a ring. maps (optional) saves lookups in long lists.
+  var SKILL_ZH = { read: '读', recall: '说', listen: '听' };
+  function skillMaps() { return { read: marksOf('read').status, recall: marksOf('recall').status, listen: marksOf('listen').status }; }
+  function skillMarks(c, maps) {
+    maps = maps || skillMaps();
+    var w = el('span', 'skill-marks'), parts = [];
+    ['read', 'recall', 'listen'].forEach(function (k) {
+      var s = maps[k][c.zh] || 'unmarked';
+      var m = el('span', 'sm sm-' + s + (k === state.skill ? ' active' : ''), SKILL_ZH[k]);
+      m.setAttribute('lang', 'zh-CN');
+      m.setAttribute('aria-hidden', 'true');
+      w.appendChild(m);
+      parts.push(SKILLS[k] + ': ' + STATUS_NAMES[s]);
+    });
+    w.setAttribute('role', 'img');
+    w.setAttribute('aria-label', parts.join(', '));
+    w.title = parts.join(' · ');
+    return w;
+  }
   function knownIn(k) {
     var st = marksOf(k).status, n = 0;
     cards.forEach(function (c) { if (st[c.zh] === 'known') n++; });

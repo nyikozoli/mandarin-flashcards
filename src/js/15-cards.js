@@ -181,6 +181,8 @@
     var s = statusOf(c);
     els.cardStatus.textContent = s === 'unmarked' ? 'New' : STATUS_NAMES[s];
     els.cardStatus.className = 'status-tag' + (s === 'unmarked' ? '' : ' ' + s);
+    els.cardSkills.textContent = '';
+    els.cardSkills.appendChild(skillMarks(c));
     applyPractice(c);
     // In these styles the word or its reading is the answer, so a screen reader must not hear it either.
     var reading = readingHidden ? '' : ', ' + c.py;

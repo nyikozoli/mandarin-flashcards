@@ -8,7 +8,9 @@
         {
           "name": "",
           "items": [
-            "A right answer (I know it, Hard, Good, Easy, or a right quiz answer) keeps a word in Learning until its next review is a week or more away; then it becomes Known. Words you already marked Known stay Known."
+            "A right answer (I know it, Hard, Good, Easy, or a right quiz answer) keeps a word in Learning until its next review is a week or more away; then it becomes Known. Words you already marked Known stay Known.",
+            "Cards and the word list show the mark in all three skills: 读 reading, 说 recall, 听 listening.",
+            "The panda moved to the top left of the screen."
           ]
         }
       ]

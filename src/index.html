@@ -51,7 +51,7 @@
 <div class="app" id="app">
   <header class="topbar">
     <div class="brand">
-      <div class="seal" aria-hidden="true" lang="zh-CN">汉</div>
+      <button type="button" class="pet-mini pet-top" id="btnPet" aria-haspopup="dialog" aria-label="Your panda"><span id="petMini" class="pet-art" aria-hidden="true"></span></button>
       <h1><span class="h1-lang">Mandarin </span>HSK <span class="h1-levels">1–3</span></h1>
     </div>
     <div class="top-actions">
@@ -132,7 +132,6 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
       </div>
-      <button type="button" class="pet-mini" id="btnPet" aria-haspopup="dialog" aria-label="Your panda"><span id="petMini" class="pet-art" aria-hidden="true"></span></button>
       <button type="button" class="today-pill" id="todayPill" aria-label="Today's progress">0/20 today</button>
     </div>
     <div class="progress" id="progressBar" role="progressbar" aria-label="Words marked as known" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0">
@@ -167,7 +166,7 @@
       <div class="stamp stamp-learn" aria-hidden="true"><span lang="zh-CN">学</span><small>Learning</small></div>
       <div class="card-meta">
         <span class="meta-left"><span id="cardNumber">#1</span><span id="cardRank" class="rank-tag" hidden></span><span id="comboTag" class="combo-tag" hidden></span></span>
-        <span id="cardStatus" class="status-tag">New</span>
+        <span class="meta-right"><span id="cardSkills"></span><span id="cardStatus" class="status-tag">New</span></span>
       </div>
       <div id="cardPrompt" class="prompt" hidden></div>
       <div class="card-head">
@@ -475,7 +474,8 @@
           <dt>Sync button</dt><dd>On the website, once you sign in under Settings → Sync across devices, a ⟳ button appears in the top bar. Tap it to sync now; it spins while syncing, and a dot means changes are waiting to upload. Progress also syncs on its own.</dd>
           <dt>What's new</dt><dd>After an update a short notice appears at the top. The “What’s new” link at the bottom of the page (and Settings → What's new) opens the list of every version at any time.</dd>
           <dt>Chinese labels</dt><dd>Buttons and headings carry their Chinese name (复习 fùxí = Due, 我会了 wǒ huì le = I know it), so you pick up everyday words as you use the app. Settings → Interface labels switches between 中文 + English, English, and 中文 only; hover or long-press a label to see its pinyin.</dd>
-          <dt>Your panda</dt><dd>The little panda next to today's count lives on your studying. Every answer feeds it a bamboo leaf, your daily goal fills its belly, and all your answers together make it grow from newborn to sage. Tap it to see how it is doing and to give it a name.</dd>
+          <dt>读 说 听</dt><dd>On each card and in the word list, three small seals show the card's mark in every skill: 读 reading, 说 recall (meaning → Chinese), 听 listening. Green is Known, amber Learning, an outline New; the skill you are practising has a ring. The tag next to them names that skill's mark.</dd>
+          <dt>Your panda</dt><dd>The panda at the top left lives on your studying. Every answer feeds it a bamboo leaf, your daily goal fills its belly, and all your answers together make it grow from newborn to sage. Tap it to see how it is doing and to give it a name.</dd>
           <dt>Word of the day</dt><dd>Each day a useful word you do not know yet appears above the card. “Study it” opens it; ✕ hides it until tomorrow.</dd>
           <dt>Daily quests</dt><dd>Three small goals each day, shown in the progress view. Each finished quest gives 30 XP; all three give 50 XP more and a 🧊 streak freeze. You can save two, and a saved freeze keeps your streak alive over a missed day. Every Monday a short recap of last week appears.</dd>
           <dt>Seals and challenges</dt><dd>The progress view collects 20 red seals (印章) for milestones such as 100 words, a 7-day streak or a passed exam, each worth 50 XP. Its challenges are a 60-second blitz (as many meanings as you can) and a 20-question exam per HSK level (pass at 80%). Challenges never change your review schedule.</dd>

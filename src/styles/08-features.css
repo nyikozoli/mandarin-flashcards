@@ -121,3 +121,15 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
 /* What's new link in the footer: its own line, with a full-size tap target. */
 .foot-links { display: block; }
 .foot-news { display: inline-flex; align-items: center; min-height: 44px; padding: 0 8px; font-size: 13px; font-weight: 600; }
+
+/* Every skill's mark: 读 reading, 说 recall, 听 listening. */
+.meta-right { display: inline-flex; align-items: center; gap: 8px; }
+.skill-marks { display: inline-flex; gap: 3px; }
+.sm { width: 20px; height: 20px; display: grid; place-items: center; border-radius: 4px; border: 1px solid var(--line); color: var(--muted); font-family: var(--zh-font); font-size: 12px; line-height: 1; }
+.sm-known { background: var(--known); border-color: var(--known); color: var(--known-ink); }
+.sm-learning { background: var(--learn); border-color: var(--learn); color: var(--learn-ink); }
+.sm.active { box-shadow: 0 0 0 1.5px var(--surface), 0 0 0 3px var(--soft); }
+.wr-badges .skill-marks { margin-top: 2px; }
+/* The panda is the app icon at the top left. */
+.pet-top { flex: none; }
+.pet-top .pet-art { width: 40px; height: 40px; }
