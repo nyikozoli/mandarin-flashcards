@@ -773,6 +773,20 @@ label.btn { cursor: pointer; }
 .seal-stamp-mark { border-radius: 22px; }
 .act.know .act-seal { box-shadow: inset 0 0 0 1.5px var(--known-ink), inset 0 0 0 2.5px rgba(79, 209, 161, .55); }
 @media (max-width: 360px) { .act-seal { border-radius: 5px; } .h1-lang { display: none; } }
+
+/* Interface labels: the Chinese sits small above the English in buttons and before it in headings. */
+.lbl { display: inline-flex; flex-direction: column; align-items: center; line-height: 1.12; }
+.lbl .zl { font-family: var(--zh-font); font-size: .78em; font-weight: 600; letter-spacing: .06em; opacity: .78; }
+.lbl.inline { flex-direction: row; align-items: baseline; gap: .45em; }
+.lbl.inline .zl { font-size: .92em; opacity: 1; color: var(--pinyin); }
+.act-label .lbl { align-items: flex-start; }
+body.labels-en .lbl .zl { display: none; }
+body.labels-zh .lbl .el { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+body.labels-zh .lbl .zl { font-size: 1em; opacity: 1; letter-spacing: .03em; }
+body.labels-zh .lbl.inline .zl { color: inherit; }
+@media (max-width: 360px) { .act-label .lbl { align-items: center; } }
+/* Arrow key caps only where there is a keyboard and room for them. */
+@media (max-width: 440px), (hover: none) { .act-key { display: none; } }
 </style>
 <script>
 /* Early error reporter: shows any JavaScript error visibly on the page, even if the main script fails to load. */
@@ -841,11 +855,11 @@ label.btn { cursor: pointer; }
 
   <nav class="deckbar" aria-label="Choose what to study">
     <div class="modes" role="radiogroup" aria-label="Study mode">
-      <button type="button" class="mode" id="modeAll" role="radio" aria-checked="true" data-mode="all">All cards <span class="count" id="countAll">0</span></button>
-      <button type="button" class="mode" id="modeDue" role="radio" aria-checked="false" data-mode="due">Due <span class="count" id="countDueMode">0</span></button>
-      <button type="button" class="mode" id="modeLearning" role="radio" aria-checked="false" data-mode="learning">Learning <span class="count" id="countLearningMode">0</span></button>
-      <button type="button" class="mode" id="modeUnmarked" role="radio" aria-checked="false" data-mode="unmarked">New <span class="count" id="countUnmarkedMode">0</span></button>
-      <button type="button" class="mode" id="modeHard" role="radio" aria-checked="false" data-mode="hard">Hardest <span class="count" id="countHardMode">0</span></button>
+      <button type="button" class="mode" id="modeAll" role="radio" aria-checked="true" data-mode="all"><span data-lbl>All cards</span> <span class="count" id="countAll">0</span></button>
+      <button type="button" class="mode" id="modeDue" role="radio" aria-checked="false" data-mode="due"><span data-lbl>Due</span> <span class="count" id="countDueMode">0</span></button>
+      <button type="button" class="mode" id="modeLearning" role="radio" aria-checked="false" data-mode="learning"><span data-lbl>Learning</span> <span class="count" id="countLearningMode">0</span></button>
+      <button type="button" class="mode" id="modeUnmarked" role="radio" aria-checked="false" data-mode="unmarked"><span data-lbl>New</span> <span class="count" id="countUnmarkedMode">0</span></button>
+      <button type="button" class="mode" id="modeHard" role="radio" aria-checked="false" data-mode="hard"><span data-lbl>Hardest</span> <span class="count" id="countHardMode">0</span></button>
     </div>
     <div class="deckbar-row">
       <div class="levels" role="radiogroup" aria-label="HSK level">
@@ -933,9 +947,9 @@ label.btn { cursor: pointer; }
       <div id="cardAnswer" class="answer">
         <div id="gradeRow" class="grade-row" role="group" aria-label="How well did you know it?" hidden>
           <span class="grade-q">How well did you know it?</span>
-          <button type="button" class="grade hard" data-grade="hard">Hard <small></small></button>
-          <button type="button" class="grade good" data-grade="good">Good <small></small></button>
-          <button type="button" class="grade easy" data-grade="easy">Easy <small></small></button>
+          <button type="button" class="grade hard" data-grade="hard"><span data-lbl>Hard</span> <small></small></button>
+          <button type="button" class="grade good" data-grade="good"><span data-lbl>Good</span> <small></small></button>
+          <button type="button" class="grade easy" data-grade="easy"><span data-lbl>Easy</span> <small></small></button>
         </div>
         <div class="meaning"><span class="tag en">EN</span><p id="cardEn"></p></div>
         <div class="meaning"><span class="tag hu">HU</span><p id="cardHu" lang="hu"></p></div>
@@ -959,9 +973,9 @@ label.btn { cursor: pointer; }
   </main>
 
   <nav class="actions" aria-label="Answer">
-    <button type="button" class="act learn" id="btnLearning" aria-label="Still learning (Left arrow)"><span class="act-key" aria-hidden="true">←</span><span class="act-seal" lang="zh-CN" aria-hidden="true">学</span><span class="act-text"><span class="act-label">Still learning</span></span></button>
-    <button type="button" class="act skip" id="btnSkip" aria-label="Skip to the next card (Space)"><svg class="act-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15a8 8 0 0 1 14.6-4.5M19 5v5.5h-5.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="act-label">Skip</span></button>
-    <button type="button" class="act know" id="btnKnown" aria-label="I know it (Right arrow)"><span class="act-seal" lang="zh-CN" aria-hidden="true">会</span><span class="act-text"><span class="act-label">I know it</span></span><span class="act-key" aria-hidden="true">→</span></button>
+    <button type="button" class="act learn" id="btnLearning" aria-label="Still learning (Left arrow)"><span class="act-key" aria-hidden="true">←</span><span class="act-seal" lang="zh-CN" aria-hidden="true">学</span><span class="act-text"><span class="act-label" data-lbl>Still learning</span></span></button>
+    <button type="button" class="act skip" id="btnSkip" aria-label="Skip to the next card (Space)"><svg class="act-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15a8 8 0 0 1 14.6-4.5M19 5v5.5h-5.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="act-label" data-lbl>Skip</span></button>
+    <button type="button" class="act know" id="btnKnown" aria-label="I know it (Right arrow)"><span class="act-seal" lang="zh-CN" aria-hidden="true">会</span><span class="act-text"><span class="act-label" data-lbl>I know it</span></span><span class="act-key" aria-hidden="true">→</span></button>
   </nav>
   <p class="kbd-hint"><span><kbd>Space</kbd> skip</span><span><kbd>S</kbd> speak</span><span><kbd>↑</kbd><kbd>↓</kbd> flip</span><span><kbd>1</kbd>–<kbd>4</kbd> choose</span><span><kbd>H</kbd> <kbd>E</kbd> hard, easy</span><span><kbd>T</kbd> type</span><span>more in Help</span></p>
 
@@ -973,12 +987,20 @@ label.btn { cursor: pointer; }
 <div id="settingsView" class="overlay" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
     <div class="sheet-head">
-      <h2 id="settingsTitle">Settings</h2>
+      <h2 id="settingsTitle" data-lbl="inline">Settings</h2>
       <button type="button" class="close-btn" id="btnCloseSettings" aria-label="Close settings">✕</button>
     </div>
     <div class="settings-body">
       <section class="set-group">
-        <h3>Cards</h3>
+        <h3 data-lbl="inline">Cards</h3>
+        <div class="set-row">
+          <label for="optLabels">Interface labels</label>
+          <select id="optLabels">
+            <option value="both">中文 + English</option>
+            <option value="en">English</option>
+            <option value="zh">中文 only</option>
+          </select>
+        </div>
         <label class="switch"><input type="checkbox" id="optAutoReveal"><span>Always show meanings</span></label>
         <label class="switch"><input type="checkbox" id="optTones"><span>Tone colours <span class="tone-key" aria-hidden="true"><span class="t1">mā</span> <span class="t2">má</span> <span class="t3">mǎ</span> <span class="t4">mà</span> <span class="t5">ma</span></span></span></label>
         <label class="switch"><input type="checkbox" id="optAutoplay"><span>Read each new card aloud</span></label>
@@ -987,7 +1009,7 @@ label.btn { cursor: pointer; }
         <label class="switch"><input type="checkbox" id="optVibrate"><span>Vibrate on answers</span></label>
       </section>
       <section class="set-group">
-        <h3>Voice</h3>
+        <h3 data-lbl="inline">Voice</h3>
         <div class="set-row">
           <label for="optVoice">Chinese voice</label>
           <select id="optVoice"><option value="">Automatic</option></select>
@@ -1007,7 +1029,7 @@ label.btn { cursor: pointer; }
         <label class="switch" title="Plays a near-silent sound first so speakers or headphones are awake. Adds about a second of delay."><input type="checkbox" id="optWarmup"><span>Fix cut-off audio start</span></label>
       </section>
       <section class="set-group" id="syncGroup">
-        <h3>Sync across devices</h3>
+        <h3 data-lbl="inline">Sync across devices</h3>
         <div class="set-row" id="syncEmailRow">
           <label for="syncEmail">Email</label>
           <input type="email" id="syncEmail" autocomplete="email" inputmode="email" spellcheck="false" placeholder="you@example.com" aria-describedby="syncEmailNote">
@@ -1027,7 +1049,7 @@ label.btn { cursor: pointer; }
         <p id="syncStatus" class="transfer-status" role="status"></p>
       </section>
       <section class="set-group">
-        <h3>Progress and checks</h3>
+        <h3 data-lbl="inline">Progress and checks</h3>
         <div class="set-row">
           <span class="set-note">Move progress without an account.</span>
           <span class="set-btns">
@@ -1089,7 +1111,7 @@ label.btn { cursor: pointer; }
 <div id="petView" class="overlay" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="petTitle">
     <div class="sheet-head">
-      <h2 id="petTitle">Your panda</h2>
+      <h2 id="petTitle" data-lbl="inline">Your panda</h2>
       <button type="button" class="close-btn" id="btnClosePet" aria-label="Close the panda">✕</button>
     </div>
     <div class="pv-body pet-body">
@@ -1125,7 +1147,7 @@ label.btn { cursor: pointer; }
 <div id="topicView" class="overlay" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="topicTitle">
     <div class="sheet-head">
-      <h2 id="topicTitle">Topics</h2>
+      <h2 id="topicTitle" data-lbl="inline">Topics</h2>
       <button type="button" class="close-btn" id="btnCloseTopic" aria-label="Close topics">✕</button>
     </div>
     <div class="pv-body">
@@ -1159,7 +1181,7 @@ label.btn { cursor: pointer; }
 <div id="helpView" class="overlay" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
     <div class="sheet-head">
-      <h2 id="helpTitle">How it works</h2>
+      <h2 id="helpTitle" data-lbl="inline">How it works</h2>
       <button type="button" class="close-btn" id="btnCloseHelp" aria-label="Close help">✕</button>
     </div>
     <div class="help-body">
@@ -1203,6 +1225,7 @@ label.btn { cursor: pointer; }
           <dt>Fill the gap</dt><dd>One of the word's example sentences with the word blanked out, and its translation. Pick the word that fits from four of the same length; keys 1–4 pick. Words only; it counts toward reading.</dd>
           <dt>Which tone?</dt><dd>Hear the word, then pick the tone of its first syllable from the four written forms; keys 1–4 pick tones 1–4. Words only. The 21 words whose first syllable is neutral, or changes tone when it is spoken (你好, 可以), come up as normal cards.</dd>
           <dt>Tap a word</dt><dd>In any example sentence, and on sentence cards, the words from HSK 1–3 have a dotted underline. Tap one to see its pinyin and meaning; tap elsewhere or press Esc to close it. On a word card the word itself is highlighted instead.</dd>
+          <dt>Chinese labels</dt><dd>Buttons and headings carry their Chinese name (复习 fùxí = Due, 我会了 wǒ huì le = I know it), so you pick up everyday words as you use the app. Settings → Interface labels switches between 中文 + English, English, and 中文 only; hover or long-press a label to see its pinyin.</dd>
           <dt>Your panda</dt><dd>The little panda next to today's count lives on your studying. Every answer feeds it a bamboo leaf, your daily goal fills its belly, and all your answers together make it grow from newborn to sage. Tap it to see how it is doing and to give it a name.</dd>
           <dt>Word of the day</dt><dd>Each day a useful word you do not know yet appears above the card. “Study it” opens it; ✕ hides it until tomorrow.</dd>
           <dt>Daily quests</dt><dd>Three small goals each day, shown in the progress view. Each finished quest gives 30 XP; all three give 50 XP more and a 🧊 streak freeze. You can save two, and a saved freeze keeps your streak alive over a missed day. Every Monday a short recap of last week appears.</dd>
@@ -1336,7 +1359,7 @@ label.btn { cursor: pointer; }
   var EXPECTED_LEVELS = __EXPECTED_LEVELS__;
   var MODE_NAMES = { all: 'All cards', due: 'Due for review', learning: 'Learning only', unmarked: 'New cards only', hard: 'Hardest words' };
   var STATUS_NAMES = { known: 'Known', learning: 'Learning', unmarked: 'New' };
-  var REQUIRED_IDS = ['btnPet', 'petMini', 'petView', 'btnClosePet', 'petBig', 'petName', 'petStageName', 'petMood', 'petFedText', 'petFed', 'petGrowText', 'petGrow', 'petRename', 'petNameInput', 'cardHints', 'quizView', 'quizTitle', 'quizBody', 'btnCloseQuiz', 'wotd', 'wotdZh', 'wotdPy', 'wotdEn', 'wotdHint', 'btnWotdStudy', 'btnWotdClose', 'extra-data', 'btnTopic', 'topicBtnZh', 'topicBtnName', 'topicView', 'btnCloseTopic', 'topicGrid', 'cardRank', 'comboTag', 'gradeRow', 'legendTones', 'optChoicePinyin', 'progressTitle', 'optFadePinyin', 'wordPop', 'wordPopZh', 'wordPopLv', 'wordPopPy', 'wordPopEn', 'wordPopHu', 'btnWordPopSpeak', 'btnWordPopClose', 'app', 'errorBanner', 'errorList', 'modeAll', 'modeLearning', 'modeUnmarked', 'countAll', 'countLearningMode',
+  var REQUIRED_IDS = ['optLabels', 'btnPet', 'petMini', 'petView', 'btnClosePet', 'petBig', 'petName', 'petStageName', 'petMood', 'petFedText', 'petFed', 'petGrowText', 'petGrow', 'petRename', 'petNameInput', 'cardHints', 'quizView', 'quizTitle', 'quizBody', 'btnCloseQuiz', 'wotd', 'wotdZh', 'wotdPy', 'wotdEn', 'wotdHint', 'btnWotdStudy', 'btnWotdClose', 'extra-data', 'btnTopic', 'topicBtnZh', 'topicBtnName', 'topicView', 'btnCloseTopic', 'topicGrid', 'cardRank', 'comboTag', 'gradeRow', 'legendTones', 'optChoicePinyin', 'progressTitle', 'optFadePinyin', 'wordPop', 'wordPopZh', 'wordPopLv', 'wordPopPy', 'wordPopEn', 'wordPopHu', 'btnWordPopSpeak', 'btnWordPopClose', 'app', 'errorBanner', 'errorList', 'modeAll', 'modeLearning', 'modeUnmarked', 'countAll', 'countLearningMode',
     'countUnmarkedMode', 'btnShuffle', 'btnUndo', 'btnReset', 'btnSelfCheck', 'btnList', 'cardCounter', 'knownCount', 'learningCount',
     'unmarkedCount', 'progressBar', 'progKnown', 'progLearning', 'progressLabel', 'stage', 'card', 'cardNumber', 'cardStatus', 'cardHanzi',
     'cardPinyin', 'btnSpeak', 'speakLabel', 'cardAnswer', 'cardEn', 'cardHu', 'cardExamples', 'revealHint', 'deckEnd', 'endEmoji', 'endTitle',
@@ -1345,7 +1368,7 @@ label.btn { cursor: pointer; }
     'confirmText', 'confirmCancel', 'confirmAlt', 'confirmOk', 'diagView', 'btnCloseDiag', 'diagSummary', 'diagResults', 'btnRunCheck', 'toast', 'vocab-data',
     'syncGroup', 'syncEmailRow', 'syncEmail', 'syncLinkRow', 'syncEmailNote', 'btnSignIn', 'syncAccountRow', 'syncAccount', 'btnSignOut',
     'syncDatesRow', 'syncDates', 'btnSyncNow', 'syncStatus'];
-  var CORE_BUTTONS = ['btnPet', 'btnClosePet', 'petBig', 'petRename', 'btnCloseQuiz', 'quizBody', 'btnWotdStudy', 'btnWotdClose', 'btnTopic', 'btnCloseTopic', 'topicGrid', 'pvBody', 'gradeRow', 'optChoicePinyin', 'optFadePinyin', 'btnWordPopSpeak', 'btnWordPopClose', 'btnExport', 'btnImport', 'btnApplyImport', 'revealHint', 'btnHelp', 'btnTourNext', 'btnSettings', 'btnKnown', 'btnLearning', 'btnSkip', 'btnSpeak', 'cardExamples', 'modeDue', 'modeHard', 'optPractice', 'choiceBox', 'cardPrompt', 'btnProgress', 'levelAll', 'level1', 'level2', 'level3', 'card', 'btnShuffle', 'btnUndo', 'btnReset', 'btnSelfCheck',
+  var CORE_BUTTONS = ['optLabels', 'btnPet', 'btnClosePet', 'petBig', 'petRename', 'btnCloseQuiz', 'quizBody', 'btnWotdStudy', 'btnWotdClose', 'btnTopic', 'btnCloseTopic', 'topicGrid', 'pvBody', 'gradeRow', 'optChoicePinyin', 'optFadePinyin', 'btnWordPopSpeak', 'btnWordPopClose', 'btnExport', 'btnImport', 'btnApplyImport', 'revealHint', 'btnHelp', 'btnTourNext', 'btnSettings', 'btnKnown', 'btnLearning', 'btnSkip', 'btnSpeak', 'cardExamples', 'modeDue', 'modeHard', 'optPractice', 'choiceBox', 'cardPrompt', 'btnProgress', 'levelAll', 'level1', 'level2', 'level3', 'card', 'btnShuffle', 'btnUndo', 'btnReset', 'btnSelfCheck',
     'btnList', 'btnCloseList', 'modeAll', 'modeLearning', 'modeUnmarked', 'searchInput', 'confirmOk', 'confirmCancel', 'confirmAlt', 'btnSignIn', 'btnSignOut', 'btnSyncNow'];
 
   var $ = function (id) { return document.getElementById(id); };
@@ -1353,7 +1376,7 @@ label.btn { cursor: pointer; }
   var bound = {};
   var cards = [], wordCards = [], sentCards = [];
   var state = { status: {}, mode: 'all', deck: [], pos: 0, shuffled: false, revealed: false, autoReveal: false, rate: 0.85, voice: '', badVoices: [], voicesTested: false, level: 'all', activity: {}, goal: 20, warmup: true, deckType: 'words',
-    srs: {}, misses: {}, skill: 'read', marks: {}, deckMemory: {}, topic: 'all', xp: 0, bestCombo: 0, learned: {}, wotdSeen: '', quests: null, freezes: 0, frozen: [], recapWeek: '', seals: {}, questDays: 0, petName: '', blitzBest: {}, exams: {}, milestones: [], practice: 'zh', toneColors: true, fadePinyin: false, choicePinyin: true,
+    srs: {}, misses: {}, skill: 'read', marks: {}, deckMemory: {}, topic: 'all', xp: 0, bestCombo: 0, learned: {}, wotdSeen: '', quests: null, freezes: 0, frozen: [], recapWeek: '', seals: {}, questDays: 0, petName: '', labels: 'both', blitzBest: {}, exams: {}, milestones: [], practice: 'zh', toneColors: true, fadePinyin: false, choicePinyin: true,
     autoplay: false, vibrate: true, seenTour: false };
   var undoStack = [];
   var busy = false;
@@ -1424,6 +1447,59 @@ label.btn { cursor: pointer; }
       };
       indexCard(c);
       return c;
+    });
+  }
+
+  /* ---------- Chinese interface labels ---------- */
+  // English label → [Chinese, pinyin]. The "Interface labels" setting shows English, 中文 + English (the default) or 中文 only.
+  // In 中文 only the English stays in the page, visually hidden, so screen readers still read it; the tooltip shows both.
+  var LABEL_MODES = { both: '中文 + English', en: 'English', zh: '中文 only' };
+  var ZH_LABELS = {
+    'All cards': ['全部', 'quánbù'], 'Due': ['复习', 'fùxí'], 'Learning': ['在学', 'zài xué'], 'New': ['生词', 'shēngcí'], 'Hardest': ['难词', 'náncí'],
+    'Still learning': ['还在学', 'hái zài xué'], 'Skip': ['跳过', 'tiàoguò'], 'I know it': ['我会了', 'wǒ huì le'],
+    'Hard': ['难', 'nán'], 'Good': ['好', 'hǎo'], 'Easy': ['容易', 'róngyì'],
+    'Today': ['今天', 'jīntiān'], 'Progress': ['进度', 'jìndù'], 'Collection': ['收藏', 'shōucáng'], 'Your progress': ['我的进度', 'wǒ de jìndù'],
+    'Today\u2019s quests': ['每日任务', 'měirì rènwu'], 'Daily goal': ['每日目标', 'měirì mùbiāo'], 'Coming reviews': ['复习计划', 'fùxí jìhuà'],
+    'Last 14 days': ['最近两周', 'zuìjìn liǎng zhōu'], 'What you can read': ['你能读懂的', 'nǐ néng dúdǒng de'], 'Your stats': ['统计', 'tǒngjì'],
+    'Challenges': ['挑战', 'tiǎozhàn'], 'Seals': ['印章', 'yìnzhāng'], 'By topic': ['话题', 'huàtí'], 'By HSK level': ['等级', 'děngjí'],
+    'Settings': ['设置', 'shèzhì'], 'How it works': ['使用说明', 'shǐyòng shuōmíng'], 'Topics': ['话题', 'huàtí'], 'Your panda': ['熊猫', 'xióngmāo'],
+    'All words': ['词表', 'cíbiǎo'], 'All sentences': ['句子表', 'jùzi biǎo'],
+    'Cards': ['卡片', 'kǎpiàn'], 'Voice': ['声音', 'shēngyīn'], 'Sync across devices': ['同步', 'tóngbù'], 'Progress and checks': ['进度和检查', 'jìndù hé jiǎnchá']
+  };
+  var PRACTICE_ZH = { zh: '认字', reverse: '说中文', listen: '听力', choice: '选择题', hanzi: '只看汉字', tone: '声调', cloze: '填空', pairs: '易混词',
+    's-zh': '读句子', 's-reverse': '说句子', 's-listen': '听句子', 's-choice': '句子选择题', 's-hanzi': '只看汉字', 's-build': '组句' };
+  var GROUP_ZH = { Words: '词语', Sentences: '句子' };
+  // A label unit: the Chinese and the English, stacked in buttons, side by side in headings.
+  function zhLabel(en, inline) {
+    var z = ZH_LABELS[en];
+    if (!z) return document.createTextNode(en);
+    var w = el('span', 'lbl' + (inline ? ' inline' : ''));
+    w.title = z[0] + ' ' + z[1] + ' · ' + en;
+    var zl = el('span', 'zl', z[0]);
+    zl.setAttribute('lang', 'zh-CN');
+    w.appendChild(zl);
+    w.appendChild(el('span', 'el', en));
+    return w;
+  }
+  function setLabel(node, en, inline) { node.textContent = ''; node.appendChild(zhLabel(en, inline)); }
+  // Turns every [data-lbl] element of the static page into a label unit once, at start-up.
+  function upgradeLabels() {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-lbl]'), function (n) {
+      if (!n.querySelector('.lbl')) setLabel(n, n.textContent.trim(), n.getAttribute('data-lbl') === 'inline');
+    });
+  }
+  // Labels switch with a class on <body>; the practice menu, which cannot hold markup, is rewritten.
+  function applyLabelMode() {
+    var m = state.labels;
+    ['en', 'both', 'zh'].forEach(function (k) { document.body.classList.toggle('labels-' + k, m === k); });
+    var pick = function (zh, en) { return !zh || m === 'en' ? en : m === 'both' ? zh + ' · ' + en : zh; };
+    Array.prototype.forEach.call(els.optPractice.querySelectorAll('optgroup'), function (g) {
+      if (!g.hasAttribute('data-en')) g.setAttribute('data-en', g.label);
+      g.label = pick(GROUP_ZH[g.getAttribute('data-en')], g.getAttribute('data-en'));
+    });
+    Array.prototype.forEach.call(els.optPractice.options, function (o) {
+      if (!o.hasAttribute('data-en')) o.setAttribute('data-en', o.textContent);
+      o.textContent = pick(PRACTICE_ZH[o.value], o.getAttribute('data-en'));
     });
   }
 
@@ -1541,6 +1617,7 @@ label.btn { cursor: pointer; }
     els.optTones.checked = state.toneColors;
     els.optAutoplay.checked = state.autoplay;
     els.optFadePinyin.checked = state.fadePinyin;
+    els.optLabels.value = state.labels;
     els.optChoicePinyin.checked = state.choicePinyin;
     els.optVibrate.checked = state.vibrate;
     els.optWarmup.checked = state.warmup;
@@ -2139,6 +2216,7 @@ label.btn { cursor: pointer; }
       recapWeek: state.recapWeek,
       seals: state.seals,
       petName: state.petName,
+      labels: state.labels,
       questDays: state.questDays,
       blitzBest: state.blitzBest,
       exams: state.exams,
@@ -2241,6 +2319,7 @@ label.btn { cursor: pointer; }
     state.freezes = saved ? clampInt(saved.freezes, 0, MAX_FREEZES) : 0;
     state.questDays = saved ? clampInt(saved.questDays, 0, 100000) : 0;
     state.petName = saved && typeof saved.petName === 'string' ? saved.petName.trim().slice(0, 16) : '';
+    state.labels = saved && LABEL_MODES[saved.labels] ? saved.labels : 'both';
     var numMap = function (src, keys, max) {
       var out = {};
       if (src && typeof src === 'object') keys.forEach(function (k) { if (typeof src[k] === 'number') out[k] = clampInt(src[k], 0, max); });
@@ -2408,7 +2487,8 @@ label.btn { cursor: pointer; }
   function pct(a, b) { return b ? Math.round(a / b * 100) : 0; }
   function section(title, sub) {
     var s = el('section', 'pv-section');
-    var h = el('h3', null, title);
+    var h = el('h3');
+    h.appendChild(zhLabel(title, true));
     s.appendChild(h);
     if (sub) s.appendChild(el('p', 'pv-sub', sub));
     return s;
@@ -2592,14 +2672,16 @@ label.btn { cursor: pointer; }
       tiles.appendChild(tile);
     });
     hero.appendChild(tiles);
-    els.progressTitle.textContent = 'Your progress: ' + SKILLS[state.skill].toLowerCase();
+    setLabel(els.progressTitle, 'Your progress', true);
+    els.progressTitle.appendChild(document.createTextNode(': ' + SKILLS[state.skill].toLowerCase()));
     // Three tabs: what to do today, how far you are, and what you have collected.
     var panes = { today: el('div', 'pv-pane'), progress: el('div', 'pv-pane'), collection: el('div', 'pv-pane') };
     var tabs = el('div', 'pv-tabs');
     tabs.setAttribute('role', 'group');
     tabs.setAttribute('aria-label', 'Progress sections');
     [['today', 'Today'], ['progress', 'Progress'], ['collection', 'Collection']].forEach(function (t) {
-      var b = el('button', 'pv-tab', t[1]);
+      var b = el('button', 'pv-tab');
+      b.appendChild(zhLabel(t[1]));
       b.type = 'button';
       b.setAttribute('data-pvtab', t[0]);
       tabs.appendChild(b);
@@ -4358,7 +4440,8 @@ label.btn { cursor: pointer; }
     Array.prototype.forEach.call(els.gradeRow.querySelectorAll('.grade'), function (b) {
       var wait = fmtWait(SRS_DAYS[nextBox(c, b.getAttribute('data-grade'))]);
       b.querySelector('small').textContent = wait;
-      b.setAttribute('aria-label', b.firstChild.textContent.trim() + ': next review in ' + (wait === 'today' ? 'today' : wait.replace(' d', ' days').replace(' mo', ' months')));
+      var gname = { hard: 'Hard', good: 'Good', easy: 'Easy' }[b.getAttribute('data-grade')];
+      b.setAttribute('aria-label', gname + ': next review in ' + (wait === 'today' ? 'today' : wait.replace(' d', ' days').replace(' mo', ' months')));
     });
   }
   function setRevealed(v) {
@@ -4933,7 +5016,7 @@ label.btn { cursor: pointer; }
 
   /* ---------- list view ---------- */
   function openList() {
-    els.listTitle.textContent = deck().listTitle;
+    setLabel(els.listTitle, deck().listTitle, true);
     openOverlay(els.listView, els.searchInput);
     renderList();
     var cur = els.wordList.querySelector('.word-row.current');
@@ -5824,6 +5907,24 @@ label.btn { cursor: pointer; }
       })();
       add('Similar words', simRes.ok, simRes.d);
 
+      var labRes = (function () {
+        var keep = state.labels, mz = els.modeDue.querySelector('.lbl .zl'), me = els.modeDue.querySelector('.lbl .el');
+        var hidden = function (n) { return getComputedStyle(n).display === 'none' || getComputedStyle(n).position === 'absolute'; };
+        state.labels = 'both'; applyLabelMode();
+        var both = !!mz && mz.textContent === '复习' && !hidden(mz) && !hidden(me) && els.optPractice.options[0].textContent.indexOf('认字 · ') === 0;
+        state.labels = 'zh'; applyLabelMode();
+        var zhOnly = !hidden(mz) && hidden(me) && els.modeDue.textContent.indexOf('Due') !== -1 && els.optPractice.options[0].textContent === '认字';
+        state.labels = 'en'; applyLabelMode();
+        var en = hidden(mz) && !hidden(me) && els.optPractice.options[0].textContent === els.optPractice.options[0].getAttribute('data-en');
+        var table = Object.keys(ZH_LABELS).every(function (k) { return /[\u4e00-\u9fff]/.test(ZH_LABELS[k][0]) && /[a-zāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜü]/.test(ZH_LABELS[k][1]); });
+        var marked = document.querySelectorAll('[data-lbl] .lbl').length >= 19;
+        state.labels = keep; applyLabelMode();
+        return { ok: both && zhOnly && en && table && marked,
+          d: '中文 + English shows both: ' + both + ', 中文 only keeps the English for screen readers: ' + zhOnly + ', English hides the Chinese: ' + en +
+            ', every label has Chinese and pinyin: ' + table + ', page labels upgraded: ' + marked };
+      })();
+      add('Chinese interface labels', labRes.ok, labRes.d);
+
       var tapRes = (function () {
         var small = ['btnShuffle', 'btnUndo', 'btnPet', 'todayPill', 'btnWotdClose'].filter(function (id) {
           var r = els[id].getBoundingClientRect();
@@ -6451,6 +6552,7 @@ label.btn { cursor: pointer; }
       }
     });
     on('optTones', 'change', function () { state.toneColors = els.optTones.checked; render(false); save(); });
+    on('optLabels', 'change', function () { state.labels = LABEL_MODES[els.optLabels.value] ? els.optLabels.value : 'both'; applyLabelMode(); save(); });
     on('optFadePinyin', 'change', function () { state.fadePinyin = els.optFadePinyin.checked; render(false); save(); });
     on('optChoicePinyin', 'change', function () { state.choicePinyin = els.optChoicePinyin.checked; render(false); save(); });
     on('optAutoplay', 'change', function () { state.autoplay = els.optAutoplay.checked; save(); });
@@ -6515,7 +6617,9 @@ label.btn { cursor: pointer; }
     useDeckType(saved && saved.deckType === 'sentences' ? 'sentences' : 'words');
     restore(saved);
     migrateSrs();
+    upgradeLabels();
     syncSettingsUI();
+    applyLabelMode();
     wire();
     updateTopicBtn();
     renderCombo();
