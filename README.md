@@ -74,6 +74,7 @@ Row-level security is what makes the anon key safe to publish:
 - There is deliberately no `anon` policy and no `anon` grant on `progress`.
 - `authenticated` holds only `SELECT, INSERT, UPDATE, DELETE`. `TRUNCATE` is revoked, because row-level security does not filter it.
 - `upsert_progress` is `security invoker`, so the policies still apply inside it, and it reads `auth.uid()` rather than trusting a `user_id` argument.
+- A restrictive policy also requires the account to be in `public.sync_allowlist`. The migration enrolled every account that had signed in by then. The list has no API access; add an account from the SQL editor with `insert into public.sync_allowlist (user_id) values ('<auth.users id>');`. An account that is not on the list sees "This account is not enabled for cloud sync."
 
 **Sign-ups are closed.** Sync is for existing accounts: `[auth] enable_signup = false`, applied with `supabase config push` (preview it first with `echo n | supabase config push`). Leave `[auth.email] enable_signup = true`; the CLI treats it as the email login switch, and turning it off locks out existing users too.
 
@@ -96,6 +97,8 @@ node scripts/check-sentence-pinyin.js           # every HSK 1–2 sentence has p
 node scripts/check-hsk3.js data/hsk3/h3-1.json  # one HSK 3 file
 node scripts/fix-hsk3.js fixes.json             # apply [headword, old text, new text] corrections to the HSK 3 files
 ```
+
+Settings shows the build date and build id. The build id is a hash of the app and its data, and also names the service worker cache, so it changes exactly when the app does.
 
 The in-app self-check (Settings → Run self-check) tests the data and every control in the browser, including the sync logic against a simulated server.
 

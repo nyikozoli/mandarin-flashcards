@@ -21,3 +21,6 @@ supabase/.branches/
 node_modules/
 .claude/allow-main-commits
 .claude/settings.local.json
+
+# Python runtime that a Windows installer dropped in the repo root
+Python/

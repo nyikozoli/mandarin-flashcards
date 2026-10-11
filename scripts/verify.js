@@ -4,7 +4,7 @@ const html=fs.readFileSync(process.argv[2],'utf8'); let fail=0;
 const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m); if(!c) fail++;};
 ok(html.startsWith('<!DOCTYPE html>'),'doctype');
 ok(/<meta charset="UTF-8">/.test(html),'meta charset UTF-8');
-ok(!/__VOCAB_JSON__|__EXPECTED_|__SITE_HEAD__|__SYNC_CONFIG__/.test(html),'all placeholders replaced');
+ok(!/__VOCAB_JSON__|__EXPECTED_|__SITE_HEAD__|__SYNC_CONFIG__|__BUILD_/.test(html),'all placeholders replaced');
 // The anon key is public by design; the service_role key would be a full database compromise.
 ok(!/service_role|sb_secret_/.test(html),'no service_role secret in output');
 ok(!/(src|href)\s*=\s*["']https?:/i.test(html) && !/@import|url\(\s*["']?https?:/i.test(html),'no external resources');

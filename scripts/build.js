@@ -78,6 +78,9 @@ const json = JSON.stringify(cards).replace(/</g, '\\u003c').replace(/>/g, '\\u00
 // ---------- html ----------
 const template = read(rel('template.html')).replace(/\r\n/g, '\n');
 const buildId = crypto.createHash('sha1').update(template).update(json).digest('hex').slice(0, 10);
+// Shown in Settings, so you can tell which version a device runs. The build id is a content hash
+// and also names the service worker cache, so it changes exactly when the app does.
+const buildDate = new Date().toISOString().slice(0, 10);
 
 function render(siteHead, syncConfig) {
   const parts = template.split('__VOCAB_JSON__');
@@ -88,8 +91,10 @@ function render(siteHead, syncConfig) {
   html = html.replace('__EXPECTED_TOTAL__', String(total))
     .replace('__EXPECTED_LEVELS__', JSON.stringify(expected))
     .replace('__SYNC_CONFIG__', function () { return syncConfig ? JSON.stringify(syncConfig) : 'null'; })
-    .replace('<!--__SITE_HEAD__-->', siteHead);
-  if (/__EXPECTED_|__SITE_HEAD__|__VOCAB_JSON__|__SYNC_CONFIG__/.test(html)) throw new Error('Unreplaced placeholder in template');
+    .replace('<!--__SITE_HEAD__-->', siteHead)
+    .replace('__BUILD_DATE__', buildDate)
+    .replace('__BUILD_ID__', buildId);
+  if (/__EXPECTED_|__SITE_HEAD__|__VOCAB_JSON__|__SYNC_CONFIG__|__BUILD_/.test(html)) throw new Error('Unreplaced placeholder in template');
   return html;
 }
 

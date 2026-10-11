@@ -418,6 +418,7 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
 .set-row select, .set-row input[type="email"] { min-height: 40px; max-width: 100%; border-radius: 10px; border: 1px solid var(--line); background: var(--surface2); color: var(--text); padding: 4px 8px; }
 .set-row input[type="email"] { flex: 1 1 180px; }
 .set-note { color: var(--soft); font-size: 14px; }
+.app-version { margin: 14px 0 0; font-size: 13px; font-variant-numeric: tabular-nums; }
 .sync-dates { flex: 1 1 100%; list-style: none; margin: 0; padding: 0; font-size: 14px; color: var(--soft); }
 .sync-dates li { display: flex; gap: 10px; justify-content: space-between; padding: 2px 0; }
 .sync-dates b { font-weight: 600; }
@@ -740,6 +741,7 @@ label.btn { cursor: pointer; }
           <span class="set-note">Check the word data and test every control.</span>
           <button type="button" class="btn small" id="btnSelfCheck" aria-label="Run the self-check diagnostics">Run self-check</button>
         </div>
+        <p class="set-note app-version">Version __BUILD_DATE__, build __BUILD_ID__</p>
       </section>
     </div>
   </div>
@@ -3461,6 +3463,9 @@ label.btn { cursor: pointer; }
       els.card.click();
       var hanzi = hidden && hanziReveal;
       state.practice = 'zh'; render(false);
+      var ver = document.querySelector('.app-version');
+      add('Version shown in Settings', !!ver && /^Version \d{4}-\d\d-\d\d, build [0-9a-f]{10}$/.test(ver.textContent), ver ? ver.textContent : 'missing');
+
       add('Practice modes: meaning → Chinese, listening, multiple choice, characters only', rev && revShown && listen && choice && hanzi,
         'reverse hides the word: ' + rev + ', reveal shows it: ' + revShown + ', listening: ' + listen + ', multiple choice (4 options, right answer marks Known): ' + choice +
         ', characters only hides pinyin and audio until the reveal: ' + hanzi);

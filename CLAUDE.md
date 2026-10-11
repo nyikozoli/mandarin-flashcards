@@ -21,7 +21,7 @@ This repository is **public** (`nyikozoli/mandarin-flashcards`). Never commit se
 
 ## How the app is put together (`src/template.html`)
 
-- **Structure:** the JS is one IIFE, split into sections marked `/* ---------- name ---------- */`. The build fills `__VOCAB_JSON__`, `__EXPECTED_TOTAL__`, `__EXPECTED_LEVELS__`, `__SYNC_CONFIG__` (null except in the Pages build) and `<!--__SITE_HEAD__-->`.
+- **Structure:** the JS is one IIFE, split into sections marked `/* ---------- name ---------- */`. The build fills `__VOCAB_JSON__`, `__EXPECTED_TOTAL__`, `__EXPECTED_LEVELS__`, `__SYNC_CONFIG__` (null except in the Pages build), `<!--__SITE_HEAD__-->`, and `__BUILD_DATE__` / `__BUILD_ID__` for the version line in Settings.
 - **State:** everything lives in `state`. `progressSnapshot()` is the single list of persisted fields: `save()` stores it, and export and sync send it minus `DEVICE_ONLY`. `restore(saved)` reads it back, so a new persisted field needs an entry in both.
 - **Decks:** `wordCards`, plus `sentCards` built from them at startup. `cards` points at the active one; switch only through `useDeckType()`. Text that differs between words and sentences goes in `DECKS`, read through `deck()` and `noun()`.
 - **Panels:** every overlay id is listed in `OVERLAYS`. Open and close them only with `openOverlay()` / `closeOverlay()`, which also lock the page behind (`inert`). `askConfirm(title, text, ok, cb, altLabel, altCb)` is the confirm dialog, with an optional second action.
@@ -29,6 +29,7 @@ This repository is **public** (`nyikozoli/mandarin-flashcards`). Never commit se
   - Writes go only through the `upsert_progress` RPC, a compare-and-set on `updated_at`. A refusal opens the conflict dialog; the client never merges or silently overwrites.
   - `ensureSession()` signs out only when the auth server rejects the refresh token (400/401). A network error or a 5xx keeps the session.
   - Sign-ups are closed: `[auth] enable_signup = false` in `supabase/config.toml`, applied with `supabase config push`. Keep `[auth.email] enable_signup = true`: the CLI maps it to the email provider switch, so `false` also blocks existing users' magic-link sign-in. That happened once, for about a minute.
+  - Only accounts in `public.sync_allowlist` can read or write `progress` (a restrictive policy plus a check in `upsert_progress`). The ids live only in the database, never in this repo.
 - **Element ids:** any id used from JS must be in `REQUIRED_IDS`; wired controls also go in `CORE_BUTTONS`. `verify.js` and the self-check enforce this.
 - **Self-check:**
   - `runSelfCheck()` → `functionalTest()` clicks through every feature with `testing = true`, which turns off animation, saving, toasts and speech. It snapshots state and restores it afterwards.
