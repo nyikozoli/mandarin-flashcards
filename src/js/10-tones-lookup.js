@@ -149,6 +149,12 @@
     els.wordPopLv.textContent = 'HSK ' + w.lv;
     els.wordPopEn.textContent = w.en;
     els.wordPopHu.textContent = w.hu;
+    var on = langsOn();
+    els.wordPopEn.parentNode.hidden = on.indexOf('en') === -1;
+    els.wordPopHu.parentNode.hidden = on.indexOf('hu') === -1;
+    els.wordPopMore.textContent = '';
+    meaningLines(els.wordPopMore, { en: '', hu: '', tr: w.tr }, 'ex-line');
+    Array.prototype.forEach.call(els.wordPopMore.querySelectorAll('[lang="en"], [lang="hu"]'), function (n) { n.parentNode.removeChild(n); });
     els.wordPop.hidden = false;
     anchor.setAttribute('aria-expanded', 'true');
     placeWordPop(anchor);

@@ -182,8 +182,9 @@
           <button type="button" class="grade good" data-grade="good"><span data-lbl>Good</span> <small></small></button>
           <button type="button" class="grade easy" data-grade="easy"><span data-lbl>Easy</span> <small></small></button>
         </div>
-        <div class="meaning"><span class="tag en">EN</span><p id="cardEn"></p></div>
-        <div class="meaning"><span class="tag hu">HU</span><p id="cardHu" lang="hu"></p></div>
+        <div class="meaning" data-mlang="en"><span class="tag en">EN</span><p id="cardEn"></p></div>
+        <div class="meaning" data-mlang="hu"><span class="tag hu">HU</span><p id="cardHu" lang="hu"></p></div>
+        <div id="cardMeanMore"></div>
         <div id="cardHints" class="hints" hidden></div>
         <div id="cardExamples" class="examples"></div>
       </div>
@@ -238,6 +239,17 @@
         <label class="switch"><input type="checkbox" id="optFadePinyin"><span>Hide pinyin on cards I know well (until I tap)</span></label>
         <label class="switch"><input type="checkbox" id="optChoicePinyin"><span>Show pinyin in multiple choice</span></label>
         <label class="switch"><input type="checkbox" id="optVibrate"><span>Vibrate on answers</span></label>
+      </section>
+      <section class="set-group">
+        <h3 data-lbl="inline">Translations</h3>
+        <p class="set-note">Which meanings to show on cards, in quizzes and in the word list. At least one stays on; the first one on is the main meaning.</p>
+        <div class="lang-switches">
+          <label class="switch"><input type="checkbox" id="optLangEn" data-mlang="en"><span>English</span></label>
+          <label class="switch"><input type="checkbox" id="optLangHu" data-mlang="hu"><span>Magyar (Hungarian)</span></label>
+          <label class="switch"><input type="checkbox" id="optLangDe" data-mlang="de"><span>Deutsch (German)</span></label>
+          <label class="switch"><input type="checkbox" id="optLangEs" data-mlang="es"><span>Español (Spanish)</span></label>
+          <label class="switch"><input type="checkbox" id="optLangRo" data-mlang="ro"><span>Română (Romanian)</span></label>
+        </div>
       </section>
       <section class="set-group">
         <h3 data-lbl="inline">Voice</h3>
@@ -474,6 +486,7 @@
           <dt>Sync button</dt><dd>On the website, once you sign in under Settings → Sync across devices, a ⟳ button appears in the top bar. Tap it to sync now; it spins while syncing, and a dot means changes are waiting to upload. Progress also syncs on its own.</dd>
           <dt>What's new</dt><dd>After an update a short notice appears at the top. The “What’s new” link at the bottom of the page (and Settings → What's new) opens the list of every version at any time.</dd>
           <dt>Chinese labels</dt><dd>Buttons and headings carry their Chinese name (复习 fùxí = Due, 我会了 wǒ huì le = I know it), so you pick up everyday words as you use the app. Settings → Interface labels switches between 中文 + English, English, and 中文 only; hover or long-press a label to see its pinyin.</dd>
+          <dt>Translations</dt><dd>Settings → Translations shows the meanings in English, Hungarian, German, Spanish and Romanian, in any combination. At least one stays on; the first one switched on is the main meaning in quizzes and multiple choice. Search finds words in all five.</dd>
           <dt>读 说 听</dt><dd>On each card and in the word list, three small seals show the card's mark in every skill: 读 reading, 说 recall (meaning → Chinese), 听 listening. Green is Known, amber Learning, an outline New; the skill you are practising has a ring. The tag next to them names that skill's mark.</dd>
           <dt>Your panda</dt><dd>The panda at the top left lives on your studying. Every answer feeds it a bamboo leaf, your daily goal fills its belly, and all your answers together make it grow from newborn to sage. Tap it to see how it is doing and to give it a name.</dd>
           <dt>Word of the day</dt><dd>Each day a useful word you do not know yet appears above the card. “Study it” opens it; ✕ hides it until tomorrow.</dd>
@@ -587,8 +600,9 @@
 <div id="wordPop" class="word-pop" role="dialog" aria-labelledby="wordPopZh" hidden>
   <div class="wp-head"><span id="wordPopZh" class="wp-zh" lang="zh-CN"></span><span id="wordPopLv" class="wp-lv"></span></div>
   <p id="wordPopPy" class="wp-py" lang="zh-Latn-pinyin"></p>
-  <p class="ex-line"><span class="tag en">EN</span><span id="wordPopEn"></span></p>
-  <p class="ex-line" lang="hu"><span class="tag hu">HU</span><span id="wordPopHu"></span></p>
+  <p class="ex-line" data-mlang="en"><span class="tag en">EN</span><span id="wordPopEn"></span></p>
+  <p class="ex-line" data-mlang="hu" lang="hu"><span class="tag hu">HU</span><span id="wordPopHu"></span></p>
+  <div id="wordPopMore"></div>
   <button type="button" class="btn small wp-speak" id="btnWordPopSpeak">🔊 Read aloud</button>
   <button type="button" class="close-btn wp-close" id="btnWordPopClose" aria-label="Close the word">✕</button>
 </div>

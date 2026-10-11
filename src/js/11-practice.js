@@ -24,8 +24,8 @@
     return t.length > 60 ? t.slice(0, 57) + '…' : t;
   }
   function buildChoices(c) {
-    var key = shortText(c.en).toLowerCase();
-    var pool = cards.filter(function (x) { return x !== c && x.lv === c.lv && shortText(x.en).toLowerCase() !== key; });
+    var key = shortText(mainMeaning(c)).toLowerCase();
+    var pool = cards.filter(function (x) { return x !== c && x.lv === c.lv && shortText(mainMeaning(x)).toLowerCase() !== key; });
     if (pool.length < 3) pool = cards.filter(function (x) { return x !== c; });
     var opts = [c];
     while (opts.length < 4 && pool.length) opts.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
@@ -37,10 +37,16 @@
       b.setAttribute('data-ok', o === c ? '1' : '0');
       b.appendChild(el('span', 'choice-num', String(k + 1)));
       var tx = el('span', 'choice-text');
-      tx.appendChild(el('span', 'choice-en', shortText(o.en)));
-      var hu = el('span', 'choice-hu', shortText(o.hu));
-      hu.setAttribute('lang', 'hu');
-      tx.appendChild(hu);
+      // The first language on is the answer; a second one, if on, sits below it smaller.
+      var ls = langsOn();
+      var main = el('span', 'choice-en', shortText(mean(o, ls[0])));
+      main.setAttribute('lang', ls[0]);
+      tx.appendChild(main);
+      if (ls[1]) {
+        var sub = el('span', 'choice-hu', shortText(mean(o, ls[1])));
+        sub.setAttribute('lang', ls[1]);
+        tx.appendChild(sub);
+      }
       b.appendChild(tx);
       els.choiceBox.appendChild(b);
     });
@@ -215,6 +221,15 @@
     var pos = state.pos;
     setTimeout(function () { if (state.pos === pos && !busy) act(ok ? 'known' : 'learning'); }, ok ? 650 : 1800);
   }
+  // The meaning prompt: the first language on large, the others below it.
+  function promptMeanings(c, short) {
+    langsOn().forEach(function (k, i) {
+      var t = mean(c, k);
+      var x = el('p', i ? 'prompt-hu' : 'prompt-en', short ? shortText(t) : t);
+      x.setAttribute('lang', k);
+      els.cardPrompt.appendChild(x);
+    });
+  }
   function applyPractice(c) {
     var p = state.practice;
     toneQ = p === 'tone' ? toneQuizTarget(c) : null;
@@ -230,12 +245,8 @@
     els.cardPrompt.textContent = '';
     els.choiceBox.classList.toggle('tone-grid', !!toneQ);
     if (p === 'reverse') {
-      var en = el('p', 'prompt-en', c.en);
-      var hu = el('p', 'prompt-hu', c.hu);
-      hu.setAttribute('lang', 'hu');
       els.cardPrompt.appendChild(el('p', 'prompt-q', deck().sayIt));
-      els.cardPrompt.appendChild(en);
-      els.cardPrompt.appendChild(hu);
+      promptMeanings(c, false);
       if (!c.sentence) {
         var tf = el('form', 'type-form');
         var ti = el('input', 'type-input');
@@ -271,25 +282,16 @@
       gap.appendChild(hole);
       gap.appendChild(document.createTextNode(clozeQ.ex.zh.slice(at + c.zh.length)));
       els.cardPrompt.appendChild(gap);
-      els.cardPrompt.appendChild(el('p', 'prompt-sub', clozeQ.ex.en));
-      var gapHu = el('p', 'prompt-sub', clozeQ.ex.hu);
-      gapHu.setAttribute('lang', 'hu');
-      els.cardPrompt.appendChild(gapHu);
+      langsOn().forEach(function (k) { var x = el('p', 'prompt-sub', mean(clozeQ.ex, k)); x.setAttribute('lang', k); els.cardPrompt.appendChild(x); });
     } else if (similarQ) {
       els.cardPrompt.appendChild(el('p', 'prompt-q', 'Which one means this?'));
-      els.cardPrompt.appendChild(el('p', 'prompt-en', shortText(c.en)));
-      var sHu = el('p', 'prompt-hu', shortText(c.hu));
-      sHu.setAttribute('lang', 'hu');
-      els.cardPrompt.appendChild(sHu);
+      promptMeanings(c, true);
       var sb = el('button', 'listen-btn similar-play', '🔊 Hear it');
       sb.type = 'button';
       els.cardPrompt.appendChild(sb);
     } else if (buildQ) {
       els.cardPrompt.appendChild(el('p', 'prompt-q', 'Put the words in order:'));
-      els.cardPrompt.appendChild(el('p', 'prompt-sub', c.en));
-      var bHu = el('p', 'prompt-sub', c.hu);
-      bHu.setAttribute('lang', 'hu');
-      els.cardPrompt.appendChild(bHu);
+      langsOn().forEach(function (k) { var x = el('p', 'prompt-sub', mean(c, k)); x.setAttribute('lang', k); els.cardPrompt.appendChild(x); });
       var bLine = el('div', 'build-line');
       bLine.setAttribute('aria-label', 'Your sentence');
       els.cardPrompt.appendChild(bLine);

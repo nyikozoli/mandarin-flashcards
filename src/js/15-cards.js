@@ -147,6 +147,19 @@
     renderPinyin(els.cardPinyin, c.py);
     els.cardEn.textContent = c.en;
     els.cardHu.textContent = c.hu;
+    var on = langsOn();
+    els.cardEn.parentNode.hidden = on.indexOf('en') === -1;
+    els.cardHu.parentNode.hidden = on.indexOf('hu') === -1;
+    els.cardMeanMore.textContent = '';
+    on.forEach(function (k) {
+      if (k === 'en' || k === 'hu') return;
+      var m = el('div', 'meaning');
+      m.appendChild(el('span', 'tag ' + k, k.toUpperCase()));
+      var t = el('p', null, mean(c, k));
+      t.setAttribute('lang', k);
+      m.appendChild(t);
+      els.cardMeanMore.appendChild(m);
+    });
     renderHints(c);
     els.cardExamples.textContent = '';
     c.ex.forEach(function (e, k) {
@@ -162,14 +175,8 @@
       var py = el('p', 'ex-py');
       py.setAttribute('lang', 'zh-Latn-pinyin');
       renderPinyin(py, e.py);
-      var en = el('p', 'ex-line');
-      en.appendChild(el('span', 'tag en', 'EN'));
-      en.appendChild(el('span', null, e.en));
-      var hu = el('p', 'ex-line');
-      hu.setAttribute('lang', 'hu');
-      hu.appendChild(el('span', 'tag hu', 'HU'));
-      hu.appendChild(el('span', null, e.hu));
-      box.appendChild(sb); box.appendChild(zh); box.appendChild(py); box.appendChild(en); box.appendChild(hu);
+      box.appendChild(sb); box.appendChild(zh); box.appendChild(py);
+      meaningLines(box, e, 'ex-line');
       els.cardExamples.appendChild(box);
     });
     if (c.sentence) els.cardExamples.insertBefore(el('p', 'ex-caption', c.ex.length > 1 ? 'From the words' : 'From the word'), els.cardExamples.firstChild);
@@ -203,7 +210,7 @@
         state.practice === 'listen' ? 'Listen to the ' + noun(1) + '.' :
         toneQ ? 'Listen to ' + c.zh + ', then pick the tone of the first syllable.' :
         buildQ ? 'Put the words in order: ' + c.en :
-        similarQ ? 'Which word means: ' + shortText(c.en) + '?' :
+        similarQ ? 'Which word means: ' + shortText(mainMeaning(c)) + '?' :
         clozeQ ? 'Which word fills the gap? ' + clozeQ.blanked.replace(/＿+/g, ' blank ') + ' ' + clozeQ.ex.en :
         c.zh + (readingHidden ? '.' : ', ' + c.py + '.')));
     }

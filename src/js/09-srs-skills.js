@@ -74,7 +74,7 @@
   var SKILLS = { read: 'Reading', recall: 'Recall', listen: 'Listening' };
   // Snapshot format. 2 added `skills`. The server refuses uploads older than the stored format, and this copy refuses
   // to apply progress written by a newer one, so neither side drops what it does not understand.
-  var FORMAT = 3;
+  var FORMAT = 4;
   var SKILL_OF = { zh: 'read', hanzi: 'read', choice: 'read', cloze: 'read', pairs: 'read', reverse: 'recall', build: 'recall', listen: 'listen', tone: 'listen' };
   function skillOf(p) { return SKILL_OF[p] || 'read'; }
   function emptyMarks() { return { status: {}, srs: {}, misses: {} }; }

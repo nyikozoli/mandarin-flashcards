@@ -57,6 +57,9 @@
 .tag { flex: none; display: inline-block; min-width: 30px; text-align: center; padding: 1px 6px; border-radius: 6px; background: var(--surface3); color: var(--soft); font-size: 11px; font-weight: 800; letter-spacing: .05em; }
 .tag.hu { background: #2c3d32; color: #b9f0cc; }
 .tag.en { background: #2b3550; color: #c4d4ff; }
+.tag.de { background: #403223; color: #f3d7a8; }
+.tag.es { background: #47282a; color: #ffc2c2; }
+.tag.ro { background: #22383f; color: #b4e6f2; }
 .examples { margin-top: 12px; display: flex; flex-direction: column; gap: 10px; }
 .ex { position: relative; background: rgba(255, 255, 255, .035); border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; }
 .ex p { margin: 0; }

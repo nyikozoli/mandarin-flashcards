@@ -9,7 +9,7 @@
   var EXPECTED_LEVELS = __EXPECTED_LEVELS__;
   var MODE_NAMES = { all: 'All cards', due: 'Due for review', learning: 'Learning only', unmarked: 'New cards only', hard: 'Hardest words' };
   var STATUS_NAMES = { known: 'Known', learning: 'Learning', unmarked: 'New' };
-  var REQUIRED_IDS = ['cardSkills', 'confirmCompare', 'confirmActions', 'btnSyncTop', 'newsStrip', 'newsStripText', 'btnNewsSee', 'btnNewsClose', 'btnNews', 'newsView', 'btnCloseNews', 'newsBody', 'optLabels', 'btnPet', 'petMini', 'petView', 'btnClosePet', 'petBig', 'petName', 'petStageName', 'petMood', 'petFedText', 'petFed', 'petGrowText', 'petGrow', 'petRename', 'petNameInput', 'cardHints', 'quizView', 'quizTitle', 'quizBody', 'btnCloseQuiz', 'wotd', 'wotdZh', 'wotdPy', 'wotdEn', 'wotdHint', 'btnWotdStudy', 'btnWotdClose', 'extra-data', 'btnTopic', 'topicBtnZh', 'topicBtnName', 'topicView', 'btnCloseTopic', 'topicGrid', 'cardRank', 'comboTag', 'gradeRow', 'legendTones', 'optChoicePinyin', 'progressTitle', 'optFadePinyin', 'wordPop', 'wordPopZh', 'wordPopLv', 'wordPopPy', 'wordPopEn', 'wordPopHu', 'btnWordPopSpeak', 'btnWordPopClose', 'app', 'errorBanner', 'errorList', 'modeAll', 'modeLearning', 'modeUnmarked', 'countAll', 'countLearningMode',
+  var REQUIRED_IDS = ['optLangEn', 'optLangHu', 'optLangDe', 'optLangEs', 'optLangRo', 'cardMeanMore', 'wordPopMore', 'cardSkills', 'confirmCompare', 'confirmActions', 'btnSyncTop', 'newsStrip', 'newsStripText', 'btnNewsSee', 'btnNewsClose', 'btnNews', 'newsView', 'btnCloseNews', 'newsBody', 'optLabels', 'btnPet', 'petMini', 'petView', 'btnClosePet', 'petBig', 'petName', 'petStageName', 'petMood', 'petFedText', 'petFed', 'petGrowText', 'petGrow', 'petRename', 'petNameInput', 'cardHints', 'quizView', 'quizTitle', 'quizBody', 'btnCloseQuiz', 'wotd', 'wotdZh', 'wotdPy', 'wotdEn', 'wotdHint', 'btnWotdStudy', 'btnWotdClose', 'extra-data', 'btnTopic', 'topicBtnZh', 'topicBtnName', 'topicView', 'btnCloseTopic', 'topicGrid', 'cardRank', 'comboTag', 'gradeRow', 'legendTones', 'optChoicePinyin', 'progressTitle', 'optFadePinyin', 'wordPop', 'wordPopZh', 'wordPopLv', 'wordPopPy', 'wordPopEn', 'wordPopHu', 'btnWordPopSpeak', 'btnWordPopClose', 'app', 'errorBanner', 'errorList', 'modeAll', 'modeLearning', 'modeUnmarked', 'countAll', 'countLearningMode',
     'countUnmarkedMode', 'btnShuffle', 'btnUndo', 'btnReset', 'btnSelfCheck', 'btnList', 'cardCounter', 'knownCount', 'learningCount',
     'unmarkedCount', 'progressBar', 'progKnown', 'progLearning', 'progressLabel', 'stage', 'card', 'cardNumber', 'cardStatus', 'cardHanzi',
     'cardPinyin', 'btnSpeak', 'speakLabel', 'cardAnswer', 'cardEn', 'cardHu', 'cardExamples', 'revealHint', 'deckEnd', 'endEmoji', 'endTitle',
@@ -18,7 +18,7 @@
     'confirmText', 'confirmCancel', 'confirmAlt', 'confirmOk', 'diagView', 'btnCloseDiag', 'diagSummary', 'diagResults', 'btnRunCheck', 'toast', 'vocab-data',
     'syncGroup', 'syncEmailRow', 'syncEmail', 'syncLinkRow', 'syncEmailNote', 'btnSignIn', 'syncAccountRow', 'syncAccount', 'btnSignOut',
     'syncDatesRow', 'syncDates', 'btnSyncNow', 'syncStatus'];
-  var CORE_BUTTONS = ['footnote', 'btnSyncTop', 'btnNewsSee', 'btnNewsClose', 'btnNews', 'btnCloseNews', 'optLabels', 'btnPet', 'btnClosePet', 'petBig', 'petRename', 'btnCloseQuiz', 'quizBody', 'btnWotdStudy', 'btnWotdClose', 'btnTopic', 'btnCloseTopic', 'topicGrid', 'pvBody', 'gradeRow', 'optChoicePinyin', 'optFadePinyin', 'btnWordPopSpeak', 'btnWordPopClose', 'btnExport', 'btnImport', 'btnApplyImport', 'revealHint', 'btnHelp', 'btnTourNext', 'btnSettings', 'btnKnown', 'btnLearning', 'btnSkip', 'btnSpeak', 'cardExamples', 'modeDue', 'modeHard', 'optPractice', 'choiceBox', 'cardPrompt', 'btnProgress', 'levelAll', 'level1', 'level2', 'level3', 'card', 'btnShuffle', 'btnUndo', 'btnReset', 'btnSelfCheck',
+  var CORE_BUTTONS = ['optLangEn', 'optLangHu', 'optLangDe', 'optLangEs', 'optLangRo', 'footnote', 'btnSyncTop', 'btnNewsSee', 'btnNewsClose', 'btnNews', 'btnCloseNews', 'optLabels', 'btnPet', 'btnClosePet', 'petBig', 'petRename', 'btnCloseQuiz', 'quizBody', 'btnWotdStudy', 'btnWotdClose', 'btnTopic', 'btnCloseTopic', 'topicGrid', 'pvBody', 'gradeRow', 'optChoicePinyin', 'optFadePinyin', 'btnWordPopSpeak', 'btnWordPopClose', 'btnExport', 'btnImport', 'btnApplyImport', 'revealHint', 'btnHelp', 'btnTourNext', 'btnSettings', 'btnKnown', 'btnLearning', 'btnSkip', 'btnSpeak', 'cardExamples', 'modeDue', 'modeHard', 'optPractice', 'choiceBox', 'cardPrompt', 'btnProgress', 'levelAll', 'level1', 'level2', 'level3', 'card', 'btnShuffle', 'btnUndo', 'btnReset', 'btnSelfCheck',
     'btnList', 'btnCloseList', 'modeAll', 'modeLearning', 'modeUnmarked', 'searchInput', 'confirmOk', 'confirmCancel', 'confirmAlt', 'btnSignIn', 'btnSignOut', 'btnSyncNow'];
 
   var $ = function (id) { return document.getElementById(id); };
@@ -26,7 +26,7 @@
   var bound = {};
   var cards = [], wordCards = [], sentCards = [];
   var state = { status: {}, mode: 'all', deck: [], pos: 0, shuffled: false, revealed: false, autoReveal: false, rate: 0.85, voice: '', badVoices: [], voicesTested: false, level: 'all', activity: {}, goal: 20, warmup: true, deckType: 'words',
-    srs: {}, misses: {}, skill: 'read', marks: {}, deckMemory: {}, topic: 'all', xp: 0, bestCombo: 0, learned: {}, wotdSeen: '', quests: null, freezes: 0, frozen: [], recapWeek: '', seals: {}, questDays: 0, petName: '', labels: 'both', newsSeen: '', blitzBest: {}, exams: {}, milestones: [], practice: 'zh', toneColors: true, fadePinyin: false, choicePinyin: true,
+    srs: {}, misses: {}, skill: 'read', marks: {}, deckMemory: {}, topic: 'all', xp: 0, bestCombo: 0, learned: {}, wotdSeen: '', quests: null, freezes: 0, frozen: [], recapWeek: '', seals: {}, questDays: 0, petName: '', labels: 'both', newsSeen: '', langs: { en: true, hu: true, de: false, es: false, ro: false }, blitzBest: {}, exams: {}, milestones: [], practice: 'zh', toneColors: true, fadePinyin: false, choicePinyin: true,
     autoplay: false, vibrate: true, seenTour: false };
   var undoStack = [];
   var busy = false;
@@ -55,8 +55,35 @@
   }
   function compact(s) { return s.replace(/[\s'’\-.,;:()]/g, ''); }
   // Search text for the word list: Chinese, pinyin and both meanings, with tone marks and accents removed.
+  /* ---------- meaning languages ---------- */
+  // English and Hungarian live on every card; German, Spanish and Romanian come from data/i18n (in c.tr and e.tr).
+  // Settings switches each one on or off; at least one stays on. The first one on is the main meaning where only one fits.
+  var MEANING_LANGS = [['en', 'English'], ['hu', 'Magyar'], ['de', 'Deutsch'], ['es', 'Español'], ['ro', 'Română']];
+  var EXTRA_LANGS = ['de', 'es', 'ro'];
+  var LANG_AVAILABLE = { en: true, hu: true };
+  function trOf(t) {
+    var out = {};
+    if (t && typeof t === 'object') EXTRA_LANGS.forEach(function (k) { if (typeof t[k] === 'string' && t[k]) { out[k] = t[k]; LANG_AVAILABLE[k] = true; } });
+    return out;
+  }
+  function mean(o, k) { return k === 'en' ? o.en : k === 'hu' ? o.hu : (o.tr && o.tr[k]) || ''; }
+  function langsOn() {
+    var on = MEANING_LANGS.map(function (l) { return l[0]; }).filter(function (k) { return LANG_AVAILABLE[k] && state.langs[k]; });
+    return on.length ? on : ['en'];
+  }
+  function mainMeaning(o) { return mean(o, langsOn()[0]); }
+  // One line per language that is on: a coloured tag and the text, in the given class.
+  function meaningLines(into, o, cls, short) {
+    langsOn().forEach(function (k) {
+      var p = el('p', cls);
+      p.setAttribute('lang', k);
+      p.appendChild(el('span', 'tag ' + k, k.toUpperCase()));
+      p.appendChild(el('span', null, short ? shortText(mean(o, k)) : mean(o, k)));
+      into.appendChild(p);
+    });
+  }
   function indexCard(c) {
-    c.search = fold([c.zh, c.py, c.en, c.hu].join(' | '));
+    c.search = fold([c.zh, c.py, c.en, c.hu].concat(EXTRA_LANGS.map(function (k) { return (c.tr && c.tr[k]) || ''; })).join(' | '));
     c.searchCompact = compact(c.search);
   }
   function charLen(s) { return Array.from ? Array.from(s).length : s.length; }
@@ -91,9 +118,9 @@
       d = d || {};
       var c = {
         n: i + 1,
-        zh: str(d.zh), py: str(d.py), en: str(d.en), hu: str(d.hu), lv: parseInt(d.lv, 10) || 0,
+        zh: str(d.zh), py: str(d.py), en: str(d.en), hu: str(d.hu), lv: parseInt(d.lv, 10) || 0, tr: trOf(d.tr),
         rk: parseInt(d.rk, 10) || 0, fq: Number(d.fq) || 0, tp: str(d.tp),
-        ex: Array.isArray(d.ex) ? d.ex.map(function (e) { e = e || {}; return { zh: str(e.zh), py: str(e.py), en: str(e.en), hu: str(e.hu) }; }) : []
+        ex: Array.isArray(d.ex) ? d.ex.map(function (e) { e = e || {}; return { zh: str(e.zh), py: str(e.py), en: str(e.en), hu: str(e.hu), tr: trOf(e.tr) }; }) : []
       };
       indexCard(c);
       return c;

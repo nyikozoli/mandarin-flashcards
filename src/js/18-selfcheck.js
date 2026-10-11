@@ -795,6 +795,36 @@
       })();
       add('Marks for all three skills; panda in the top bar', marksRes.ok, marksRes.d);
 
+      var langRes = (function () {
+        var keep = JSON.parse(JSON.stringify(state.langs)), deckSnap = state.deck.slice(), posSnap = state.pos;
+        var extra = EXTRA_LANGS.filter(function (k) { return LANG_AVAILABLE[k]; });
+        state.practice = 'zh'; state.deck = [0]; state.pos = 0; state.revealed = true;
+        var c = cards[0];
+        // English off, Hungarian on (and the first extra language, if this build has one)
+        state.langs = { en: false, hu: true, de: false, es: false, ro: false };
+        if (extra[0]) state.langs[extra[0]] = true;
+        render(false);
+        var enHidden = els.cardEn.parentNode.hidden && !els.cardHu.parentNode.hidden;
+        var extraShown = !extra[0] || els.cardMeanMore.textContent.indexOf(mean(c, extra[0])) !== -1;
+        var exLines = els.cardExamples.querySelector('.ex').querySelectorAll('.ex-line').length === (extra[0] ? 2 : 1);
+        state.practice = 'choice'; render(false);
+        var chipMain = els.choiceBox.querySelector('.choice-en').getAttribute('lang') === 'hu';
+        state.practice = 'zh';
+        // the last language cannot be switched off
+        state.langs = { en: true, hu: false, de: false, es: false, ro: false };
+        syncSettingsUI();
+        els.optLangEn.checked = false;
+        els.optLangEn.dispatchEvent(new Event('change'));
+        var lastStays = state.langs.en === true && els.optLangEn.checked === true;
+        var hiddenUnavailable = EXTRA_LANGS.every(function (k) { return els['optLang' + k.charAt(0).toUpperCase() + k.slice(1)].closest('label').hidden === !LANG_AVAILABLE[k]; });
+        state.langs = keep; syncSettingsUI();
+        state.deck = deckSnap; state.pos = posSnap; state.revealed = false; render(false);
+        return { ok: enHidden && extraShown && exLines && chipMain && lastStays && hiddenUnavailable,
+          d: 'English off hides it: ' + enHidden + ', extra language (' + (extra[0] || 'none in this build') + ') shown: ' + extraShown + ', examples follow: ' + exLines +
+            ', choices use the first language on: ' + chipMain + ', the last one stays on: ' + lastStays + ', switches only for languages with data: ' + hiddenUnavailable };
+      })();
+      add('Meaning languages on and off', langRes.ok, langRes.d);
+
       var undoRes = (function () {
         var deckSnap = state.deck.slice(), posSnap = state.pos;
         state.practice = 'zh'; state.deck = [0, 1, 2]; state.pos = 0; render(false);

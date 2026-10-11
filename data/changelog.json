@@ -1,6 +1,21 @@
 {
   "releases": [
     {
+      "version": "2.4",
+      "date": "2026-10-12",
+      "title": "German, Spanish and Romanian",
+      "groups": [
+        {
+          "name": "",
+          "items": [
+            "Meanings and example sentences in German, Spanish and Romanian, next to English and Hungarian. Switch each language on or off in Settings → Translations.",
+            "Every translation went through several independent reviews: accuracy, native fluency, and a side-by-side check of all three languages.",
+            "Search finds words in all five languages."
+          ]
+        }
+      ]
+    },
+    {
       "version": "2.3",
       "date": "2026-10-12",
       "title": "Known means remembered",

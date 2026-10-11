@@ -86,8 +86,23 @@ if (CHANGELOG) {
     r.groups.forEach((g) => { if (!Array.isArray(g.items) || !g.items.length) throw new Error('Empty changelog group in ' + r.version); });
   });
 }
+//   data/i18n/<code>.json  extra meaning languages: { code, name, words: { headword: meaning }, sentences: { sentence: translation } }
+const I18N = fs.existsSync(dataPath('i18n')) ? fs.readdirSync(dataPath('i18n')).filter((f) => /^[a-z]{2}\.json$/.test(f)).sort()
+  .map((f) => JSON.parse(read(dataPath('i18n', f)))) : [];
 cards = cards.map((c) => {
   const o = Object.assign({}, c);
+  if (I18N.length) {
+    o.tr = {};
+    o.ex = c.ex.map((e) => Object.assign({}, e, { tr: {} }));
+    I18N.forEach((L) => {
+      if (!L.words[c.zh]) throw new Error('No ' + L.code + ' meaning for ' + c.zh);
+      o.tr[L.code] = L.words[c.zh];
+      o.ex.forEach((e) => {
+        if (!L.sentences[e.zh]) throw new Error('No ' + L.code + ' translation for ' + e.zh);
+        e.tr[L.code] = L.sentences[e.zh];
+      });
+    });
+  }
   const f = FREQ && FREQ.words[c.zh];
   if (f && f[0]) o.rk = f[0];
   if (f && f[1]) o.fq = f[1];

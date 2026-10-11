@@ -168,7 +168,7 @@
       b.type = 'button';
       b.setAttribute('data-study', nu.zh);
       line.appendChild(b);
-      line.appendChild(document.createTextNode(' (' + shortText(nu.en) + ', the ' + nu.rk + ordinal(nu.rk) + ' most used word).'));
+      line.appendChild(document.createTextNode(' (' + shortText(mainMeaning(nu)) + ', the ' + nu.rk + ordinal(nu.rk) + ' most used word).'));
       sec.appendChild(line);
     }
     return sec;

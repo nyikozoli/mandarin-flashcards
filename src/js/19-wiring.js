@@ -139,6 +139,20 @@
     on('todayPill', 'click', function () { openProgress('today'); });
     on('btnTopic', 'click', openTopics);
     on('btnNews', 'click', openNews);
+    ['En', 'Hu', 'De', 'Es', 'Ro'].forEach(function (K) {
+      on('optLang' + K, 'change', function () {
+        var box = els['optLang' + K], k = K.toLowerCase();
+        state.langs[k] = box.checked;
+        if (!MEANING_LANGS.some(function (l) { return LANG_AVAILABLE[l[0]] && state.langs[l[0]]; })) {
+          state.langs[k] = true;
+          box.checked = true;
+          if (!testing) toast('Keep at least one translation on.');
+          return;
+        }
+        render(false);
+        save();
+      });
+    });
     on('footnote', 'click', function (e) { if (e.target.closest && e.target.closest('[data-news]')) openNews(); });
     on('btnNewsSee', 'click', openNews);
     on('btnNewsClose', 'click', markNewsSeen);

@@ -68,6 +68,7 @@
       seals: state.seals,
       petName: state.petName,
       labels: state.labels,
+      langs: state.langs,
       newsSeen: state.newsSeen,
       questDays: state.questDays,
       blitzBest: state.blitzBest,
@@ -173,6 +174,10 @@
     state.petName = saved && typeof saved.petName === 'string' ? saved.petName.trim().slice(0, 16) : '';
     state.labels = saved && LABEL_MODES[saved.labels] ? saved.labels : 'both';
     state.newsSeen = saved && typeof saved.newsSeen === 'string' ? saved.newsSeen.slice(0, 12) : '';
+    state.langs = { en: true, hu: true, de: false, es: false, ro: false };
+    if (saved && saved.langs && typeof saved.langs === 'object') {
+      MEANING_LANGS.forEach(function (l) { if (typeof saved.langs[l[0]] === 'boolean') state.langs[l[0]] = saved.langs[l[0]]; });
+    }
     var numMap = function (src, keys, max) {
       var out = {};
       if (src && typeof src === 'object') keys.forEach(function (k) { if (typeof src[k] === 'number') out[k] = clampInt(src[k], 0, max); });

@@ -107,6 +107,7 @@ Reading (Chinese → meaning, 汉字 only, multiple choice), recall (meaning →
 |---|---|---|
 | `data/topics.json` | One of 16 topics per word | Tagged by rule (most specific topic wins; function words → grammar), then reviewed |
 | `data/freq.json` | Frequency rank and share of running text per word, share per character | Extracted from [wordfreq](https://github.com/rspeer/wordfreq) 3.1.1. Regenerate with `scripts/freq.py` (steps in its header). **This file is CC BY-SA 4.0**, as an adaptation of wordfreq's data. |
+| `data/i18n/<code>.json` | German, Spanish and Romanian meanings and sentence translations: `{ code, name, words: { headword: meaning }, sentences: { sentence: translation } }` | Translated from the Chinese with the English and Hungarian as sense reference, then reviewed in three rounds per language (accuracy, native fluency, a side-by-side check of all three). The build fails if a word or sentence is missing. |
 | `data/changelog.json` | Release notes, newest first: `version`, `date`, `title`, and `groups` of items | Written by hand for every user-visible change. The build checks the shape, and the newest version triggers the one-time "What's new" notice. |
 | `data/hints.json` | Memory hints for 180 characters (picture, combined meaning, or meaning + sound part) | Written from the Shuowen and mainstream modern etymology, then fact-checked by an independent review; contested readings are marked "Traditionally" |
 

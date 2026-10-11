@@ -133,3 +133,7 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
 /* The panda is the app icon at the top left. */
 .pet-top { flex: none; }
 .pet-top .pet-art { width: 40px; height: 40px; }
+
+/* Meaning-language switches */
+.lang-switches { display: flex; flex-direction: column; gap: 2px; }
+#cardMeanMore { display: contents; }

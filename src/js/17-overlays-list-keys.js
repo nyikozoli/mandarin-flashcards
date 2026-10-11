@@ -108,7 +108,7 @@
       wpy.setAttribute('lang', 'zh-Latn-pinyin');
       renderPinyin(wpy, c.py);
       txt.appendChild(wpy);
-      txt.appendChild(el('span', 'wr-mean', c.en + ' · ' + c.hu));
+      txt.appendChild(el('span', 'wr-mean', langsOn().map(function (k) { return mean(c, k); }).join(' · ')));
       b.appendChild(txt);
       var badges = el('span', 'wr-badges');
       badges.appendChild(el('span', 'badge lv', 'HSK ' + c.lv));

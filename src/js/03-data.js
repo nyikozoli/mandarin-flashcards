@@ -51,11 +51,11 @@
       w.ex.forEach(function (e) {
         var s = map[e.zh];
         if (!s) {
-          s = map[e.zh] = { zh: e.zh, py: e.py, en: e.en, hu: e.hu, ex: [], lv: w.lv, sentence: true };
+          s = map[e.zh] = { zh: e.zh, py: e.py, en: e.en, hu: e.hu, tr: e.tr || {}, ex: [], lv: w.lv, sentence: true };
           list.push(s);
         }
         s.lv = Math.min(s.lv, w.lv);
-        s.ex.push({ zh: w.zh, py: w.py, en: w.en, hu: w.hu });
+        s.ex.push({ zh: w.zh, py: w.py, en: w.en, hu: w.hu, tr: w.tr || {} });
       });
     });
     list.forEach(function (s, i) {
@@ -112,6 +112,11 @@
     els.optTones.checked = state.toneColors;
     els.optAutoplay.checked = state.autoplay;
     els.optFadePinyin.checked = state.fadePinyin;
+    ['En', 'Hu', 'De', 'Es', 'Ro'].forEach(function (K) {
+      var box = els['optLang' + K], k = K.toLowerCase();
+      box.checked = !!state.langs[k] && !!LANG_AVAILABLE[k];
+      box.closest('label').hidden = !LANG_AVAILABLE[k];
+    });
     els.optLabels.value = state.labels;
     els.optChoicePinyin.checked = state.choicePinyin;
     els.optVibrate.checked = state.vibrate;
