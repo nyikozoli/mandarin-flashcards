@@ -81,15 +81,8 @@
       if (e.key === 'Enter') { e.preventDefault(); els.btnSignIn.click(); }
     });
     on('btnSignOut', 'click', function () { if (syncEnabled()) signOut(false); });
-    on('btnSyncNow', 'click', function () {
-      if (!syncEnabled() || !sync.session || sync.busy) return;
-      // An explicit "Sync now" offers the local copy, and re-offers the choice if the conflict
-      // dialog was cancelled earlier. It must not touch localAt: that stamp is what decides
-      // the "which one is newer" wording, and clicking a button is not editing your progress.
-      sync.dirty = true;
-      saveSyncState();
-      reconcile('manual sync');
-    });
+    on('btnSyncNow', 'click', syncNow);
+    on('btnSyncTop', 'click', syncNow);
     on('btnCloseTransfer', 'click', function () { closeOverlay(els.transferView); });
     on('btnCopyProgress', 'click', function () {
       var text = els.transferText.value;

@@ -730,6 +730,21 @@
 
       var newer = parseImport(JSON.stringify({ version: 1, format: FORMAT + 1, status: {} }));
       var current = parseImport(JSON.stringify({ version: 1, format: FORMAT, status: {} }));
+      var syncTopRes = (function () {
+        var s0 = { session: sync.session, dirty: sync.dirty, busy: sync.busy };
+        sync.session = null; renderSyncTop();
+        var hiddenOut = els.btnSyncTop.hidden;
+        sync.session = { access_token: 'x.e30.x', email: 'test@example.com' }; sync.dirty = true; sync.busy = false; renderSyncTop();
+        var shown = !els.btnSyncTop.hidden && els.btnSyncTop.classList.contains('pending');
+        sync.busy = true; renderSyncTop();
+        var spins = els.btnSyncTop.classList.contains('busy') && !els.btnSyncTop.classList.contains('pending');
+        sync.session = s0.session; sync.dirty = s0.dirty; sync.busy = s0.busy; renderSyncTop();
+        var ok = hiddenOut && (syncEnabled() ? shown && spins : els.btnSyncTop.hidden);
+        return { ok: ok, d: syncEnabled() ? 'hidden when signed out: ' + hiddenOut + ', shown with a dot for waiting changes: ' + shown + ', spins while syncing: ' + spins
+          : 'sync is off in this build, so the top-bar button stays hidden: ' + els.btnSyncTop.hidden };
+      })();
+      add('Top-bar sync button', syncTopRes.ok, syncTopRes.d);
+
       var footRes = (function () {
         var sess = sync.session;
         sync.session = null; updateFootnote();

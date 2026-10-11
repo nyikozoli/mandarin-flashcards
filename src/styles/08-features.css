@@ -83,3 +83,14 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
 .news-date { margin: 2px 0 6px; font-size: 12.5px; color: var(--muted); }
 .news-group { margin: 10px 0 2px; font-size: 14px; color: var(--pinyin); }
 .news-list { margin: 4px 0 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; color: var(--soft); font-size: 14.5px; line-height: 1.45; }
+
+/* Top-bar sync button (signed in, website only) */
+.sync-btn { position: relative; }
+.sync-btn.busy svg { animation: sync-spin 1s linear infinite; }
+.sync-dot { position: absolute; top: 9px; right: 9px; width: 8px; height: 8px; border-radius: 50%; background: var(--learn); box-shadow: 0 0 0 2px var(--bg); display: none; }
+.sync-btn.pending .sync-dot { display: block; }
+@keyframes sync-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .sync-btn.busy svg { animation: none; opacity: .6; } }
+/* With five header buttons the narrowest phones keep only the 汉 seal as the title. */
+@media (max-width: 440px) { .topbar:has(#btnSyncTop:not([hidden])) .h1-lang { display: none; } }
+@media (max-width: 360px) { .topbar:has(#btnSyncTop:not([hidden])) .brand h1 { display: none; } }

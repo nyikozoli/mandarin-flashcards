@@ -225,7 +225,31 @@
     els.syncStatus.textContent = msg || '';
     els.syncStatus.className = 'transfer-status' + (bad ? ' bad' : '');
   }
+  // "Sync now", from Settings or the top bar.
+  function syncNow() {
+    if (!syncEnabled() || !sync.session || sync.busy) return;
+    // An explicit "Sync now" offers the local copy, and re-offers the choice if the conflict
+    // dialog was cancelled earlier. It must not touch localAt: that stamp is what decides
+    // the "which one is newer" wording, and clicking a button is not editing your progress.
+    sync.dirty = true;
+    saveSyncState();
+    reconcile('manual sync');
+  }
+  // The top-bar sync button: shown while signed in; spins while syncing; a dot marks changes not uploaded yet.
+  function renderSyncTop() {
+    if (!els.btnSyncTop) return;
+    var on = syncEnabled() && !!sync.session;
+    els.btnSyncTop.hidden = !on;
+    if (!on) return;
+    els.btnSyncTop.classList.toggle('busy', !!sync.busy);
+    els.btnSyncTop.classList.toggle('pending', !!sync.dirty && !sync.busy);
+    var label = sync.busy ? 'Syncing…' : 'Sync now' + (sync.dirty ? ': changes waiting to upload' : '') +
+      (sync.lastSyncedAt ? '. Last synced ' + fmtWhen(sync.lastSyncedAt) : '');
+    els.btnSyncTop.setAttribute('aria-label', label);
+    els.btnSyncTop.title = label;
+  }
   function renderSyncUI() {
+    renderSyncTop();
     if (!els.syncGroup) return;
     if (els.footnote) updateFootnote();
     if (!syncEnabled()) { els.syncGroup.hidden = true; return; }
@@ -402,6 +426,7 @@
     sync.dirty = true;
     sync.localAt = new Date().toISOString();
     saveSyncState();
+    renderSyncTop();
     if (!sync.conflict) schedulePush();
   }
   function schedulePush() {
