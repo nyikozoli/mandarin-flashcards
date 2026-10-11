@@ -1,0 +1,98 @@
+{
+  "releases": [
+    {
+      "version": "2.0",
+      "date": "2026-10-11",
+      "title": "Games, a panda and Chinese labels",
+      "groups": [
+        { "name": "New ways to practise", "items": [
+          "Fill the gap: pick the word that completes its example sentence.",
+          "Build the sentence: put a sentence's words back in order.",
+          "Similar words: tell apart look-alikes and sound-alikes such as 买/卖 and 他/她/它.",
+          "Type the pinyin in Meaning → 汉字, with tone numbers or tone marks.",
+          "Hard, Good and Easy after each answer, and reviews that grow to 60 and 120 days.",
+          "Memory hints for 180 characters on the back of word cards."
+        ] },
+        { "name": "Your progress in real terms", "items": [
+          "How many example sentences you can read, and the next one to unlock.",
+          "How much of everyday Chinese your words cover, and how common each word is (#5 most used).",
+          "16 topics to study one area at a time, each with its own seal.",
+          "A 7-day forecast of coming reviews, and a stats page."
+        ] },
+        { "name": "Daily motivation and games", "items": [
+          "Word of the day, three daily quests, and streak freezes that save a missed day.",
+          "XP and ranks from 新手 to 大师, a 连 combo counter, and 20 seals to collect.",
+          "A 60-second blitz and a 20-question exam for each HSK level.",
+          "宝宝 the panda grows as you study. Tap it to say hello.",
+          "A weekly recap every Monday."
+        ] },
+        { "name": "Look and feel", "items": [
+          "Chinese labels on buttons and headings (Settings → Interface labels).",
+          "A new answer bar with 学 and 会 seals, and gentle animations.",
+          "The progress view has Today, Progress and Collection tabs.",
+          "More room for the card on phones, and bigger tap targets.",
+          "Fixed: on an installed iPhone app the top bar sat under the status bar."
+        ] }
+      ]
+    },
+    {
+      "version": "1.4",
+      "date": "2026-10-11",
+      "title": "More ways to read and listen",
+      "groups": [
+        { "name": "", "items": [
+          "汉字 only: practise reading characters with the pinyin hidden.",
+          "Which tone?: hear a word and pick the tone of its first syllable.",
+          "Tap any word in a sentence to see its pinyin and meaning.",
+          "Optional fading pinyin for cards you know well, and optional pinyin in multiple choice.",
+          "Reading, recall and listening keep separate progress; words and sentences keep their place.",
+          "The version is shown in Settings."
+        ] }
+      ]
+    },
+    {
+      "version": "1.3",
+      "date": "2026-10-11",
+      "title": "Cloud sync",
+      "groups": [
+        { "name": "", "items": [
+          "Sign in with an email link to sync progress between devices (website only).",
+          "If two devices changed progress, the app asks which copy to keep instead of overwriting."
+        ] }
+      ]
+    },
+    {
+      "version": "1.2",
+      "date": "2026-10-11",
+      "title": "Sentences and offline",
+      "groups": [
+        { "name": "", "items": [
+          "The 777 example sentences as cards of their own.",
+          "Export and import progress to move it between devices.",
+          "Install the website to your home screen; it works offline.",
+          "Keyboard and screen-reader improvements."
+        ] }
+      ]
+    },
+    {
+      "version": "1.1",
+      "date": "2026-10-11",
+      "title": "Help and quick tour",
+      "groups": [
+        { "name": "", "items": [ "A help page and a four-step tour for the first visit." ] }
+      ]
+    },
+    {
+      "version": "1.0",
+      "date": "2026-10-11",
+      "title": "First release",
+      "groups": [
+        { "name": "", "items": [
+          "598 HSK 1–3 words with pinyin, English, Hungarian and example sentences.",
+          "Read-aloud with a choice of Chinese voices, tone colours and swipe cards.",
+          "Spaced repetition, daily goal, streak and a progress view."
+        ] }
+      ]
+    }
+  ]
+}

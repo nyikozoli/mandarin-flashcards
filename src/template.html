@@ -787,6 +787,18 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
 @media (max-width: 360px) { .act-label .lbl { align-items: center; } }
 /* Arrow key caps only where there is a keyboard and room for them. */
 @media (max-width: 440px), (hover: none) { .act-key { display: none; } }
+
+/* What's new */
+.news-strip { background: linear-gradient(90deg, rgba(240, 176, 63, .14), rgba(240, 176, 63, 0) 55%), var(--surface); }
+.news-strip .wotd-seal { background: var(--learn-strong); color: var(--learn-ink); }
+.news-release { padding: 4px 0 14px; border-bottom: 1px solid var(--line); }
+.news-release + .news-release { margin-top: 14px; }
+.news-head { margin: 0; display: flex; align-items: baseline; gap: 10px; font-size: 17px; }
+.news-ver { flex: none; padding: 1px 8px; border-radius: 6px; background: var(--surface3); font-size: 13px; font-variant-numeric: tabular-nums; }
+.news-release.latest .news-ver { background: var(--cinnabar); color: var(--paper); }
+.news-date { margin: 2px 0 6px; font-size: 12.5px; color: var(--muted); }
+.news-group { margin: 10px 0 2px; font-size: 14px; color: var(--pinyin); }
+.news-list { margin: 4px 0 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; color: var(--soft); font-size: 14.5px; line-height: 1.45; }
 </style>
 <script>
 /* Early error reporter: shows any JavaScript error visibly on the page, even if the main script fails to load. */
@@ -920,6 +932,12 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
       <span class="legend-tones" id="legendTones" title="Tone colours: 1st, 2nd, 3rd, 4th and neutral tone"><span class="visually-hidden">Tone colours: </span><span class="t1">mā</span><span class="t2">má</span><span class="t3">mǎ</span><span class="t4">mà</span><span class="t5">ma</span></span>
     </p>
     <p class="visually-hidden" id="progressLabel">0 known</p>
+  </section>
+  <section id="newsStrip" class="wotd news-strip" aria-label="What's new" hidden>
+    <div class="wotd-seal" lang="zh-CN" aria-hidden="true">新</div>
+    <p class="wotd-body" id="newsStripText"></p>
+    <button type="button" class="btn small" id="btnNewsSee">See</button>
+    <button type="button" class="icon-btn small" id="btnNewsClose" aria-label="Hide what's new">✕</button>
   </section>
   <section id="wotd" class="wotd" aria-labelledby="wotdLabel" hidden>
     <div class="wotd-seal" lang="zh-CN" aria-hidden="true">日</div>
@@ -1065,6 +1083,10 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
           <span class="set-note">Check the word data and test every control.</span>
           <button type="button" class="btn small" id="btnSelfCheck" aria-label="Run the self-check diagnostics">Run self-check</button>
         </div>
+        <div class="set-row">
+          <span class="set-note">See what changed in each version.</span>
+          <button type="button" class="btn small" id="btnNews">What's new</button>
+        </div>
         <p class="set-note app-version">Version __BUILD_DATE__, build __BUILD_ID__</p>
       </section>
     </div>
@@ -1105,6 +1127,16 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
       <button type="button" class="btn" id="confirmAlt" hidden>Other choice</button>
       <button type="button" class="btn danger" id="confirmOk">OK</button>
     </div>
+  </div>
+</div>
+
+<div id="newsView" class="overlay" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="newsTitle">
+    <div class="sheet-head">
+      <h2 id="newsTitle" data-lbl="inline">What's new</h2>
+      <button type="button" class="close-btn" id="btnCloseNews" aria-label="Close what's new">✕</button>
+    </div>
+    <div class="pv-body" id="newsBody"></div>
   </div>
 </div>
 
@@ -1225,6 +1257,7 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
           <dt>Fill the gap</dt><dd>One of the word's example sentences with the word blanked out, and its translation. Pick the word that fits from four of the same length; keys 1–4 pick. Words only; it counts toward reading.</dd>
           <dt>Which tone?</dt><dd>Hear the word, then pick the tone of its first syllable from the four written forms; keys 1–4 pick tones 1–4. Words only. The 21 words whose first syllable is neutral, or changes tone when it is spoken (你好, 可以), come up as normal cards.</dd>
           <dt>Tap a word</dt><dd>In any example sentence, and on sentence cards, the words from HSK 1–3 have a dotted underline. Tap one to see its pinyin and meaning; tap elsewhere or press Esc to close it. On a word card the word itself is highlighted instead.</dd>
+          <dt>What's new</dt><dd>After an update a short notice appears at the top; Settings → What's new lists every version.</dd>
           <dt>Chinese labels</dt><dd>Buttons and headings carry their Chinese name (复习 fùxí = Due, 我会了 wǒ huì le = I know it), so you pick up everyday words as you use the app. Settings → Interface labels switches between 中文 + English, English, and 中文 only; hover or long-press a label to see its pinyin.</dd>
           <dt>Your panda</dt><dd>The little panda next to today's count lives on your studying. Every answer feeds it a bamboo leaf, your daily goal fills its belly, and all your answers together make it grow from newborn to sage. Tap it to see how it is doing and to give it a name.</dd>
           <dt>Word of the day</dt><dd>Each day a useful word you do not know yet appears above the card. “Study it” opens it; ✕ hides it until tomorrow.</dd>
@@ -1359,7 +1392,7 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
   var EXPECTED_LEVELS = __EXPECTED_LEVELS__;
   var MODE_NAMES = { all: 'All cards', due: 'Due for review', learning: 'Learning only', unmarked: 'New cards only', hard: 'Hardest words' };
   var STATUS_NAMES = { known: 'Known', learning: 'Learning', unmarked: 'New' };
-  var REQUIRED_IDS = ['optLabels', 'btnPet', 'petMini', 'petView', 'btnClosePet', 'petBig', 'petName', 'petStageName', 'petMood', 'petFedText', 'petFed', 'petGrowText', 'petGrow', 'petRename', 'petNameInput', 'cardHints', 'quizView', 'quizTitle', 'quizBody', 'btnCloseQuiz', 'wotd', 'wotdZh', 'wotdPy', 'wotdEn', 'wotdHint', 'btnWotdStudy', 'btnWotdClose', 'extra-data', 'btnTopic', 'topicBtnZh', 'topicBtnName', 'topicView', 'btnCloseTopic', 'topicGrid', 'cardRank', 'comboTag', 'gradeRow', 'legendTones', 'optChoicePinyin', 'progressTitle', 'optFadePinyin', 'wordPop', 'wordPopZh', 'wordPopLv', 'wordPopPy', 'wordPopEn', 'wordPopHu', 'btnWordPopSpeak', 'btnWordPopClose', 'app', 'errorBanner', 'errorList', 'modeAll', 'modeLearning', 'modeUnmarked', 'countAll', 'countLearningMode',
+  var REQUIRED_IDS = ['newsStrip', 'newsStripText', 'btnNewsSee', 'btnNewsClose', 'btnNews', 'newsView', 'btnCloseNews', 'newsBody', 'optLabels', 'btnPet', 'petMini', 'petView', 'btnClosePet', 'petBig', 'petName', 'petStageName', 'petMood', 'petFedText', 'petFed', 'petGrowText', 'petGrow', 'petRename', 'petNameInput', 'cardHints', 'quizView', 'quizTitle', 'quizBody', 'btnCloseQuiz', 'wotd', 'wotdZh', 'wotdPy', 'wotdEn', 'wotdHint', 'btnWotdStudy', 'btnWotdClose', 'extra-data', 'btnTopic', 'topicBtnZh', 'topicBtnName', 'topicView', 'btnCloseTopic', 'topicGrid', 'cardRank', 'comboTag', 'gradeRow', 'legendTones', 'optChoicePinyin', 'progressTitle', 'optFadePinyin', 'wordPop', 'wordPopZh', 'wordPopLv', 'wordPopPy', 'wordPopEn', 'wordPopHu', 'btnWordPopSpeak', 'btnWordPopClose', 'app', 'errorBanner', 'errorList', 'modeAll', 'modeLearning', 'modeUnmarked', 'countAll', 'countLearningMode',
     'countUnmarkedMode', 'btnShuffle', 'btnUndo', 'btnReset', 'btnSelfCheck', 'btnList', 'cardCounter', 'knownCount', 'learningCount',
     'unmarkedCount', 'progressBar', 'progKnown', 'progLearning', 'progressLabel', 'stage', 'card', 'cardNumber', 'cardStatus', 'cardHanzi',
     'cardPinyin', 'btnSpeak', 'speakLabel', 'cardAnswer', 'cardEn', 'cardHu', 'cardExamples', 'revealHint', 'deckEnd', 'endEmoji', 'endTitle',
@@ -1368,7 +1401,7 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
     'confirmText', 'confirmCancel', 'confirmAlt', 'confirmOk', 'diagView', 'btnCloseDiag', 'diagSummary', 'diagResults', 'btnRunCheck', 'toast', 'vocab-data',
     'syncGroup', 'syncEmailRow', 'syncEmail', 'syncLinkRow', 'syncEmailNote', 'btnSignIn', 'syncAccountRow', 'syncAccount', 'btnSignOut',
     'syncDatesRow', 'syncDates', 'btnSyncNow', 'syncStatus'];
-  var CORE_BUTTONS = ['optLabels', 'btnPet', 'btnClosePet', 'petBig', 'petRename', 'btnCloseQuiz', 'quizBody', 'btnWotdStudy', 'btnWotdClose', 'btnTopic', 'btnCloseTopic', 'topicGrid', 'pvBody', 'gradeRow', 'optChoicePinyin', 'optFadePinyin', 'btnWordPopSpeak', 'btnWordPopClose', 'btnExport', 'btnImport', 'btnApplyImport', 'revealHint', 'btnHelp', 'btnTourNext', 'btnSettings', 'btnKnown', 'btnLearning', 'btnSkip', 'btnSpeak', 'cardExamples', 'modeDue', 'modeHard', 'optPractice', 'choiceBox', 'cardPrompt', 'btnProgress', 'levelAll', 'level1', 'level2', 'level3', 'card', 'btnShuffle', 'btnUndo', 'btnReset', 'btnSelfCheck',
+  var CORE_BUTTONS = ['btnNewsSee', 'btnNewsClose', 'btnNews', 'btnCloseNews', 'optLabels', 'btnPet', 'btnClosePet', 'petBig', 'petRename', 'btnCloseQuiz', 'quizBody', 'btnWotdStudy', 'btnWotdClose', 'btnTopic', 'btnCloseTopic', 'topicGrid', 'pvBody', 'gradeRow', 'optChoicePinyin', 'optFadePinyin', 'btnWordPopSpeak', 'btnWordPopClose', 'btnExport', 'btnImport', 'btnApplyImport', 'revealHint', 'btnHelp', 'btnTourNext', 'btnSettings', 'btnKnown', 'btnLearning', 'btnSkip', 'btnSpeak', 'cardExamples', 'modeDue', 'modeHard', 'optPractice', 'choiceBox', 'cardPrompt', 'btnProgress', 'levelAll', 'level1', 'level2', 'level3', 'card', 'btnShuffle', 'btnUndo', 'btnReset', 'btnSelfCheck',
     'btnList', 'btnCloseList', 'modeAll', 'modeLearning', 'modeUnmarked', 'searchInput', 'confirmOk', 'confirmCancel', 'confirmAlt', 'btnSignIn', 'btnSignOut', 'btnSyncNow'];
 
   var $ = function (id) { return document.getElementById(id); };
@@ -1376,7 +1409,7 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
   var bound = {};
   var cards = [], wordCards = [], sentCards = [];
   var state = { status: {}, mode: 'all', deck: [], pos: 0, shuffled: false, revealed: false, autoReveal: false, rate: 0.85, voice: '', badVoices: [], voicesTested: false, level: 'all', activity: {}, goal: 20, warmup: true, deckType: 'words',
-    srs: {}, misses: {}, skill: 'read', marks: {}, deckMemory: {}, topic: 'all', xp: 0, bestCombo: 0, learned: {}, wotdSeen: '', quests: null, freezes: 0, frozen: [], recapWeek: '', seals: {}, questDays: 0, petName: '', labels: 'both', blitzBest: {}, exams: {}, milestones: [], practice: 'zh', toneColors: true, fadePinyin: false, choicePinyin: true,
+    srs: {}, misses: {}, skill: 'read', marks: {}, deckMemory: {}, topic: 'all', xp: 0, bestCombo: 0, learned: {}, wotdSeen: '', quests: null, freezes: 0, frozen: [], recapWeek: '', seals: {}, questDays: 0, petName: '', labels: 'both', newsSeen: '', blitzBest: {}, exams: {}, milestones: [], practice: 'zh', toneColors: true, fadePinyin: false, choicePinyin: true,
     autoplay: false, vibrate: true, seenTour: false };
   var undoStack = [];
   var busy = false;
@@ -1462,7 +1495,7 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
     'Today\u2019s quests': ['每日任务', 'měirì rènwu'], 'Daily goal': ['每日目标', 'měirì mùbiāo'], 'Coming reviews': ['复习计划', 'fùxí jìhuà'],
     'Last 14 days': ['最近两周', 'zuìjìn liǎng zhōu'], 'What you can read': ['你能读懂的', 'nǐ néng dúdǒng de'], 'Your stats': ['统计', 'tǒngjì'],
     'Challenges': ['挑战', 'tiǎozhàn'], 'Seals': ['印章', 'yìnzhāng'], 'By topic': ['话题', 'huàtí'], 'By HSK level': ['等级', 'děngjí'],
-    'Settings': ['设置', 'shèzhì'], 'How it works': ['使用说明', 'shǐyòng shuōmíng'], 'Topics': ['话题', 'huàtí'], 'Your panda': ['熊猫', 'xióngmāo'],
+    'Settings': ['设置', 'shèzhì'], 'What\'s new': ['新功能', 'xīn gōngnéng'], 'How it works': ['使用说明', 'shǐyòng shuōmíng'], 'Topics': ['话题', 'huàtí'], 'Your panda': ['熊猫', 'xióngmāo'],
     'All words': ['词表', 'cíbiǎo'], 'All sentences': ['句子表', 'jùzi biǎo'],
     'Cards': ['卡片', 'kǎpiàn'], 'Voice': ['声音', 'shēngyīn'], 'Sync across devices': ['同步', 'tóngbù'], 'Progress and checks': ['进度和检查', 'jìndù hé jiǎnchá']
   };
@@ -1504,12 +1537,12 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
   }
 
   /* ---------- extras: character frequency, topics, hints ---------- */
-  var EXTRA = { chars: {}, topics: [], hints: {} };
+  var EXTRA = { chars: {}, topics: [], hints: {}, news: [] };
   function loadExtra() {
     var node = $('extra-data');
     try {
       var d = JSON.parse(node.textContent);
-      EXTRA = { chars: d.chars || {}, topics: Array.isArray(d.topics) ? d.topics : [], hints: d.hints || {} };
+      EXTRA = { chars: d.chars || {}, topics: Array.isArray(d.topics) ? d.topics : [], hints: d.hints || {}, news: Array.isArray(d.news) ? d.news : [] };
     } catch (e) { /* optional data: the app works without it */ }
   }
   function topicById(id) {
@@ -2217,6 +2250,7 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
       seals: state.seals,
       petName: state.petName,
       labels: state.labels,
+      newsSeen: state.newsSeen,
       questDays: state.questDays,
       blitzBest: state.blitzBest,
       exams: state.exams,
@@ -2320,6 +2354,7 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
     state.questDays = saved ? clampInt(saved.questDays, 0, 100000) : 0;
     state.petName = saved && typeof saved.petName === 'string' ? saved.petName.trim().slice(0, 16) : '';
     state.labels = saved && LABEL_MODES[saved.labels] ? saved.labels : 'both';
+    state.newsSeen = saved && typeof saved.newsSeen === 'string' ? saved.newsSeen.slice(0, 12) : '';
     var numMap = function (src, keys, max) {
       var out = {};
       if (src && typeof src === 'object') keys.forEach(function (k) { if (typeof src[k] === 'number') out[k] = clampInt(src[k], 0, max); });
@@ -3651,7 +3686,8 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
   }
   function renderWotd() {
     var w = wordOfDay();
-    els.wotd.hidden = !w || state.wotdSeen === dayKey();
+    // One strip at a time: after an update, the what's-new notice goes first.
+    els.wotd.hidden = !w || state.wotdSeen === dayKey() || !els.newsStrip.hidden;
     if (els.wotd.hidden) return;
     els.wotdZh.textContent = w.zh;
     renderPinyin(els.wotdPy, w.py);
@@ -4128,6 +4164,52 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
     });
     sec.appendChild(row);
     return sec;
+  }
+
+  /* ---------- what's new ---------- */
+  function latestNews() { return EXTRA.news[0] || null; }
+  function fmtLongDate(k) { var p = k.split('-'); return Number(p[2]) + ' ' + MONTHS[Number(p[1]) - 1] + ' ' + p[0]; }
+  // A one-line notice after an update; first-time visitors start with it marked as seen.
+  function renderNewsStrip() {
+    var n = latestNews();
+    els.newsStrip.hidden = !n || state.newsSeen === n.version;
+    if (els.newsStrip.hidden) return;
+    els.newsStripText.textContent = '';
+    els.newsStripText.appendChild(el('b', null, 'What\u2019s new in ' + n.version + ': '));
+    els.newsStripText.appendChild(document.createTextNode(n.title));
+  }
+  function markNewsSeen() {
+    var n = latestNews();
+    if (!n || state.newsSeen === n.version) return;
+    state.newsSeen = n.version;
+    renderNewsStrip();
+    renderWotd();
+    save();
+  }
+  function renderNews() {
+    var body = els.newsBody;
+    body.textContent = '';
+    EXTRA.news.forEach(function (r, i) {
+      var sec = el('section', 'news-release' + (i === 0 ? ' latest' : ''));
+      var h = el('h3', 'news-head');
+      h.appendChild(el('span', 'news-ver', r.version));
+      h.appendChild(el('span', 'news-title', r.title));
+      sec.appendChild(h);
+      sec.appendChild(el('p', 'news-date', fmtLongDate(r.date)));
+      r.groups.forEach(function (g) {
+        if (g.name) sec.appendChild(el('h4', 'news-group', g.name));
+        var ul = el('ul', 'news-list');
+        g.items.forEach(function (t) { ul.appendChild(el('li', null, t)); });
+        sec.appendChild(ul);
+      });
+      body.appendChild(sec);
+    });
+  }
+  function openNews() {
+    renderNews();
+    closeOverlay(els.settingsView);
+    openOverlay(els.newsView, els.btnCloseNews);
+    markNewsSeen();
   }
 
   /* ---------- the panda ---------- */
@@ -4961,7 +5043,7 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
   }
 
   /* ---------- overlays ---------- */
-  var OVERLAYS = ['petView', 'quizView', 'topicView', 'listView', 'progressView', 'settingsView', 'helpView', 'transferView', 'summaryView', 'tourView', 'diagView', 'confirmDialog'];
+  var OVERLAYS = ['newsView', 'petView', 'quizView', 'topicView', 'listView', 'progressView', 'settingsView', 'helpView', 'transferView', 'summaryView', 'tourView', 'diagView', 'confirmDialog'];
   var overlayStack = [];
   function anyOverlayOpen() {
     return OVERLAYS.some(function (id) { return !els[id].hidden; });
@@ -5418,7 +5500,7 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
       status: JSON.parse(JSON.stringify(state.status)), mode: state.mode, deck: state.deck.slice(), pos: state.pos,
       shuffled: state.shuffled, revealed: state.revealed, autoReveal: state.autoReveal, level: state.level,
       srs: JSON.parse(JSON.stringify(state.srs)), misses: JSON.parse(JSON.stringify(state.misses)), practice: state.practice, toneColors: state.toneColors, fadePinyin: state.fadePinyin,
-      deckType: state.deckType, petName: state.petName, seals: JSON.parse(JSON.stringify(state.seals)), questDays: state.questDays,
+      deckType: state.deckType, newsSeen: state.newsSeen, petName: state.petName, seals: JSON.parse(JSON.stringify(state.seals)), questDays: state.questDays,
       blitzBest: JSON.parse(JSON.stringify(state.blitzBest)), exams: JSON.parse(JSON.stringify(state.exams)), quests: JSON.parse(JSON.stringify(state.quests)), freezes: state.freezes, frozen: state.frozen.slice(), wotdSeen: state.wotdSeen, topic: state.topic, xp: state.xp, bestCombo: state.bestCombo, learned: JSON.parse(JSON.stringify(state.learned)),
       activity: JSON.parse(JSON.stringify(state.activity)), milestones: state.milestones.slice(), seenTour: state.seenTour
     };
@@ -5907,6 +5989,27 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
       })();
       add('Similar words', simRes.ok, simRes.d);
 
+      var newsRes = (function () {
+        if (!EXTRA.news.length) return { ok: true, d: 'no changelog in this build' };
+        var latest = latestNews();
+        state.newsSeen = '';
+        renderNewsStrip();
+        var notice = !els.newsStrip.hidden && els.newsStripText.textContent.indexOf(latest.version) !== -1;
+        els.btnNewsSee.click();
+        var sheet = !els.newsView.hidden && els.newsBody.querySelectorAll('.news-release').length === EXTRA.news.length &&
+          els.newsBody.querySelector('.news-release.latest .news-ver').textContent === latest.version;
+        var seen = state.newsSeen === latest.version && els.newsStrip.hidden;
+        closeOverlay(els.newsView);
+        els.btnNews.click();
+        var fromSettings = !els.newsView.hidden;
+        closeOverlay(els.newsView);
+        var wellFormed = EXTRA.news.every(function (r) { return r.version && r.title && r.groups.length && r.groups.every(function (g) { return g.items.length; }); });
+        return { ok: notice && sheet && seen && fromSettings && wellFormed,
+          d: 'notice for ' + latest.version + ': ' + notice + ', sheet lists ' + EXTRA.news.length + ' releases: ' + sheet + ', opening marks it seen: ' + seen +
+            ', Settings opens it: ' + fromSettings + ', entries well-formed: ' + wellFormed };
+      })();
+      add('What\'s new', newsRes.ok, newsRes.d);
+
       var labRes = (function () {
         var keep = state.labels, mz = els.modeDue.querySelector('.lbl .zl'), me = els.modeDue.querySelector('.lbl .el');
         var hidden = function (n) { return getComputedStyle(n).display === 'none' || getComputedStyle(n).position === 'absolute'; };
@@ -6269,6 +6372,7 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
       state.practice = snap.practice;
       state.toneColors = snap.toneColors;
       state.fadePinyin = snap.fadePinyin;
+      state.newsSeen = snap.newsSeen; closeOverlay(els.newsView); renderNewsStrip();
       state.petName = snap.petName; closeOverlay(els.petView); renderPet();
       state.seals = snap.seals; state.questDays = snap.questDays; state.blitzBest = snap.blitzBest; state.exams = snap.exams; stopQuiz(); quiz = null;
       state.quests = snap.quests; state.freezes = snap.freezes; state.frozen = snap.frozen; state.wotdSeen = snap.wotdSeen; renderWotd();
@@ -6443,6 +6547,10 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
     on('btnProgress', 'click', function () { openProgress('progress'); });
     on('todayPill', 'click', function () { openProgress('today'); });
     on('btnTopic', 'click', openTopics);
+    on('btnNews', 'click', openNews);
+    on('btnNewsSee', 'click', openNews);
+    on('btnNewsClose', 'click', markNewsSeen);
+    on('btnCloseNews', 'click', function () { closeOverlay(els.newsView); });
     on('btnPet', 'click', openPet);
     on('btnClosePet', 'click', function () { closeOverlay(els.petView); });
     on('petBig', 'click', petTap);
@@ -6624,6 +6732,10 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
     updateTopicBtn();
     renderCombo();
     if (applyFreezes()) save();
+    renderWotd();
+    // Someone opening the app for the first time has nothing to catch up on.
+    if (!state.seenTour && latestNews()) state.newsSeen = latestNews().version;
+    renderNewsStrip();
     renderWotd();
     renderPet();
     pickVoice();

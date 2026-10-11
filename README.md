@@ -1,6 +1,12 @@
 # Mandarin HSK flashcards
 
-Offline flashcards for 598 HSK 1–3 words and their 777 example sentences, with pinyin, English and Hungarian, read-aloud, six practice styles (including a listen-and-pick-the-tone quiz), spaced repetition, progress tracking and optional cloud sync.
+Offline flashcards for 598 HSK 1–3 words and their 777 example sentences, with pinyin, English and Hungarian, read-aloud, spaced repetition per skill and optional cloud sync. It also has:
+- **Practice styles:** 15, from flashcards and listening to fill-the-gap, sentence building, typed pinyin, a tone quiz and look-alike/sound-alike drills.
+- **Learning aids:** character memory hints, topics, and word frequency.
+- **Motivation and games:** daily quests, a 60-second blitz, level exams, seals to collect, and a panda that grows as you study.
+- **Interface:** labels in 中文 + English.
+
+What changed in each version is in `data/changelog.json` and in the app under Settings → What's new.
 
 **Use it:** https://nyikozoli.github.io/mandarin-flashcards/ (add it to your phone's home screen; it works offline), or build the single-file version below and double-click it.
 
@@ -12,7 +18,9 @@ npm run build     # writes dist/ and verifies it
 npm run selfcheck # runs the in-app self-check in headless Chrome or Edge (Node 22+)
 ```
 
-No dependencies: Node 18 or newer is all you need. `npm run build` runs `scripts/build.js`, which writes three versions and checks the first two with `scripts/verify.js`:
+To look at the build in a browser, serve `dist/` over http, e.g. `python -m http.server 8766 --directory dist`, and open http://localhost:8766/mandarin-flashcards.html. Double-clicking `dist/mandarin-flashcards.html` works too.
+
+No dependencies: Node 18 or newer builds it; the headless self-check needs Node 22 or newer. `npm run build` runs `scripts/build.js`, which writes three versions and checks the first two with `scripts/verify.js`:
 - HTML structure and tag balance, and script syntax
 - 598 words with every field and at least one example each, with the right count per level and no duplicate headwords
 - every element the code uses exists
@@ -97,9 +105,14 @@ Reading (Chinese → meaning, 汉字 only, multiple choice), recall (meaning →
 |---|---|---|
 | `data/topics.json` | One of 16 topics per word | Tagged by rule (most specific topic wins; function words → grammar), then reviewed |
 | `data/freq.json` | Frequency rank and share of running text per word, share per character | Extracted from [wordfreq](https://github.com/rspeer/wordfreq) 3.1.1. **This file is CC BY-SA 4.0**, as an adaptation of wordfreq's data. |
+| `data/changelog.json` | Release notes, newest first: `version`, `date`, `title`, and `groups` of items | Written by hand for every user-visible change. The build checks the shape, and the newest version triggers the one-time "What's new" notice. |
 | `data/hints.json` | Memory hints for 180 characters (picture, combined meaning, or meaning + sound part) | Written from the Shuowen and mainstream modern etymology, then fact-checked by an independent review; contested readings are marked "Traditionally" |
 
-The build adds rank, frequency and topic to each card and puts the topic list, character frequencies and hints in a second JSON block (`extra-data`). All three files are optional: without them the related features hide.
+The build adds rank, frequency and topic to each card and puts the topic list, character frequencies and hints in a second JSON block (`extra-data`). These files are optional: without them the related features hide.
+
+## Interface labels
+
+Buttons and headings carry their Chinese name (`ZH_LABELS` in `src/template.html`: 复习 Due, 我会了 I know it…), with the pinyin in the tooltip. Settings → Interface labels picks 中文 + English (the default), English, or 中文 only. In 中文 only, the English stays in the page, visually hidden, for screen readers. Static labels are marked `data-lbl` in the markup; labels built in code go through `zhLabel()`.
 
 ## Pinyin conventions
 

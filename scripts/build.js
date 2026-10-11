@@ -78,6 +78,14 @@ const optJson = (p) => (fs.existsSync(p) ? JSON.parse(read(p)) : null);
 const FREQ = optJson(dataPath('freq.json'));
 const TOPICS = optJson(dataPath('topics.json'));
 const HINTS = optJson(dataPath('hints.json'));
+//   data/changelog.json  release notes for the in-app "What's new" sheet, newest first
+const CHANGELOG = optJson(dataPath('changelog.json'));
+if (CHANGELOG) {
+  (CHANGELOG.releases || []).forEach((r) => {
+    if (!r.version || !/^\d{4}-\d{2}-\d{2}$/.test(r.date) || !r.title || !Array.isArray(r.groups) || !r.groups.length) throw new Error('Malformed changelog release ' + JSON.stringify(r).slice(0, 80));
+    r.groups.forEach((g) => { if (!Array.isArray(g.items) || !g.items.length) throw new Error('Empty changelog group in ' + r.version); });
+  });
+}
 cards = cards.map((c) => {
   const o = Object.assign({}, c);
   const f = FREQ && FREQ.words[c.zh];
@@ -96,7 +104,7 @@ const total = expected[1] + expected[2] + expected[3];
 const safeJson = (v) => JSON.stringify(v).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026')
   .replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
 const json = safeJson(cards);
-const extraJson = safeJson({ chars: FREQ ? FREQ.chars : {}, topics: TOPICS ? TOPICS.topics : [], hints: HINTS ? HINTS.hints : {} });
+const extraJson = safeJson({ chars: FREQ ? FREQ.chars : {}, topics: TOPICS ? TOPICS.topics : [], hints: HINTS ? HINTS.hints : {}, news: CHANGELOG ? CHANGELOG.releases : [] });
 
 // ---------- html ----------
 const template = read(rel('template.html')).replace(/\r\n/g, '\n');
