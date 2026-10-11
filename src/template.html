@@ -395,6 +395,8 @@ kbd { font-family: var(--ui-font); font-size: 11.5px; padding: 1px 6px; border-r
 .legend { margin: 0; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12.5px; color: var(--muted); }
 .legend > span { display: inline-flex; align-items: center; gap: 6px; }
 .legend b { color: var(--text); font-variant-numeric: tabular-nums; }
+/* Tone colour key for beginners; shown while tone colours are on. */
+.legend .legend-tones { margin-left: auto; gap: 7px; font-size: 14px; font-weight: 700; }
 .dot { background: #6b7489; }
 
 .card { border-radius: 20px; background: var(--surface); border-color: var(--line); box-shadow: 0 18px 40px rgba(4, 7, 10, .5); }
@@ -649,6 +651,7 @@ label.btn { cursor: pointer; }
       <span><span class="dot known" aria-hidden="true"></span><b id="knownCount">0</b> known</span>
       <span><span class="dot learning" aria-hidden="true"></span><b id="learningCount">0</b> learning</span>
       <span><span class="dot" aria-hidden="true"></span><b id="unmarkedCount">0</b> unmarked</span>
+      <span class="legend-tones" id="legendTones" title="Tone colours: 1st, 2nd, 3rd, 4th and neutral tone"><span class="visually-hidden">Tone colours: </span><span class="t1">mā</span><span class="t2">má</span><span class="t3">mǎ</span><span class="t4">mà</span><span class="t5">ma</span></span>
     </p>
     <p class="visually-hidden" id="progressLabel">0 known</p>
   </section>
@@ -1005,7 +1008,7 @@ label.btn { cursor: pointer; }
   var EXPECTED_LEVELS = __EXPECTED_LEVELS__;
   var MODE_NAMES = { all: 'All cards', due: 'Due for review', learning: 'Learning only', unmarked: 'Unmarked only', hard: 'Hardest words' };
   var STATUS_NAMES = { known: 'Known', learning: 'Learning', unmarked: 'Unmarked' };
-  var REQUIRED_IDS = ['optChoicePinyin', 'progressTitle', 'optFadePinyin', 'wordPop', 'wordPopZh', 'wordPopLv', 'wordPopPy', 'wordPopEn', 'wordPopHu', 'btnWordPopSpeak', 'btnWordPopClose', 'app', 'errorBanner', 'errorList', 'modeAll', 'modeLearning', 'modeUnmarked', 'countAll', 'countLearningMode',
+  var REQUIRED_IDS = ['legendTones', 'optChoicePinyin', 'progressTitle', 'optFadePinyin', 'wordPop', 'wordPopZh', 'wordPopLv', 'wordPopPy', 'wordPopEn', 'wordPopHu', 'btnWordPopSpeak', 'btnWordPopClose', 'app', 'errorBanner', 'errorList', 'modeAll', 'modeLearning', 'modeUnmarked', 'countAll', 'countLearningMode',
     'countUnmarkedMode', 'btnShuffle', 'btnUndo', 'btnReset', 'btnSelfCheck', 'btnList', 'cardCounter', 'knownCount', 'learningCount',
     'unmarkedCount', 'progressBar', 'progKnown', 'progLearning', 'progressLabel', 'stage', 'card', 'cardNumber', 'cardStatus', 'cardHanzi',
     'cardPinyin', 'btnSpeak', 'speakLabel', 'cardAnswer', 'cardEn', 'cardHu', 'cardExamples', 'revealHint', 'deckEnd', 'endEmoji', 'endTitle',
@@ -2836,6 +2839,7 @@ label.btn { cursor: pointer; }
 
   /* ---------- rendering ---------- */
   function render(animate) {
+    els.legendTones.hidden = !state.toneColors;
     updateStats();
     els.btnUndo.disabled = undoStack.length === 0;
     var i = currentIndex();
@@ -3815,6 +3819,12 @@ label.btn { cursor: pointer; }
       els.card.click();
       var hanzi = hidden && hanziReveal;
       state.practice = 'zh'; render(false);
+      state.toneColors = true; render(false);
+      var keyOn = !els.legendTones.hidden && els.legendTones.querySelectorAll('.t1,.t2,.t3,.t4,.t5').length === 5;
+      state.toneColors = false; render(false);
+      var keyOff = els.legendTones.hidden;
+      state.toneColors = true; render(false);
+      add('Tone colour key next to the progress bar', keyOn && keyOff, 'shown with tone colours on: ' + keyOn + ', hidden when off: ' + keyOff);
       var ver = document.querySelector('.app-version');
       add('Version shown in Settings', !!ver && /^Version \d{4}-\d\d-\d\d, build [0-9a-f]{10}$/.test(ver.textContent), ver ? ver.textContent : 'missing');
 
