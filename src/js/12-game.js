@@ -672,6 +672,10 @@
   // the word of the day is showing, and ✕ hides it until tomorrow.
   function renderLadderStrip() {
     renderRail();
+    drawLadderStrip();
+    renderSuggest();
+  }
+  function drawLadderStrip() {
     var r = nextRung();
     els.ladderStrip.hidden = !r || state.ladderSeen === dayKey() || !els.newsStrip.hidden || !els.wotd.hidden;
     if (els.ladderStrip.hidden) return;
@@ -805,4 +809,35 @@
     els.railCount.textContent = reached + '/' + EXTRA.ladder.length;
     els.railNext.textContent = nr ? nr.zh : '';
     els.railLadder.setAttribute('aria-label', 'Ladder: ' + reached + ' of ' + EXTRA.ladder.length + ' steps reached' + (nr ? ', next: ' + nr.en : '') + '. Open the ladder');
+  }
+
+  /* ---------- suggestion chip ---------- */
+  // The Today row's chip stands for the one strip showing (what's new, the word of the day or the next ladder step);
+  // tapping it opens that strip as a popover. On wide screens the rail shows the ladder, so the chip skips it there.
+  function shownStrip() { return [els.newsStrip, els.wotd, els.ladderStrip].filter(function (s) { return !s.hidden; })[0] || null; }
+  function renderSuggest() {
+    var s = shownStrip();
+    if (s === els.ladderStrip && !els.progressRail.hidden && getComputedStyle(els.progressRail).display !== 'none') s = null;
+    els.btnSuggest.hidden = !s;
+    if (!s) { closeSuggest(); return; }
+    var kind = s === els.newsStrip ? 'news' : s === els.wotd ? 'wotd' : 'ladder';
+    els.suggestSeal.textContent = s.querySelector('.wotd-seal').textContent;
+    els.suggestSeal.className = 'suggest-seal ' + kind;
+    els.suggestText.textContent = kind === 'news' ? 'What\u2019s new in ' + latestNews().version
+      : kind === 'wotd' ? els.wotdZh.textContent + ' ' + els.wotdPy.textContent
+      : els.ladderZh.textContent + ' \u00b7 ' + els.ladderLeft.textContent;
+    els.btnSuggest.setAttribute('aria-label', (kind === 'news' ? 'What\u2019s new' : kind === 'wotd' ? 'Word of the day: ' + els.wotdZh.textContent : 'Next ladder step: ' + els.ladderZh.textContent + ', ' + els.ladderLeft.textContent) + '. Show');
+  }
+  function openSuggest() {
+    els.suggestPop.hidden = false;
+    els.btnSuggest.setAttribute('aria-expanded', 'true');
+    var first = shownStrip();
+    var b = first && first.querySelector('button');
+    if (b && !testing) b.focus();
+  }
+  function closeSuggest(refocus) {
+    if (els.suggestPop.hidden) return;
+    els.suggestPop.hidden = true;
+    els.btnSuggest.setAttribute('aria-expanded', 'false');
+    if (refocus && !els.btnSuggest.hidden) els.btnSuggest.focus();
   }

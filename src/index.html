@@ -126,35 +126,38 @@
   <section class="stats" aria-label="Today">
     <div class="today-row">
       <button type="button" class="today-pill" id="todayPill" aria-label="Today's progress">0/20 today</button>
+      <button type="button" class="suggest-chip" id="btnSuggest" aria-expanded="false" aria-controls="suggestPop" hidden><span class="suggest-seal" id="suggestSeal" lang="zh-CN" aria-hidden="true"></span><span class="suggest-text" id="suggestText"></span></button>
       <p class="legend">
-        <span><span class="dot known" aria-hidden="true"></span><b id="knownCount">0</b> known</span>
-        <span><span class="dot learning" aria-hidden="true"></span><b id="learningCount">0</b> learning</span>
-        <span><span class="dot" aria-hidden="true"></span><b id="unmarkedCount">0</b> new</span>
+        <span><span class="dot known" aria-hidden="true"></span><b id="knownCount">0</b><span class="lg-w"> known</span></span>
+        <span><span class="dot learning" aria-hidden="true"></span><b id="learningCount">0</b><span class="lg-w"> learning</span></span>
+        <span><span class="dot" aria-hidden="true"></span><b id="unmarkedCount">0</b><span class="lg-w"> new</span></span>
       </p>
+      <div class="suggest-pop" id="suggestPop" hidden>
+      <section id="newsStrip" class="wotd news-strip" aria-label="What's new" hidden>
+        <div class="wotd-seal" lang="zh-CN" aria-hidden="true">新</div>
+        <p class="wotd-body" id="newsStripText"></p>
+        <button type="button" class="btn small" id="btnNewsSee">See</button>
+        <button type="button" class="icon-btn small" id="btnNewsClose" aria-label="Hide what's new">✕</button>
+      </section>
+      <section id="wotd" class="wotd" aria-labelledby="wotdLabel" hidden>
+        <div class="wotd-seal" lang="zh-CN" aria-hidden="true">日</div>
+        <p class="wotd-body"><span class="visually-hidden" id="wotdLabel">Word of the day: </span><span id="wotdZh" lang="zh-CN"></span> <span id="wotdPy" class="wotd-py" lang="zh-Latn-pinyin"></span> <span id="wotdEn" class="wotd-en"></span><span id="wotdHint" hidden></span></p>
+        <button type="button" class="btn small" id="btnWotdStudy">Study</button>
+        <button type="button" class="icon-btn small" id="btnWotdClose" aria-label="Hide the word of the day until tomorrow">✕</button>
+      </section>
+      <section id="ladderStrip" class="wotd ladder-strip" aria-label="Next ladder step" hidden>
+        <div class="wotd-seal" lang="zh-CN" aria-hidden="true">梯</div>
+        <button type="button" class="wotd-body ladder-open" id="btnLadderOpen"><span class="ladder-next">Next:</span> <span id="ladderZh" lang="zh-CN"></span> <span id="ladderLeft" class="ladder-left"></span> <span id="ladderEn" class="wotd-en"></span></button>
+        <button type="button" class="btn small" id="btnLadderGo">Practise</button>
+        <button type="button" class="icon-btn small" id="btnLadderClose" aria-label="Hide the ladder step until tomorrow">✕</button>
+      </section>
+      </div>
     </div>
     <div class="progress" id="progressBar" role="progressbar" aria-label="Words marked as known" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0">
       <div class="seg known" id="progKnown"></div>
       <div class="seg learning" id="progLearning"></div>
     </div>
     <p class="visually-hidden" id="progressLabel">0 known</p>
-  </section>
-  <section id="newsStrip" class="wotd news-strip" aria-label="What's new" hidden>
-    <div class="wotd-seal" lang="zh-CN" aria-hidden="true">新</div>
-    <p class="wotd-body" id="newsStripText"></p>
-    <button type="button" class="btn small" id="btnNewsSee">See</button>
-    <button type="button" class="icon-btn small" id="btnNewsClose" aria-label="Hide what's new">✕</button>
-  </section>
-  <section id="wotd" class="wotd" aria-labelledby="wotdLabel" hidden>
-    <div class="wotd-seal" lang="zh-CN" aria-hidden="true">日</div>
-    <p class="wotd-body"><span class="visually-hidden" id="wotdLabel">Word of the day: </span><span id="wotdZh" lang="zh-CN"></span> <span id="wotdPy" class="wotd-py" lang="zh-Latn-pinyin"></span> <span id="wotdEn" class="wotd-en"></span><span id="wotdHint" hidden></span></p>
-    <button type="button" class="btn small" id="btnWotdStudy">Study</button>
-    <button type="button" class="icon-btn small" id="btnWotdClose" aria-label="Hide the word of the day until tomorrow">✕</button>
-  </section>
-  <section id="ladderStrip" class="wotd ladder-strip" aria-label="Next ladder step" hidden>
-    <div class="wotd-seal" lang="zh-CN" aria-hidden="true">梯</div>
-    <button type="button" class="wotd-body ladder-open" id="btnLadderOpen"><span class="ladder-next">Next:</span> <span id="ladderZh" lang="zh-CN"></span> <span id="ladderLeft" class="ladder-left"></span> <span id="ladderEn" class="wotd-en"></span></button>
-    <button type="button" class="btn small" id="btnLadderGo">Practise</button>
-    <button type="button" class="icon-btn small" id="btnLadderClose" aria-label="Hide the ladder step until tomorrow">✕</button>
   </section>
   </div>
   <div id="srLive" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
@@ -520,7 +523,7 @@
           <dt>Translations</dt><dd>Settings → Translations shows the meanings in English, Hungarian, German, Spanish and Romanian, in any combination. At least one stays on; the first one switched on is the main meaning in quizzes and multiple choice. Search finds words in all five.</dd>
           <dt>读 说 听</dt><dd>On each card and in the word list, three small seals show the card's mark in every skill: 读 reading, 说 recall (meaning → Chinese), 听 listening. Green is Known, amber Learning, an outline New; the skill you are practising has a ring. The tag next to them names that skill's mark.</dd>
           <dt>Your panda</dt><dd>The panda at the top left lives on your studying. Every answer feeds it a bamboo leaf, your daily goal fills its belly, and all your answers together make it grow from newborn to sage. Tap it to see how it is doing and to give it a name.</dd>
-          <dt>Word of the day</dt><dd>Each day a useful word you do not know yet appears above the card. “Study it” opens it; ✕ hides it until tomorrow.</dd>
+          <dt>Word of the day</dt><dd>Each day a useful word you do not know yet appears as a chip in the Today row; tap it to see the word. “Study it” opens it; ✕ hides it until tomorrow.</dd>
           <dt>Daily quests</dt><dd>Three small goals each day, shown in the progress view. Each finished quest gives 30 XP; all three give 50 XP more and a 🧊 streak freeze. You can save two, and a saved freeze keeps your streak alive over a missed day. Every Monday a short recap of last week appears.</dd>
           <dt>Ladder (阶梯)</dt><dd>Real-life steps such as greeting people, ordering food or asking the way, each with a small set of words. A step is reached when you know all its words in reading and listening (读 and 听); take them in any order, each one is worth 40 XP. The strip on the main screen shows the next step and how many words it still needs; Practise studies just those words. The Ladder tab in the progress view shows every step, and on wide screens a narrow ladder on the right shows your climb and your rank.</dd>
           <dt>Seals and challenges</dt><dd>The progress view collects 20 red seals (印章) for milestones such as 100 words, a 7-day streak or a passed exam, each worth 50 XP. Its challenges are a 60-second blitz (as many meanings as you can) and a 20-question exam per HSK level (pass at 80%). Challenges never change your review schedule.</dd>

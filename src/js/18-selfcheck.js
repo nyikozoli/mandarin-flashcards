@@ -1262,6 +1262,22 @@
             ', Listening tile switches to listening and updates the button: ' + listen + ', Build the sentence switches to the sentence deck: ' + build + ', menu change updates the button: ' + back };
       })();
       add('Practice style picker', pickerRes.ok, pickerRes.d);
+      var sugRes = (function () {
+        closeSuggest();
+        if (latestNews()) state.newsSeen = latestNews().version;
+        renderNewsStrip();
+        state.wotdSeen = '';
+        renderWotd();
+        var chip = !els.btnSuggest.hidden && els.suggestText.textContent.indexOf(els.wotdZh.textContent) === 0 && els.suggestPop.hidden;
+        els.btnSuggest.click();
+        var open = !els.suggestPop.hidden && els.btnSuggest.getAttribute('aria-expanded') === 'true' && !els.wotd.hidden;
+        els.btnWotdClose.click();
+        var closed = els.suggestPop.hidden && els.wotd.hidden && els.btnSuggest.getAttribute('aria-expanded') === 'false';
+        // With the word of the day put away, the chip moves on to the ladder step (hidden where the rail shows it).
+        var next = els.btnSuggest.hidden || els.suggestSeal.className.indexOf('ladder') !== -1;
+        return { ok: chip && open && closed && next, d: 'chip stands for the word of the day: ' + chip + ', tap opens its strip: ' + open + ', ✕ in the strip closes both: ' + closed + ', chip moves on to the ladder: ' + next };
+      })();
+      add('Suggestion chip in the Today row', sugRes.ok, sugRes.d);
       var railRes = (function () {
         if (!EXTRA.ladder.length) return { ok: els.progressRail.hidden, d: 'no ladder data: the rail stays hidden' };
         renderRail();

@@ -299,3 +299,17 @@ body.labels-zh .practice-name .lbl .zl, body.labels-zh .pk-tile .lbl .zl { color
 /* A soft green wash rising behind the rungs to the share of the ladder climbed, fading out at its top edge. */
 .rail-rungs { --climb: 0%; background: linear-gradient(to top, rgba(79, 209, 161, .34) 0%, rgba(79, 209, 161, .14) calc(var(--climb) - 4%), rgba(79, 209, 161, 0) var(--climb)); }
 .rail-rank-seal.long { writing-mode: horizontal-tb; font-size: 14px; letter-spacing: 0; }
+
+/* Suggestion chip in the Today row; the strip it stands for opens below it as a popover. */
+.today-row { position: relative; flex-wrap: wrap; }
+.today-row .legend { flex: 1 1 200px; }
+.suggest-chip { display: inline-flex; align-items: center; gap: 7px; min-height: 44px; max-width: min(46%, 260px); padding: 4px 12px 4px 7px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--text); font-size: 13.5px; font-weight: 600; }
+.suggest-chip:hover, .suggest-chip[aria-expanded="true"] { border-color: var(--soft); }
+.suggest-seal { flex: none; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 6px; background: var(--cinnabar); color: var(--paper); font-family: var(--kai-font); font-size: 16px; line-height: 1; }
+.suggest-seal.news { background: var(--learn-strong); color: var(--learn-ink); }
+.suggest-seal.ladder { background: var(--known-strong); color: var(--known-ink); }
+.suggest-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.suggest-pop { position: absolute; z-index: 6; left: 0; right: 0; top: calc(100% + 6px); border-radius: 12px; background: var(--bg); box-shadow: 0 16px 40px rgba(0, 0, 0, .55); }
+@media (max-width: 360px) { .suggest-chip { max-width: 52%; padding-right: 10px; font-size: 13px; } }
+/* On phones the counts drop their words (the coloured dots say which is which), so the Today row stays one line. */
+@media (max-width: 480px) { .today-row .legend { flex: 0 1 auto; gap: 4px 10px; } .today-row .lg-w { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } }

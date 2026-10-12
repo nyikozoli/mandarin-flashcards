@@ -169,6 +169,15 @@
     });
     on('btnWotdClose', 'click', dismissWotd);
     on('btnLadderClose', 'click', dismissLadder);
+    on('btnSuggest', 'click', function () { if (els.suggestPop.hidden) openSuggest(); else closeSuggest(); });
+    // Any action in the popover (Study, Practise, See, ✕) closes it once its own handler has run.
+    on('suggestPop', 'click', function (e) { if (e.target.closest && e.target.closest('button')) closeSuggest(); });
+    document.addEventListener('click', function (e) {
+      if (!els.suggestPop.hidden && !els.suggestPop.contains(e.target) && !els.btnSuggest.contains(e.target)) closeSuggest();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (!els.suggestPop.hidden && (e.key === 'Escape' || e.key === 'Esc')) { e.preventDefault(); e.stopPropagation(); closeSuggest(true); }
+    }, true);
     on('railLadder', 'click', function () { openProgress('ladder'); });
     on('railRank', 'click', function () { openProgress('collection'); });
     on('btnLadderOpen', 'click', function () { openProgress('ladder'); });
