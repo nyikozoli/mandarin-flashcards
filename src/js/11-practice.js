@@ -34,7 +34,7 @@
     els.practiceAsk.textContent = PRACTICE_ASK[s.value] || '';
     els.btnPractice.setAttribute('aria-label', 'Practice style: ' + s.en + ' (' + SKILLS[s.skill].toLowerCase() + '). ' + (PRACTICE_ASK[s.value] || '') + '. Change');
   }
-  // The sheet: one section per skill, its word and sentence styles side by side as two columns of tiles.
+  // The sheet: one section per skill, with a row of word styles and a row of sentence styles.
   function renderPracticeSheet() {
     var grid = els.practiceGrid, all = practiceStyles(), cur = els.optPractice.value;
     grid.textContent = '';
