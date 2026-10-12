@@ -8,7 +8,8 @@
         {
           "name": "",
           "items": [
-            "On wide screens the study controls sit in a column on the left and the card gets the rest of the width; mid-sized screens get a wider single column.",
+            "On laptops and desktops the study controls sit in a column on the left and the card gets the rest of the width, from 960 pixels wide; mid-sized screens get a wider single column.",
+            "On large screens (1,440 pixels and up) the app grows wider still, with bigger characters on the card.",
             "The progress, word list and other sheets are wider on large screens."
           ]
         }

@@ -172,8 +172,8 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
 .rung.next .rung-go { margin-top: 8px; }
 
 /* Wider screens: more room; from 960px two columns, the controls on the left and the card on the right; from 1440px
-   a wider app with a bigger card and wider sheets. On smaller screens the two wrappers step aside (display: contents)
-   and .app stays one flex column. */
+   a wider app with a bigger card and wider sheets, and from 1800px wider still. On smaller screens the two wrappers
+   step aside (display: contents) and .app stays one flex column. */
 .side, .main-col { display: contents; }
 @media (min-width: 820px) { .app { max-width: 760px; } }
 @media (min-width: 960px) {
@@ -203,3 +203,4 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
   .ex-zh { font-size: 24px; }
   .sheet { max-width: 1000px; }
 }
+@media (min-width: 1800px) { .app { max-width: 1680px; grid-template-columns: minmax(420px, 480px) minmax(0, 1fr); } }

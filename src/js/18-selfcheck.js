@@ -1187,7 +1187,7 @@
       })();
       add('Accessibility basics', a11yRes.ok, a11yRes.d);
       var side = document.querySelector('.side'), mainCol = document.querySelector('.main-col');
-      var wide = window.matchMedia('(min-width: 1100px)').matches;
+      var wide = window.matchMedia('(min-width: 960px)').matches;
       var placed = !!side && !!mainCol && side.contains(document.querySelector('.deckbar')) && mainCol.contains(els.stage) && mainCol.contains(els.btnKnown);
       var shown = !!side && getComputedStyle(side).display === (wide ? 'flex' : 'contents');
       add('Layout: controls and card columns', placed && shown && document.documentElement.scrollWidth <= window.innerWidth,
