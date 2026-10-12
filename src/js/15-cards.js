@@ -82,6 +82,7 @@
     });
   }
   function setRevealed(v) {
+    var was = state.revealed;
     state.revealed = !!v;
     els.card.classList.toggle('revealed', state.revealed);
     updateGrades();
@@ -101,6 +102,12 @@
         : { zh: 'Tap the card to show the meaning', reverse: isSent() ? 'Say the Chinese sentence, then tap the card to check' : 'Say it, or type the pinyin (T), then tap the card to check',
             listen: 'Listen, then tap the card to see the word', choice: 'Pick the meaning (keys 1–4), or tap the card to reveal',
             hanzi: 'Read the characters aloud, then tap the card to check the pinyin and meaning' }[p];
+    // With "Read each new card aloud" on, revealing reads the Chinese and then its meaning, when the setting allows.
+    if (state.revealed && !was && state.autoplay && !testing && userHasInteracted) {
+      var ci = currentIndex(), rc = rehearseCard ? wordByZh(rehearseCard.zh) : ci === null ? null : cards[ci];
+      var extra = rc ? meaningSpeech(rc) : [];
+      if (extra.length) speakParts([rc.zh].concat(extra), null);
+    }
   }
   function toggleReveal() {
     if (currentIndex() === null) return;
@@ -176,6 +183,16 @@
       m.appendChild(t);
       els.cardMeanMore.appendChild(m);
     });
+    [[els.cardEn, 'en'], [els.cardHu, 'hu']].forEach(function (x) {
+      var box = x[0].parentNode, old = box.querySelector('.mean-speak');
+      if (old) box.removeChild(old);
+      box.appendChild(speakBtn(x[1], mean(c, x[1])));
+    });
+    Array.prototype.forEach.call(els.cardMeanMore.querySelectorAll('.meaning'), function (m) {
+      var p = m.querySelector('p');
+      m.appendChild(speakBtn(p.getAttribute('lang'), p.textContent));
+    });
+    if (lead) els.cardMeanMain.firstChild.appendChild(speakBtn(lead, mean(c, lead)));
     renderHints(c);
     els.cardExamples.textContent = '';
     c.ex.forEach(function (e, k) {

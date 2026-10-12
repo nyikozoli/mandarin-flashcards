@@ -332,3 +332,8 @@ body.labels-zh .practice-name .lbl .zl, body.labels-zh .pk-tile .lbl .zl { color
 .pk-seal.pk-code { font-family: var(--ui-font); font-size: 13px; font-weight: 800; }
 #cardMeanMain { display: contents; }
 .rehearse-strip .wotd-seal { background: var(--pinyin); color: var(--surface); }
+
+/* A speaker on a meaning line: small, after the text, a full tap target on touch. */
+.mean-speak { border: 0; background: transparent; color: var(--muted); font-size: 14px; min-width: 32px; min-height: 32px; margin-left: 4px; cursor: pointer; border-radius: 8px; flex: none; }
+.mean-speak:hover, .mean-speak.speaking { color: var(--pinyin); }
+@media (pointer: coarse) { .mean-speak { min-width: 44px; min-height: 44px; } }

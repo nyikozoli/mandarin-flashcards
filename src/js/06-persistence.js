@@ -75,6 +75,7 @@
       rungs: state.rungs,
       ladderSeen: state.ladderSeen,
       rehearseSeen: state.rehearseSeen,
+      readMeaning: state.readMeaning,
       petName: state.petName,
       labels: state.labels,
       langs: state.langs,
@@ -149,6 +150,7 @@
     if (saved && (saved.level === 'all' || LEVELS.indexOf(saved.level) !== -1)) state.level = saved.level;
     if (saved && GOALS.indexOf(saved.goal) !== -1) state.goal = saved.goal;
     if (saved && typeof saved.warmup === 'boolean') state.warmup = saved.warmup;
+    state.readMeaning = saved && ['off', 'rehearse', 'always'].indexOf(saved.readMeaning) !== -1 ? saved.readMeaning : 'rehearse';
     ['toneColors', 'fadePinyin', 'choicePinyin', 'autoplay', 'vibrate', 'seenTour'].forEach(function (k) { if (saved && typeof saved[k] === 'boolean') state[k] = saved[k]; });
     state.langs = readLangs(saved && saved.langs);
     if (!MEANING_LANGS.some(function (l) { return langRole(l[0]) !== 'off'; })) state.langs.en = 'show';

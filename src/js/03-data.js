@@ -140,6 +140,10 @@
     var rateOpt = String(state.rate);
     els.optRate.value = ['0.6', '0.85', '1'].indexOf(rateOpt) !== -1 ? rateOpt : '0.85';
     state.rate = parseFloat(els.optRate.value);
+    els.optReadMeaning.value = state.readMeaning;
+    var mute = speechSupported ? langsRehearsed().filter(function (k) { return !canSpeak(k); }) : [];
+    els.rehearseVoiceNote.hidden = !mute.length;
+    els.rehearseVoiceNote.textContent = mute.length ? 'No ' + mute.map(langName).join(' or ') + ' voice on this device. iPhone: Settings → Accessibility → Spoken Content → Voices. Windows: Settings → Time & language → Speech.' : '';
   }
   // After a language's role changes: settings, the card and the save follow.
   function langsChanged() {

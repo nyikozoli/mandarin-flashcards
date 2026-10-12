@@ -224,3 +224,25 @@
       'goal reached offers 5 Romanian cards: ' + strip + ', the round opens them as a Romanian deck: ' + round + ', after the last card it goes back: ' + back +
       ', offered once a day: ' + once + ', the rehearse quest counts: ' + quest);
   } });
+
+  REHEARSE_TESTS.push({ title: 'Read-aloud in every language', run: function (add) {
+    var c = wordCards.filter(function (w) { return mean(w, 'ro'); })[0] || wordCards[0];
+    var b = speakBtn('ro', 'casă');
+    var btn = b.classList.contains('mean-speak') && b.getAttribute('data-lang') === 'ro' && b.hidden === !canSpeak('ro');
+    var keepRead = state.readMeaning;
+    state.readMeaning = 'off';
+    var off = meaningSpeech(c).length === 0;
+    state.readMeaning = 'always';
+    var always = meaningSpeech(c).length === (canSpeak(mainLang(c)) ? 1 : 0);
+    state.readMeaning = keepRead;
+    var tagged = true;
+    if (speechSupported) {
+      lastUtterance = null;
+      speakParts([{ text: 'casă', lang: 'ro' }], null);
+      tagged = !!lastUtterance && lastUtterance.lang === 'ro-RO';
+      stopSpeech();
+    }
+    add('Read-aloud in every language', btn && off && always && tagged,
+      'speaker hidden without a voice: ' + btn + ', "Off" reads no meaning: ' + off + ', "Always" reads the main one: ' + always +
+      ', a Romanian part is spoken as ro-RO: ' + (speechSupported ? tagged : 'no speech in this browser'));
+  } });

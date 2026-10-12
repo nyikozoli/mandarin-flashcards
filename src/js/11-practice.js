@@ -377,6 +377,7 @@
       var rw = el('span', 'rh-word', mean(c, rh));
       rw.setAttribute('lang', rh);
       els.cardRehearse.appendChild(rw);
+      els.cardRehearse.appendChild(speakBtn(rh, mean(c, rh)));
     }
     els.cardPrompt.textContent = '';
     els.choiceBox.classList.toggle('tone-grid', !!toneQ);

@@ -302,6 +302,15 @@
     on('optFadePinyin', 'change', function () { state.fadePinyin = els.optFadePinyin.checked; render(false); save(); });
     on('optChoicePinyin', 'change', function () { state.choicePinyin = els.optChoicePinyin.checked; render(false); save(); });
     on('optAutoplay', 'change', function () { state.autoplay = els.optAutoplay.checked; save(); });
+    on('optReadMeaning', 'change', function () { state.readMeaning = els.optReadMeaning.value; save(); });
+    // Speaker buttons on meaning lines. Capture phase, so the tap does not also flip the card.
+    document.addEventListener('click', function (e) {
+      var b = e.target.closest && e.target.closest('.mean-speak');
+      if (!b) return;
+      e.stopPropagation();
+      e.preventDefault();
+      speakParts([{ text: b.getAttribute('data-text'), lang: b.getAttribute('data-lang') }], b);
+    }, true);
     on('optVibrate', 'change', function () { state.vibrate = els.optVibrate.checked; buzz(15); save(); });
     on('choiceBox', 'click', function (e) {
       var b = e.target.closest ? e.target.closest('.choice') : null;

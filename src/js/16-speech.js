@@ -6,6 +6,35 @@
   var speakToken = 0;
   var speakTimers = [];
   var warnedNoVoice = false;
+  var lastUtterance = null;
+  var LANG_TAGS = { en: 'en-US', hu: 'hu-HU', de: 'de-DE', es: 'es-ES', ro: 'ro-RO' };
+  function allVoices() { try { return synth.getVoices() || []; } catch (e) { return []; } }
+  // The best voice for a meaning language: the exact locale first, then any of the language; device voices first.
+  function voiceFor(k) {
+    if (!speechSupported) return null;
+    var tag = (LANG_TAGS[k] || k).toLowerCase(), pre = tag.split('-')[0];
+    var vs = allVoices().filter(function (v) { var l = langOf(v); return !isBadVoice(v) && (l === tag || l === pre || l.indexOf(pre + '-') === 0); });
+    vs.sort(function (a, b) { return ((langOf(b) === tag) - (langOf(a) === tag)) || ((b.localService ? 1 : 0) - (a.localService ? 1 : 0)); });
+    return vs[0] || null;
+  }
+  function canSpeak(k) { return !!voiceFor(k); }
+  // A small speaker button for a meaning line; hidden when the device has no voice for the language.
+  function speakBtn(k, text) {
+    var b = el('button', 'mean-speak', '🔊');
+    b.type = 'button';
+    b.setAttribute('data-lang', k);
+    b.setAttribute('data-text', text);
+    b.setAttribute('aria-label', 'Read the ' + langName(k) + ' aloud');
+    b.hidden = !canSpeak(k);
+    return b;
+  }
+  // What to say after the Chinese on reveal: the main meaning (or the rehearse card's language), if the setting allows it.
+  function meaningSpeech(c) {
+    var k = rehearseCode(practiceNow()) || mainLang(c);
+    if (state.readMeaning === 'off' || (state.readMeaning === 'rehearse' && langRole(k) !== 'rehearse')) return [];
+    if (!canSpeak(k)) return [];
+    return [{ text: shortText(mean(c, k)), lang: k }];
+  }
 
   function langOf(v) { return String(v.lang || '').replace('_', '-').toLowerCase(); }
   function chineseVoices() {
@@ -122,7 +151,7 @@
     if (!btn) return;
     btn.classList.toggle('speaking', on);
     if (btn === els.btnSpeak) els.speakLabel.textContent = on ? 'Stop' : 'Read aloud';
-    else btn.setAttribute('aria-label', on ? 'Stop reading this sentence' : 'Read this sentence aloud');
+    else if (btn.classList.contains('ex-speak')) btn.setAttribute('aria-label', on ? 'Stop reading this sentence' : 'Read this sentence aloud');
   }
   function stopSpeech() {
     speakToken++;
@@ -161,10 +190,11 @@
     var next = function () {
       if (token !== speakToken) return;
       if (idx >= parts.length) { finish(); return; }
-      var text = parts[idx];
+      var part = parts[idx], text = typeof part === 'string' ? part : part.text, k = typeof part === 'string' ? '' : part.lang;
       var u = new Utterance(text);
-      u.lang = 'zh-CN';
-      if (zhVoice) u.voice = zhVoice;
+      if (k) { var kv = voiceFor(k); u.lang = LANG_TAGS[k] || k; if (kv) u.voice = kv; }
+      else { u.lang = 'zh-CN'; if (zhVoice) u.voice = zhVoice; }
+      lastUtterance = u;
       u.rate = state.rate;
       var done = false;
       var advance = function () {
@@ -179,7 +209,7 @@
         var err = ev && ev.error;
         done = true;
         if (err === 'interrupted' || err === 'canceled' || err === 'not-allowed') { finish(); return; }
-        if (zhVoice && retries < 2 && err !== 'network' && err !== 'audio-busy') {
+        if (!k && zhVoice && retries < 2 && err !== 'network' && err !== 'audio-busy') {
           var failed = zhVoice.name;
           markBadVoice(failed);
           pickVoice();

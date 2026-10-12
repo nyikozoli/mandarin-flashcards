@@ -260,6 +260,10 @@
         <label class="switch"><input type="checkbox" id="optAutoReveal"><span>Always show meanings</span></label>
         <label class="switch"><input type="checkbox" id="optTones"><span>Tone colours <span class="tone-key" aria-hidden="true"><span class="t1">mā</span> <span class="t2">má</span> <span class="t3">mǎ</span> <span class="t4">mà</span> <span class="t5">ma</span></span></span></label>
         <label class="switch"><input type="checkbox" id="optAutoplay"><span>Read each new card aloud</span></label>
+        <div class="set-row">
+          <label for="optReadMeaning">Read the meaning after the Chinese</label>
+          <select id="optReadMeaning"><option value="off">Off</option><option value="rehearse">Rehearsed languages only</option><option value="always">Always</option></select>
+        </div>
         <label class="switch"><input type="checkbox" id="optFadePinyin"><span>Hide pinyin on cards I know well (until I tap)</span></label>
         <label class="switch"><input type="checkbox" id="optChoicePinyin"><span>Show pinyin in multiple choice</span></label>
         <label class="switch"><input type="checkbox" id="optVibrate"><span>Vibrate on answers</span></label>
@@ -281,6 +285,7 @@
           </div>
           <label class="switch"><input type="checkbox" id="optRehearseAfterGoal"><span>Offer a short round after the daily goal</span></label>
         </div>
+        <p class="set-note" id="rehearseVoiceNote" hidden></p>
       </section>
       <section class="set-group">
         <h3 data-lbl="inline">Voice</h3>
