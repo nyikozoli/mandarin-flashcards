@@ -81,6 +81,28 @@
 
   <div class="side">
   <nav class="deckbar" aria-label="Choose what to study">
+    <label class="practice" for="optPractice"><span class="visually-hidden">Practice style</span>
+      <select id="optPractice">
+        <optgroup label="Words">
+          <option value="zh">汉字 → meaning</option>
+          <option value="reverse">Meaning → 汉字</option>
+          <option value="listen">Listening</option>
+          <option value="choice">Multiple choice</option>
+          <option value="hanzi">汉字 only (pinyin hidden)</option>
+          <option value="tone">Which tone? (listen)</option>
+          <option value="cloze">Fill the gap (sentence)</option>
+          <option value="pairs">Similar words (look and sound alike)</option>
+        </optgroup>
+        <optgroup label="Sentences">
+          <option value="s-zh">Sentences → meaning</option>
+          <option value="s-reverse">Meaning → sentence</option>
+          <option value="s-listen">Sentence listening</option>
+          <option value="s-choice">Sentence multiple choice</option>
+          <option value="s-hanzi">Sentences, 汉字 only</option>
+          <option value="s-build">Sentences: build from words</option>
+        </optgroup>
+      </select>
+    </label>
     <div class="modes" role="radiogroup" aria-label="Study mode">
       <button type="button" class="mode" id="modeAll" role="radio" aria-checked="true" data-mode="all"><span data-lbl>All cards</span> <span class="count" id="countAll">0</span></button>
       <button type="button" class="mode" id="modeDue" role="radio" aria-checked="false" data-mode="due"><span data-lbl>Due</span> <span class="count" id="countDueMode">0</span></button>
@@ -96,55 +118,24 @@
         <button type="button" class="level" id="level3" role="radio" aria-checked="false" data-level="3" aria-label="HSK 3"><span class="lv-pre">HSK </span>3 <span class="count" id="countLv3">0</span></button>
       </div>
       <button type="button" class="topic-btn" id="btnTopic" aria-haspopup="dialog" hidden><span class="topic-btn-zh" id="topicBtnZh" lang="zh-CN" aria-hidden="true">全</span><span class="topic-btn-name" id="topicBtnName">All topics</span></button>
-      <label class="practice" for="optPractice"><span class="visually-hidden">Practice mode</span>
-        <select id="optPractice">
-          <optgroup label="Words">
-            <option value="zh">汉字 → meaning</option>
-            <option value="reverse">Meaning → 汉字</option>
-            <option value="listen">Listening</option>
-            <option value="choice">Multiple choice</option>
-            <option value="hanzi">汉字 only (pinyin hidden)</option>
-            <option value="tone">Which tone? (listen)</option>
-            <option value="cloze">Fill the gap (sentence)</option>
-            <option value="pairs">Similar words (look and sound alike)</option>
-          </optgroup>
-          <optgroup label="Sentences">
-            <option value="s-zh">Sentences → meaning</option>
-            <option value="s-reverse">Meaning → sentence</option>
-            <option value="s-listen">Sentence listening</option>
-            <option value="s-choice">Sentence multiple choice</option>
-            <option value="s-hanzi">Sentences, 汉字 only</option>
-            <option value="s-build">Sentences: build from words</option>
-          </optgroup>
-        </select>
-      </label>
     </div>
 
   </nav>
 
-  <section class="stats" aria-label="Progress">
-    <div class="stats-row">
-      <div class="counter" id="cardCounter">Card 0 / 0</div>
-      <div class="deck-tools">
-        <button type="button" class="icon-btn small" id="btnShuffle" aria-label="Shuffle the current deck" title="Shuffle">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h3.5c2.5 0 4 1.5 5.5 5s3 5 5.5 5H21M3 17h3.5c1.4 0 2.5-.5 3.4-1.5M14.1 8.5C15 7.5 16.1 7 17.5 7H21M18 4l3 3-3 3M18 14l3 3-3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-        <button type="button" class="icon-btn small" id="btnUndo" aria-label="Undo the last answer (Z)" title="Undo (Z)">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-      </div>
+  <section class="stats" aria-label="Today">
+    <div class="today-row">
       <button type="button" class="today-pill" id="todayPill" aria-label="Today's progress">0/20 today</button>
+      <p class="legend">
+        <span><span class="dot known" aria-hidden="true"></span><b id="knownCount">0</b> known</span>
+        <span><span class="dot learning" aria-hidden="true"></span><b id="learningCount">0</b> learning</span>
+        <span><span class="dot" aria-hidden="true"></span><b id="unmarkedCount">0</b> new</span>
+        <span class="legend-tones" id="legendTones" title="Tone colours: 1st, 2nd, 3rd, 4th and neutral tone"><span class="visually-hidden">Tone colours: </span><span class="t1">mā</span><span class="t2">má</span><span class="t3">mǎ</span><span class="t4">mà</span><span class="t5">ma</span></span>
+      </p>
     </div>
     <div class="progress" id="progressBar" role="progressbar" aria-label="Words marked as known" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0">
       <div class="seg known" id="progKnown"></div>
       <div class="seg learning" id="progLearning"></div>
     </div>
-    <p class="legend">
-      <span><span class="dot known" aria-hidden="true"></span><b id="knownCount">0</b> known</span>
-      <span><span class="dot learning" aria-hidden="true"></span><b id="learningCount">0</b> learning</span>
-      <span><span class="dot" aria-hidden="true"></span><b id="unmarkedCount">0</b> new</span>
-      <span class="legend-tones" id="legendTones" title="Tone colours: 1st, 2nd, 3rd, 4th and neutral tone"><span class="visually-hidden">Tone colours: </span><span class="t1">mā</span><span class="t2">má</span><span class="t3">mǎ</span><span class="t4">mà</span><span class="t5">ma</span></span>
-    </p>
     <p class="visually-hidden" id="progressLabel">0 known</p>
   </section>
   <section id="newsStrip" class="wotd news-strip" aria-label="What's new" hidden>
@@ -169,6 +160,17 @@
   <div id="srLive" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
 
   <div class="main-col">
+  <div class="round-bar" role="group" aria-label="This round">
+    <div class="counter" id="cardCounter">Card 0 / 0</div>
+    <div class="deck-tools">
+      <button type="button" class="icon-btn small" id="btnShuffle" aria-label="Shuffle the current deck" title="Shuffle">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h3.5c2.5 0 4 1.5 5.5 5s3 5 5.5 5H21M3 17h3.5c1.4 0 2.5-.5 3.4-1.5M14.1 8.5C15 7.5 16.1 7 17.5 7H21M18 4l3 3-3 3M18 14l3 3-3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button type="button" class="icon-btn small" id="btnUndo" aria-label="Undo the last answer (Z)" title="Undo (Z)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </div>
   <main class="stage" id="stage">
     <article id="card" class="card" role="group" aria-roledescription="flashcard" aria-label="Flashcard">
       <div class="stamp stamp-know" aria-hidden="true"><span lang="zh-CN">会</span><small>I know it</small></div>

@@ -212,3 +212,12 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
 @media (max-width: 420px) { .mode { min-height: 56px; font-size: 13.5px; padding: 4px 1px; } .mode .count { font-size: 12.5px; } }
 @media (max-width: 360px) { .mode { font-size: 12.5px; } }
 @media (min-width: 960px) { .mode { min-height: 66px; font-size: 16.5px; } .mode .count { font-size: 13.5px; } }
+
+/* Controls in the order you decide: how (practice style), what (modes, then level and topic), today (goal, counts,
+   progress, tone key, the day's strip), and this round (counter, shuffle, undo) right above the card. */
+.deckbar .practice { flex: none; }
+.deckbar-row .levels { flex: 1; justify-content: space-between; }
+.today-row { display: flex; align-items: center; gap: 10px; }
+.today-row .legend { flex: 1; min-width: 0; }
+.side > .stats { padding-top: 10px; border-top: 1px solid var(--line); }
+.round-bar { display: flex; align-items: center; gap: 6px; }

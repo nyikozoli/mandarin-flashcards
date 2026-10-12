@@ -1189,9 +1189,13 @@
       var side = document.querySelector('.side'), mainCol = document.querySelector('.main-col');
       var wide = window.matchMedia('(min-width: 960px)').matches;
       var placed = !!side && !!mainCol && side.contains(document.querySelector('.deckbar')) && mainCol.contains(els.stage) && mainCol.contains(els.btnKnown);
+      // Grouped as you decide: practice style first, then modes, level and topic; today's numbers; the round's counter by the card.
+      var deckbar = document.querySelector('.deckbar'), first = deckbar && deckbar.firstElementChild;
+      var grouped = !!first && first.contains(els.optPractice) && !!side && side.querySelector('.stats').contains(els.todayPill) && mainCol.contains(els.cardCounter) && mainCol.contains(els.btnUndo);
+      placed = placed && grouped;
       var shown = !!side && getComputedStyle(side).display === (wide ? 'flex' : 'contents');
       add('Layout: controls and card columns', placed && shown && document.documentElement.scrollWidth <= window.innerWidth,
-        'controls in the side column, card and answer buttons in the main column: ' + placed + ', ' + (wide ? 'two columns at this width' : 'one column at this width') + ': ' + shown +
+        'controls in the side column (practice style first, today block with goal and counts), card counter, card and answer buttons in the main column: ' + placed + ', ' + (wide ? 'two columns at this width' : 'one column at this width') + ': ' + shown +
         ', no sideways scroll: ' + (document.documentElement.scrollWidth <= window.innerWidth));
 
       add('Progress overview renders', pvOk && els.progressView.hidden, 'Ring, ' + lvRows + ' level bars, 14-day chart and ' + cells + ' word squares (' + known2 + ' known).');

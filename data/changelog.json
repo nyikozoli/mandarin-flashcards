@@ -3,12 +3,13 @@
     {
       "version": "2.7",
       "date": "2026-10-12",
-      "title": "Bigger study modes",
+      "title": "Bigger study modes, regrouped controls",
       "groups": [
         {
           "name": "",
           "items": [
-            "The study modes at the top (All cards, Due, Learning, New, Hardest) are bigger and easier to tap, with larger counts."
+            "The study modes at the top (All cards, Due, Learning, New, Hardest) are bigger and easier to tap, with larger counts.",
+            "The controls are grouped the way you use them: the practice style first, then what to study (mode, HSK level, topic), then today (daily goal, streak, counts, progress). The card counter, shuffle and undo sit right above the card."
           ]
         }
       ]
