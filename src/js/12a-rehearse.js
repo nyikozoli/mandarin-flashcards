@@ -34,3 +34,82 @@
       return a.n - b.n;
     });
   }
+
+  /* ---------- rehearse cards in the word deck ---------- */
+  var sinceRehearse = 0;
+  var rehearsedThisSession = [];
+  // True while a rehearse answer is recorded (for the rehearse quest and the day's rehearse count).
+  var answeringRehearse = false;
+  function isRehearseAnswer() { return answeringRehearse || isRehearseStyle(state.practice); }
+  // Runs fn with skill k active and switches back, without clearing undo (useSkill would).
+  function withSkill(k, fn) {
+    var back = state.skill;
+    if (k === back) return fn();
+    stashSkill(); state.skill = k; loadSkill();
+    try { return fn(); } finally { stashSkill(); state.skill = back; loadSkill(); }
+  }
+  // A rehearsed language, weighted by its share (at least 1, so a 0% language still gets cards).
+  function pickRehearseLang() {
+    var ls = langsRehearsed();
+    if (!ls.length) return '';
+    var w = ls.map(function (k) { return Math.max(1, state.rehearse.share[k] || 0); });
+    var x = Math.random() * w.reduce(function (a, b) { return a + b; }, 0);
+    for (var i = 0; i < ls.length; i++) { x -= w[i]; if (x < 0) return ls[i]; }
+    return ls[ls.length - 1];
+  }
+  // Called after every answer in the deck: after `every` answers in the word deck, the next card shown is a rehearse card.
+  function maybeInterject(kind) {
+    if (kind === 'skip' || rehearseCard) return;
+    sinceRehearse++;
+    if (!state.rehearse.every || sinceRehearse < state.rehearse.every) return;
+    if (state.deckType !== 'words' || isRehearseStyle(state.practice) || currentIndex() === null) return;
+    var code = pickRehearseLang();
+    if (!code) return;
+    var pick = rehearsePool(code).filter(function (c) { return rehearsedThisSession.indexOf(code + ':' + c.zh) === -1; })[0];
+    if (!pick) return;
+    sinceRehearse = 0;
+    rehearsedThisSession.push(code + ':' + pick.zh);
+    rehearseCard = { zh: pick.zh, code: code };
+    state.revealed = false;
+  }
+  // Answers the rehearse card on screen: only its language's marks move, and the deck stays where it was.
+  function actRehearse(kind, grade) {
+    var r = rehearseCard, c = wordByZh(r.zh), entry = null;
+    rehearseCard = null;
+    if (!c) { render(true); return false; }
+    withSkill(rehearseSkill(r.code), function () {
+      entry = { rehearse: r.code, pos: state.pos, zh: c.zh, prev: state.status[c.zh] || null, srs: state.srs[c.zh] || null,
+        miss: state.misses[c.zh] || 0, day: dayKey(), kind: kind, requeued: false };
+      if (kind === 'known' || kind === 'learning') {
+        applySrs(c, kind, grade);
+        state.status[c.zh] = markAfter(c, kind);
+      }
+    });
+    undoStack.push(entry);
+    if (kind === 'known' || kind === 'learning') {
+      if (testing) entry.kind = 'skip';
+      else { answeringRehearse = true; try { recordAnswer(kind, c, entry.prev); } finally { answeringRehearse = false; } }
+    }
+    stopSpeech();
+    state.revealed = state.autoReveal;
+    resetCardPosition();
+    render(true);
+    save();
+    afterAnswer(kind);
+    return true;
+  }
+  // Undoes a rehearse answer: its marks go back and the card is shown again.
+  function undoRehearse(h) {
+    withSkill(rehearseSkill(h.rehearse), function () {
+      if (h.prev) state.status[h.zh] = h.prev; else delete state.status[h.zh];
+      if (h.srs) state.srs[h.zh] = h.srs; else delete state.srs[h.zh];
+      if (h.miss) state.misses[h.zh] = h.miss; else delete state.misses[h.zh];
+    });
+    var a = state.activity[h.day];
+    if (a && (h.kind === 'known' || h.kind === 'learning')) { if (h.kind === 'known') a.k = Math.max(0, a.k - 1); else a.l = Math.max(0, a.l - 1); }
+    rehearseCard = { zh: h.zh, code: h.rehearse };
+    state.revealed = false;
+    stopSpeech();
+    render(true);
+    save();
+  }

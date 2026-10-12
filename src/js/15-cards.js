@@ -1,6 +1,7 @@
   /* ---------- answering ---------- */
   function act(kind, grade) {
     if (busy) return false;
+    if (rehearseCard) return actRehearse(kind, grade);
     var i = currentIndex();
     if (i === null) return false;
     var c = cards[i];
@@ -19,6 +20,7 @@
     stopSpeech();
     var finish = function () {
       state.pos += 1;
+      maybeInterject(kind);
       state.revealed = state.autoReveal;
       render(true);
       save();
@@ -50,6 +52,8 @@
     if (busy) return;
     var h = undoStack.pop();
     if (!h) { toast('Nothing to undo.'); return; }
+    if (h.rehearse) { undoRehearse(h); return; }
+    rehearseCard = null;
     if (h.prev) state.status[h.zh] = h.prev;
     else delete state.status[h.zh];
     if (h.srs) state.srs[h.zh] = h.srs; else delete state.srs[h.zh];
@@ -109,7 +113,9 @@
     updateStats();
     els.btnUndo.disabled = undoStack.length === 0;
     var i = currentIndex();
-    if (i === null) showEnd();
+    if (rehearseCard && (state.deckType !== 'words' || langRole(rehearseCard.code) !== 'rehearse' || !wordByZh(rehearseCard.zh))) rehearseCard = null;
+    if (rehearseCard) showCard(wordByZh(rehearseCard.zh), animate);
+    else if (i === null) showEnd();
     else showCard(cards[i], animate);
   }
 

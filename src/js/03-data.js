@@ -83,6 +83,7 @@
   function deck() { return DECKS[state.deckType]; }
   function noun(n) { return deck().noun[n === 1 ? 0 : 1]; }
   function useDeckType(t) {
+    rehearseCard = null;
     state.deckType = t === 'sentences' ? 'sentences' : 'words';
     fixStyleForDeck();
     cards = isSent() ? sentCards : wordCards;

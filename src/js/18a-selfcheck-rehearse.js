@@ -6,6 +6,7 @@
     state.langs = JSON.parse(JSON.stringify(keep.langs));
     state.rehearse = JSON.parse(JSON.stringify(keep.rehearse));
     rebuildSkills();
+    rehearseCard = null;
     syncSettingsUI();
   }
   function rehearseTests(add) {
@@ -151,4 +152,42 @@
       'same language all day: ' + stable + ', about 30% Romanian (' + Math.round(share * 100) + '%): ' + weighted + ', 0% means never: ' + none +
       ', the base keeps 30% (' + Math.round(base * 100) + '%): ' + floor + ', a missing meaning falls back: ' + missing +
       ', the recall prompt leads with Romanian: ' + prompt + ', challenges use the base language: ' + quizBase);
+  } });
+
+  REHEARSE_TESTS.push({ title: 'Rehearse cards come up in the word deck', run: function (add) {
+    if (!LANG_AVAILABLE.ro) { add('Rehearse cards come up in the word deck', true, 'No Romanian data in this build.'); return; }
+    state.langs.ro = 'rehearse';
+    state.rehearse.every = 6;
+    rebuildSkills();
+    seedRehearsePool('ro', 3);
+    useDeckType('words');
+    state.practice = 'zh'; useSkill('read');
+    state.deck = [0, 1, 2, 3, 4]; state.pos = 0; state.revealed = true;
+    rehearseCard = null; rehearsedThisSession = []; undoStack = [];
+    sinceRehearse = 5;
+    act('known');
+    var shown = !!rehearseCard && state.pos === 1 && els.card.classList.contains('rh-mode') && state.skill === 'read';
+    var c = rehearseCard ? wordByZh(rehearseCard.zh) : null;
+    // Undo while it is on screen: the previous Chinese card comes back, the rehearse card goes.
+    undo();
+    var undoBefore = !rehearseCard && state.pos === 0;
+    sinceRehearse = 5;
+    act('known');
+    c = rehearseCard ? wordByZh(rehearseCard.zh) : c;
+    var before = marksOf('say:ro').status[c.zh] || null, readBefore = marksOf('read').status[c.zh] || null;
+    act('learning');
+    var marked = marksOf('say:ro').status[c.zh] === 'learning' && (marksOf('read').status[c.zh] || null) === readBefore && state.pos === 1 && !rehearseCard;
+    undo();
+    var undone = (marksOf('say:ro').status[c.zh] || null) === before && !!rehearseCard && rehearseCard.zh === c.zh;
+    // Never on the sentence deck.
+    rehearseCard = null;
+    useDeckType('sentences');
+    state.deck = [0, 1, 2]; state.pos = 0; sinceRehearse = 5;
+    act('known');
+    var noSentences = !rehearseCard;
+    useDeckType('words');
+    delete state.marks['say:ro'];
+    add('Rehearse cards come up in the word deck', shown && undoBefore && marked && undone && noSentences,
+      'after the 6th answer a Romanian card appears in place: ' + shown + ', undo on it brings back the Chinese card: ' + undoBefore +
+      ', answering it moves only the Romanian mark: ' + marked + ', undo brings it back: ' + undone + ', none on the sentence deck: ' + noSentences);
   } });
