@@ -71,6 +71,7 @@
       petName: state.petName,
       labels: state.labels,
       langs: state.langs,
+      rehearse: state.rehearse,
       newsSeen: state.newsSeen,
       questDays: state.questDays,
       blitzBest: state.blitzBest,
@@ -105,6 +106,27 @@
     // markLocalChange() no-ops when signed out or when sync is disabled for this build.
     markLocalChange(snap || undefined);
   }
+  // Language roles from a save. Older saves stored true/false; anything else falls back to the default.
+  function readLangs(src) {
+    var out = { en: 'show', hu: 'show', de: 'off', es: 'off', ro: 'off' };
+    if (src && typeof src === 'object') {
+      MEANING_LANGS.forEach(function (l) {
+        var v = src[l[0]];
+        if (v === true) out[l[0]] = 'show';
+        else if (v === false) out[l[0]] = 'off';
+        else if (typeof v === 'string' && LANG_ROLES[v]) out[l[0]] = v;
+      });
+    }
+    return out;
+  }
+  function readRehearse(src) {
+    src = src && typeof src === 'object' ? src : {};
+    var out = { share: {}, every: [0, 6, 8, 12].indexOf(src.every) !== -1 ? src.every : 8, afterGoal: src.afterGoal !== false };
+    if (src.share && typeof src.share === 'object') {
+      MEANING_LANGS.forEach(function (l) { if (typeof src.share[l[0]] === 'number') out.share[l[0]] = clampInt(src.share[l[0]], 0, 50); });
+    }
+    return out;
+  }
   function restore(saved) {
     var byZh = {};
     cards.forEach(function (c, i) { byZh[c.zh] = i; });
@@ -121,6 +143,9 @@
     if (saved && GOALS.indexOf(saved.goal) !== -1) state.goal = saved.goal;
     if (saved && typeof saved.warmup === 'boolean') state.warmup = saved.warmup;
     ['toneColors', 'fadePinyin', 'choicePinyin', 'autoplay', 'vibrate', 'seenTour'].forEach(function (k) { if (saved && typeof saved[k] === 'boolean') state[k] = saved[k]; });
+    state.langs = readLangs(saved && saved.langs);
+    if (!MEANING_LANGS.some(function (l) { return langRole(l[0]) !== 'off'; })) state.langs.en = 'show';
+    state.rehearse = readRehearse(saved && saved.rehearse);
     if (saved && PRACTICE[saved.practice]) state.practice = saved.practice;
     fixStyleForDeck();
     if (saved && Array.isArray(saved.milestones)) state.milestones = saved.milestones.filter(function (m) { return typeof m === 'string'; }).slice(-500);
@@ -176,10 +201,6 @@
     state.petName = saved && typeof saved.petName === 'string' ? saved.petName.trim().slice(0, 16) : '';
     state.labels = saved && LABEL_MODES[saved.labels] ? saved.labels : 'both';
     state.newsSeen = saved && typeof saved.newsSeen === 'string' ? saved.newsSeen.slice(0, 12) : '';
-    state.langs = { en: true, hu: true, de: false, es: false, ro: false };
-    if (saved && saved.langs && typeof saved.langs === 'object') {
-      MEANING_LANGS.forEach(function (l) { if (typeof saved.langs[l[0]] === 'boolean') state.langs[l[0]] = saved.langs[l[0]]; });
-    }
     var numMap = function (src, keys, max) {
       var out = {};
       if (src && typeof src === 'object') keys.forEach(function (k) { if (typeof src[k] === 'number') out[k] = clampInt(src[k], 0, max); });

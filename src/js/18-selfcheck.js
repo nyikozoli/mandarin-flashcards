@@ -901,8 +901,8 @@
         state.practice = 'zh'; state.deck = [0]; state.pos = 0; state.revealed = true;
         var c = cards[0];
         // English off, Hungarian on (and the first extra language, if this build has one)
-        state.langs = { en: false, hu: true, de: false, es: false, ro: false };
-        if (extra[0]) state.langs[extra[0]] = true;
+        state.langs = { en: 'off', hu: 'show', de: 'off', es: 'off', ro: 'off' };
+        if (extra[0]) state.langs[extra[0]] = 'show';
         render(false);
         var enHidden = els.cardEn.parentNode.hidden && !els.cardHu.parentNode.hidden;
         var extraShown = !extra[0] || els.cardMeanMore.textContent.indexOf(mean(c, extra[0])) !== -1;
@@ -911,12 +911,12 @@
         var chipMain = els.choiceBox.querySelector('.choice-en').getAttribute('lang') === 'hu';
         state.practice = 'zh';
         // the last language cannot be switched off
-        state.langs = { en: true, hu: false, de: false, es: false, ro: false };
+        state.langs = { en: 'show', hu: 'off', de: 'off', es: 'off', ro: 'off' };
         syncSettingsUI();
-        els.optLangEn.checked = false;
+        els.optLangEn.value = 'off';
         els.optLangEn.dispatchEvent(new Event('change'));
-        var lastStays = state.langs.en === true && els.optLangEn.checked === true;
-        var hiddenUnavailable = EXTRA_LANGS.every(function (k) { return els['optLang' + k.charAt(0).toUpperCase() + k.slice(1)].closest('label').hidden === !LANG_AVAILABLE[k]; });
+        var lastStays = state.langs.en === 'show' && els.optLangEn.value === 'show';
+        var hiddenUnavailable = EXTRA_LANGS.every(function (k) { return els['optLang' + k.charAt(0).toUpperCase() + k.slice(1)].closest('.lang-row').hidden === !LANG_AVAILABLE[k]; });
         state.langs = keep; syncSettingsUI();
         state.deck = deckSnap; state.pos = posSnap; state.revealed = false; render(false);
         return { ok: enHidden && extraShown && exLines && chipMain && lastStays && hiddenUnavailable,
@@ -1273,6 +1273,7 @@
         return { ok: chip && open && closed && next, d: 'chip stands for the word of the day: ' + chip + ', tap opens its strip: ' + open + ', ✕ in the strip closes both: ' + closed + ', chip moves on to the ladder: ' + next };
       })();
       add('Suggestion chip in the Today row', sugRes.ok, sugRes.d);
+      rehearseTests(add);
       var railRes = (function () {
         if (!EXTRA.ladder.length) return { ok: els.progressRail.hidden, d: 'no ladder data: the rail stays hidden' };
         renderRail();

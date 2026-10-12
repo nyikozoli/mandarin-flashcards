@@ -632,7 +632,7 @@
     return null;
   }
   // The step's can-do line in English, or in Hungarian when only Hungarian is switched on.
-  function rungName(r) { return !state.langs.en && state.langs.hu ? r.hu : r.en; }
+  function rungName(r) { return langRole('en') === 'off' && langRole('hu') !== 'off' ? r.hu : r.en; }
   function rungsReached() { return EXTRA.ladder.filter(function (r) { return state.rungs[r.id]; }).length; }
   // The first step, in ladder order, that is not reached yet.
   function nextRung() {

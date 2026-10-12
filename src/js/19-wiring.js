@@ -140,19 +140,28 @@
     on('btnTopic', 'click', openTopics);
     on('btnNews', 'click', openNews);
     ['En', 'Hu', 'De', 'Es', 'Ro'].forEach(function (K) {
+      var k = K.toLowerCase();
       on('optLang' + K, 'change', function () {
-        var box = els['optLang' + K], k = K.toLowerCase();
-        state.langs[k] = box.checked;
-        if (!MEANING_LANGS.some(function (l) { return LANG_AVAILABLE[l[0]] && state.langs[l[0]]; })) {
-          state.langs[k] = true;
-          box.checked = true;
+        var sel = els['optLang' + K], before = langRole(k);
+        state.langs[k] = LANG_ROLES[sel.value] ? sel.value : 'show';
+        if (!MEANING_LANGS.some(function (l) { return langRole(l[0]) !== 'off'; })) {
+          state.langs[k] = before;
+          sel.value = before;
           if (!testing) toast('Keep at least one translation on.');
           return;
         }
+        if (state.langs[k] === 'rehearse' && state.rehearse.share[k] == null) state.rehearse.share[k] = 30;
+        langsChanged();
+      });
+      on('optShare' + K, 'input', function () {
+        state.rehearse.share[k] = clampInt(els['optShare' + K].value, 0, 50);
+        els['optShare' + K + 'Out'].textContent = state.rehearse.share[k] + '%';
         render(false);
         save();
       });
     });
+    on('optRehearseEvery', 'change', function () { state.rehearse.every = clampInt(els.optRehearseEvery.value, 0, 12); save(); });
+    on('optRehearseAfterGoal', 'change', function () { state.rehearse.afterGoal = els.optRehearseAfterGoal.checked; save(); });
     on('footnote', 'click', function (e) { if (e.target.closest && e.target.closest('[data-news]')) openNews(); });
     on('btnCloseNews', 'click', function () { closeOverlay(els.newsView); });
     on('btnPet', 'click', openPet);

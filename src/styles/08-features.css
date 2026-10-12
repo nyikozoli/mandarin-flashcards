@@ -316,3 +316,9 @@ body.labels-zh .practice-name .lbl .zl, body.labels-zh .pk-tile .lbl .zl { color
 @media (max-width: 480px) { .suggest-chip .sg-more { display: none; } }
 @media (max-width: 360px) { .today-row { column-gap: 6px; } }
 @media (max-width: 360px) { .suggest-chip { padding: 5px 10px 5px 7px; gap: 6px; } .suggest-seal { width: 24px; height: 24px; font-size: 15px; } .today-row .today-pill { padding-left: 9px; padding-right: 9px; } }
+
+/* Translations: a role per language (Off / Show / Rehearse) and, when rehearsed, its share of main meanings. */
+.lang-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px 10px; }
+.lang-row .lang-share { grid-column: 1; width: 100%; min-width: 0; }
+.lang-row output { grid-column: 2; justify-self: end; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.rehearse-opts { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }

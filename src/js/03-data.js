@@ -121,10 +121,16 @@
     els.optAutoplay.checked = state.autoplay;
     els.optFadePinyin.checked = state.fadePinyin;
     ['En', 'Hu', 'De', 'Es', 'Ro'].forEach(function (K) {
-      var box = els['optLang' + K], k = K.toLowerCase();
-      box.checked = !!state.langs[k] && !!LANG_AVAILABLE[k];
-      box.closest('label').hidden = !LANG_AVAILABLE[k];
+      var k = K.toLowerCase(), role = langRole(k), share = els['optShare' + K], out = els['optShare' + K + 'Out'];
+      els['optLang' + K].value = role;
+      els['optLang' + K].closest('.lang-row').hidden = !LANG_AVAILABLE[k];
+      share.hidden = out.hidden = role !== 'rehearse';
+      share.value = String(state.rehearse.share[k] != null ? state.rehearse.share[k] : 30);
+      out.textContent = share.value + '%';
     });
+    els.rehearseOpts.hidden = !langsRehearsed().length;
+    els.optRehearseEvery.value = String(state.rehearse.every);
+    els.optRehearseAfterGoal.checked = state.rehearse.afterGoal;
     els.optLabels.value = state.labels;
     els.optChoicePinyin.checked = state.choicePinyin;
     els.optVibrate.checked = state.vibrate;
@@ -133,6 +139,12 @@
     var rateOpt = String(state.rate);
     els.optRate.value = ['0.6', '0.85', '1'].indexOf(rateOpt) !== -1 ? rateOpt : '0.85';
     state.rate = parseFloat(els.optRate.value);
+  }
+  // After a language's role changes: settings, the card and the save follow.
+  function langsChanged() {
+    syncSettingsUI();
+    render(false);
+    save();
   }
   function announce(msg) {
     if (testing || !els.srLive) return;
