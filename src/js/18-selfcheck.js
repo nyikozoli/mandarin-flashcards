@@ -180,7 +180,7 @@
       shuffled: state.shuffled, revealed: state.revealed, autoReveal: state.autoReveal, level: state.level,
       srs: JSON.parse(JSON.stringify(state.srs)), misses: JSON.parse(JSON.stringify(state.misses)), practice: state.practice, toneColors: state.toneColors, fadePinyin: state.fadePinyin,
       deckType: state.deckType, newsSeen: state.newsSeen, petName: state.petName, seals: JSON.parse(JSON.stringify(state.seals)), questDays: state.questDays,
-      blitzBest: JSON.parse(JSON.stringify(state.blitzBest)), exams: JSON.parse(JSON.stringify(state.exams)), quests: JSON.parse(JSON.stringify(state.quests)), freezes: state.freezes, frozen: state.frozen.slice(), wotdSeen: state.wotdSeen, topic: state.topic, xp: state.xp, bestCombo: state.bestCombo, learned: JSON.parse(JSON.stringify(state.learned)),
+      blitzBest: JSON.parse(JSON.stringify(state.blitzBest)), exams: JSON.parse(JSON.stringify(state.exams)), quests: JSON.parse(JSON.stringify(state.quests)), freezes: state.freezes, frozen: state.frozen.slice(), wotdSeen: state.wotdSeen, rungs: JSON.parse(JSON.stringify(state.rungs)), ladderSeen: state.ladderSeen, topic: state.topic, xp: state.xp, bestCombo: state.bestCombo, learned: JSON.parse(JSON.stringify(state.learned)),
       activity: JSON.parse(JSON.stringify(state.activity)), milestones: state.milestones.slice(), seenTour: state.seenTour
     };
     var undoSnap = undoStack.slice();
@@ -542,6 +542,55 @@
             ', nothing to cover twice: ' + noFreeze + ', weekly recap counts the week: ' + recap };
       })();
       add('Word of the day, daily quests, streak freeze, weekly recap', dailyRes.ok, dailyRes.d);
+
+      var ladderRes = (function () {
+        if (!EXTRA.ladder.length) return { ok: true, d: 'no ladder data in this build' };
+        var r0 = EXTRA.ladder[0], r1 = EXTRA.ladder[1], last = EXTRA.ladder[EXTRA.ladder.length - 1];
+        stashSkill();
+        var keepMarks = JSON.parse(JSON.stringify(state.marks)), keepSkill = state.skill;
+        state.rungs = {};
+        state.ladderSeen = '';
+        state.marks.read = emptyMarks();
+        state.marks.listen = emptyMarks();
+        loadSkill();
+        var first = nextRung() === r0;
+        els.newsStrip.hidden = true;
+        state.wotdSeen = dayKey();
+        renderWotd();
+        var strip = !els.ladderStrip.hidden && els.ladderZh.textContent === r0.zh && els.ladderLeft.textContent === r0.words.length + ' words to go';
+        r0.words.forEach(function (w) { state.marks.read.status[w] = 'known'; });
+        loadSkill();
+        var readOnly = checkRungs().length === 0;
+        els.btnLadderGo.click();
+        var practise = state.skill === 'listen' && state.deckType === 'words' && state.deck.length === r0.words.length &&
+          state.deck.every(function (i) { return r0.words.indexOf(cards[i].zh) !== -1; });
+        var xp0 = state.xp;
+        r0.words.forEach(function (w) { state.marks.listen.status[w] = 'known'; });
+        loadSkill();
+        var fresh = checkRungs();
+        var reached = fresh.length === 1 && state.rungs[r0.id] === dayKey() && state.xp === xp0 + LADDER_XP && checkRungs().length === 0;
+        renderLadderStrip();
+        var moved = nextRung() === r1 && els.ladderZh.textContent === r1.zh && progressSnapshot().rungs[r0.id] === dayKey();
+        openProgress('ladder');
+        var tab = els.pvBody.querySelector('[data-pvtab="ladder"]');
+        var drawn = !!tab && tab.getAttribute('aria-pressed') === 'true' && els.pvBody.querySelectorAll('.rung').length === EXTRA.ladder.length &&
+          els.pvBody.querySelectorAll('.rung.on').length === 1 && els.pvBody.querySelectorAll('.rung.next').length === 1 && !!els.pvBody.querySelector('.rung.next [data-study]');
+        var lastRead = rungProgress(last).miss.filter(function (m) { return !m.read; }).length;
+        var go = els.pvBody.querySelector('[data-rung="' + last.id + '"]');
+        if (go) go.click();
+        var anyOrder = !!go && els.progressView.hidden && state.skill === 'read' && state.deck.length === lastRead;
+        els.btnLadderClose.click();
+        var hid = els.ladderStrip.hidden && state.ladderSeen === dayKey();
+        // Later checks expect the marks they started with.
+        state.marks = keepMarks;
+        state.skill = keepSkill;
+        loadSkill();
+        return { ok: first && strip && readOnly && practise && reached && moved && drawn && anyOrder && hid,
+          d: EXTRA.ladder.length + ' steps; first step is next: ' + first + ', strip shows it: ' + strip + ', reading alone does not reach it: ' + readOnly +
+            ', Practise opens its words in listening: ' + practise + ', reached once with ' + LADDER_XP + ' XP: ' + reached + ', next step moves on and is saved: ' + moved +
+            ', Ladder tab draws every step: ' + drawn + ', a later step can be practised: ' + anyOrder + ', ✕ hides the strip for today: ' + hid };
+      })();
+      add('Can-do ladder: next step strip, Practise, reaching a step, Ladder tab', ladderRes.ok, ladderRes.d);
 
       var gameRes = (function () {
         state.seals = {};
@@ -1201,7 +1250,7 @@
       state.newsSeen = snap.newsSeen; closeOverlay(els.newsView); renderNewsStrip();
       state.petName = snap.petName; closeOverlay(els.petView); renderPet();
       state.seals = snap.seals; state.questDays = snap.questDays; state.blitzBest = snap.blitzBest; state.exams = snap.exams; stopQuiz(); quiz = null;
-      state.quests = snap.quests; state.freezes = snap.freezes; state.frozen = snap.frozen; state.wotdSeen = snap.wotdSeen; renderWotd();
+      state.quests = snap.quests; state.freezes = snap.freezes; state.frozen = snap.frozen; state.wotdSeen = snap.wotdSeen; state.rungs = snap.rungs; state.ladderSeen = snap.ladderSeen; renderWotd();
       state.topic = snap.topic; state.xp = snap.xp; state.bestCombo = snap.bestCombo; state.learned = snap.learned;
       combo = 0; renderCombo(); updateTopicBtn();
       state.marks = marksSnap;

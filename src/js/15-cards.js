@@ -296,6 +296,7 @@
     els.countLvAll.textContent = String(cards.length);
     LEVELS.forEach(function (lv) { var n = countsFor(lv); els['countLv' + lv].textContent = n.known + '/' + n.total; });
     updateToday();
+    renderLadderStrip();
   }
 
   function updateFootnote() {
@@ -310,7 +311,7 @@
     // A permanent way back to the release notes, after the one-time notice is gone.
     var n = latestNews();
     if (n) {
-      var links = el('span', 'foot-links');
+      var links = el('span', 'foot-links', ' · ');
       var b = el('button', 'linkish foot-news', 'What’s new in ' + n.version);
       b.type = 'button';
       b.setAttribute('data-news', '1');

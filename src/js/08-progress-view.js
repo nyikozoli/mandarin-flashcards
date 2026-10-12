@@ -252,12 +252,13 @@
     hero.appendChild(tiles);
     setLabel(els.progressTitle, 'Your progress', true);
     els.progressTitle.appendChild(document.createTextNode(': ' + SKILLS[state.skill].toLowerCase()));
-    // Three tabs: what to do today, how far you are, and what you have collected.
-    var panes = { today: el('div', 'pv-pane'), progress: el('div', 'pv-pane'), collection: el('div', 'pv-pane') };
+    // Tabs: what to do today, how far you are, the can-do ladder (when there is ladder data) and what you have collected.
+    var panes = { today: el('div', 'pv-pane'), progress: el('div', 'pv-pane'), ladder: el('div', 'pv-pane'), collection: el('div', 'pv-pane') };
     var tabs = el('div', 'pv-tabs');
     tabs.setAttribute('role', 'group');
     tabs.setAttribute('aria-label', 'Progress sections');
-    [['today', 'Today'], ['progress', 'Progress'], ['collection', 'Collection']].forEach(function (t) {
+    [['today', 'Today'], ['progress', 'Progress'], ['ladder', 'Ladder'], ['collection', 'Collection']].forEach(function (t) {
+      if (t[0] === 'ladder' && !EXTRA.ladder.length) return;
       var b = el('button', 'pv-tab');
       b.appendChild(zhLabel(t[1]));
       b.type = 'button';
@@ -430,8 +431,9 @@
     panes.progress.appendChild(mapSec);
     body.appendChild(panes.today);
     body.appendChild(panes.progress);
+    if (EXTRA.ladder.length) { panes.ladder.appendChild(ladderSection()); body.appendChild(panes.ladder); }
     body.appendChild(panes.collection);
-    showPvTab(pvTab);
+    showPvTab(pvTab === 'ladder' && !EXTRA.ladder.length ? 'today' : pvTab);
   }
   var pvTab = 'today';
   function showPvTab(t) {

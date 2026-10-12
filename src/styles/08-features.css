@@ -118,9 +118,10 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
   .cmp-counts { grid-column: 1 / -1; margin-top: 2px !important; }
 }
 
-/* What's new link in the footer: its own line, with a full-size tap target. */
-.foot-links { display: block; }
-.foot-news { display: inline-flex; align-items: center; min-height: 44px; padding: 0 8px; font-size: 13px; font-weight: 600; }
+/* What's new link: on the status line, with a full-size tap target whose
+   negative margins keep the line as short as the text. */
+.foot-links { display: inline; }
+.foot-news { display: inline-flex; align-items: center; min-height: 44px; margin: -12px 0; padding: 0 4px; vertical-align: middle; font-size: 12px; font-weight: 600; }
 
 /* Every skill's mark: 读 reading, 说 recall, 听 listening. */
 .meta-right { display: inline-flex; align-items: center; gap: 8px; }
@@ -137,3 +138,35 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
 /* Meaning-language switches */
 .lang-switches { display: flex; flex-direction: column; gap: 2px; }
 #cardMeanMore { display: contents; }
+
+/* Can-do ladder: the main-screen strip and the Ladder tab. */
+.pv-tabs { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 1fr; }
+@media (max-width: 380px) { .pv-tab { font-size: 13px; padding: 0 2px; } }
+.ladder-strip .wotd-seal { background: var(--known-strong); color: var(--known-ink); }
+.ladder-open { border: 0; background: transparent; color: inherit; font: inherit; text-align: left; padding: 6px 0; min-height: 40px; cursor: pointer; }
+.ladder-next { color: var(--muted); font-weight: 600; }
+#ladderZh { font-family: var(--zh-font); font-size: 17px; color: var(--paper); }
+.ladder-left { color: var(--known); font-weight: 600; white-space: nowrap; }
+@media (max-width: 420px) { .ladder-next, .ladder-w { display: none; } }
+@media (max-width: 360px) { .ladder-strip { gap: 6px; } .ladder-strip .btn.small { padding: 4px 8px; } #ladderZh { font-size: 15px; } }
+.ladder { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.rung { padding: 8px 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface2); }
+.rung-head { display: flex; align-items: center; gap: 10px; }
+.rung-seal { flex: none; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 6px; border: 1px solid var(--line); color: var(--muted); font-weight: 700; font-size: 13px; font-variant-numeric: tabular-nums; }
+.rung.on .rung-seal { border: 0; background: var(--cinnabar); color: var(--paper); font-family: var(--kai-font); font-size: 18px; font-weight: 400; transform: rotate(-4deg); }
+.rung-text { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 8px; }
+.rung-zh { font-family: var(--zh-font); font-size: 18px; color: var(--paper); }
+.rung-py { color: var(--pinyin); font-size: 13px; font-weight: 600; }
+.rung-en { flex-basis: 100%; color: var(--soft); font-size: 14px; }
+.rung-count { flex: none; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.rung.on .rung-count { color: var(--known); }
+.rung:not(.on):not(.next) { opacity: .72; }
+.rung.next { border-color: var(--known); background: linear-gradient(90deg, rgba(79, 209, 161, .12), rgba(79, 209, 161, 0) 60%), var(--surface2); }
+.rung.next .rung-seal { border-color: var(--known); color: var(--known); }
+.rung.next .pv-goalbar { display: block; margin: 8px 0 4px; min-width: 0; height: 8px; }
+.rung-ex { margin: 6px 0 0; font-family: var(--zh-font); font-size: 16px; color: var(--text); }
+.rung-word { gap: 4px; }
+.rung-word span[lang] { font-family: var(--zh-font); }
+.rung-need { color: var(--learn-strong); font-size: 11px; }
+.rung-go { flex: none; min-height: 40px; }
+.rung.next .rung-go { margin-top: 8px; }

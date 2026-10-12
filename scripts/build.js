@@ -86,6 +86,20 @@ if (CHANGELOG) {
     r.groups.forEach((g) => { if (!Array.isArray(g.items) || !g.items.length) throw new Error('Empty changelog group in ' + r.version); });
   });
 }
+//   data/ladder.json  can-do steps: { rungs: [{ id, zh, py, en, hu, words: [headword], sentences: [example sentence] }] }
+const LADDER = optJson(dataPath('ladder.json'));
+if (LADDER) {
+  const heads = new Set(cards.map((c) => c.zh));
+  const exs = new Set([].concat(...cards.map((c) => c.ex.map((e) => e.zh))));
+  const ids = new Set();
+  (LADDER.rungs || []).forEach((r) => {
+    if (!r.id || ids.has(r.id) || !r.zh || !r.py || !r.en || !r.hu) throw new Error('Malformed ladder rung ' + JSON.stringify(r).slice(0, 80));
+    ids.add(r.id);
+    if (!Array.isArray(r.words) || !r.words.length) throw new Error('Ladder rung ' + r.id + ' has no words');
+    r.words.forEach((w) => { if (!heads.has(w)) throw new Error('Ladder rung ' + r.id + ': ' + w + ' is not a headword'); });
+    (r.sentences || []).forEach((x) => { if (!exs.has(x)) throw new Error('Ladder rung ' + r.id + ': not an example sentence: ' + x); });
+  });
+}
 //   data/i18n/<code>.json  extra meaning languages: { code, name, words: { headword: meaning }, sentences: { sentence: translation } }
 const I18N = fs.existsSync(dataPath('i18n')) ? fs.readdirSync(dataPath('i18n')).filter((f) => /^[a-z]{2}\.json$/.test(f)).sort()
   .map((f) => JSON.parse(read(dataPath('i18n', f)))) : [];
@@ -119,7 +133,7 @@ const total = expected[1] + expected[2] + expected[3];
 const safeJson = (v) => JSON.stringify(v).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026')
   .replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
 const json = safeJson(cards);
-const extraJson = safeJson({ chars: FREQ ? FREQ.chars : {}, topics: TOPICS ? TOPICS.topics : [], hints: HINTS ? HINTS.hints : {}, news: CHANGELOG ? CHANGELOG.releases : [] });
+const extraJson = safeJson({ chars: FREQ ? FREQ.chars : {}, topics: TOPICS ? TOPICS.topics : [], hints: HINTS ? HINTS.hints : {}, news: CHANGELOG ? CHANGELOG.releases : [], ladder: LADDER ? LADDER.rungs : [] });
 
 // ---------- html ----------
 // The app's source: src/index.html is the page. Its /*__STYLES__*/ and /*__SCRIPTS__*/ lines are replaced by the

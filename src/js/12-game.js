@@ -97,6 +97,7 @@
     var w = wordOfDay();
     // One strip at a time: after an update, the what's-new notice goes first.
     els.wotd.hidden = !w || state.wotdSeen === dayKey() || !els.newsStrip.hidden;
+    renderLadderStrip();
     if (els.wotd.hidden) return;
     els.wotdZh.textContent = w.zh;
     renderPinyin(els.wotdPy, w.py);
@@ -345,7 +346,7 @@
     var mark = el('span', 'seal-stamp-mark', x.zh);
     mark.setAttribute('lang', 'zh-CN');
     n.appendChild(mark);
-    n.appendChild(el('span', 'seal-stamp-text', 'New seal: ' + x.en + ' (+50 XP)'));
+    n.appendChild(el('span', 'seal-stamp-text', x.text || 'New seal: ' + x.en + ' (+50 XP)'));
     document.body.appendChild(n);
     confetti();
     setTimeout(function () { n.classList.add('out'); }, 2600);
@@ -621,3 +622,156 @@
     markNewsSeen();
   }
 
+  /* ---------- can-do ladder ---------- */
+  // Real-life steps (greet people, order food...), each a small set of words. A step is reached when all its words are
+  // Known in both reading and listening, in any order; reaching one stamps it and gives LADDER_XP.
+  var LADDER_XP = 40;
+  function ladderMaps() { return { read: marksOf('read').status, listen: marksOf('listen').status }; }
+  // Which words of a step are still missing, and in which skill.
+  function rungProgress(r, maps) {
+    maps = maps || ladderMaps();
+    var miss = [];
+    r.words.forEach(function (zh) {
+      var rd = maps.read[zh] === 'known', ls = maps.listen[zh] === 'known';
+      if (!rd || !ls) miss.push({ zh: zh, read: rd, listen: ls });
+    });
+    return { miss: miss, done: r.words.length - miss.length, total: r.words.length };
+  }
+  function rungById(id) {
+    for (var i = 0; i < EXTRA.ladder.length; i++) if (EXTRA.ladder[i].id === id) return EXTRA.ladder[i];
+    return null;
+  }
+  // The step's can-do line in English, or in Hungarian when only Hungarian is switched on.
+  function rungName(r) { return !state.langs.en && state.langs.hu ? r.hu : r.en; }
+  function rungsReached() { return EXTRA.ladder.filter(function (r) { return state.rungs[r.id]; }).length; }
+  // The first step, in ladder order, that is not reached yet.
+  function nextRung() {
+    for (var i = 0; i < EXTRA.ladder.length; i++) if (!state.rungs[EXTRA.ladder[i].id]) return EXTRA.ladder[i];
+    return null;
+  }
+  // Marks every step whose words are now all known; returns the new ones. Several at once (say, after an import)
+  // share one stamp.
+  function checkRungs() {
+    var maps = ladderMaps(), fresh = [];
+    EXTRA.ladder.forEach(function (r) {
+      if (state.rungs[r.id] || rungProgress(r, maps).miss.length) return;
+      state.rungs[r.id] = dayKey();
+      state.xp += LADDER_XP;
+      fresh.push(r);
+    });
+    if (fresh.length && !testing) {
+      stampSeal({ zh: '梯', text: fresh.length === 1 ? 'You can now: ' + rungName(fresh[0]) + ' (+' + LADDER_XP + ' XP)'
+        : fresh.length + ' ladder steps reached (+' + fresh.length * LADDER_XP + ' XP)' });
+      buzz([20, 40, 20]);
+    }
+    if (fresh.length) renderLadderStrip();
+    return fresh;
+  }
+  // The main-screen strip: the next step and how many words it still needs. It waits while the what's-new notice or
+  // the word of the day is showing, and ✕ hides it until tomorrow.
+  function renderLadderStrip() {
+    var r = nextRung();
+    els.ladderStrip.hidden = !r || state.ladderSeen === dayKey() || !els.newsStrip.hidden || !els.wotd.hidden;
+    if (els.ladderStrip.hidden) return;
+    var p = rungProgress(r);
+    els.ladderZh.textContent = r.zh;
+    els.ladderEn.textContent = rungName(r);
+    // On narrow screens “9 words to go” shortens to “9 to go”.
+    els.ladderLeft.textContent = String(p.miss.length);
+    els.ladderLeft.appendChild(el('span', 'ladder-w', ' word' + (p.miss.length === 1 ? '' : 's')));
+    els.ladderLeft.appendChild(document.createTextNode(' to go'));
+    els.btnLadderOpen.setAttribute('aria-label', 'Next ladder step: ' + r.en + ', ' + p.miss.length + ' of ' + p.total + ' words to go. Open the ladder');
+    els.btnLadderGo.setAttribute('data-rung', r.id);
+  }
+  function dismissLadder() { state.ladderSeen = dayKey(); renderLadderStrip(); save(); }
+  // Studies a step's missing words as a deck of their own: reading first, then listening. Picking a study mode goes
+  // back to the full deck.
+  function practiseRung(id) {
+    var r = rungById(id);
+    if (!r) return;
+    var miss = rungProgress(r).miss;
+    if (!miss.length) return;
+    var skill = miss.some(function (m) { return !m.read; }) ? 'read' : 'listen';
+    var want = miss.filter(function (m) { return !m[skill]; }).map(function (m) { return m.zh; });
+    OVERLAYS.forEach(function (o) { closeOverlay(els[o]); });
+    stopSpeech();
+    rememberDeck();
+    useDeckType('words');
+    if (skillOf(state.practice) !== skill) state.practice = skill === 'read' ? 'zh' : 'listen';
+    useSkill(skill);
+    var deckIdx = [];
+    wordCards.forEach(function (c, i) { if (want.indexOf(c.zh) !== -1) deckIdx.push(i); });
+    state.mode = 'all';
+    state.deck = deckIdx;
+    state.pos = 0;
+    state.shuffled = false;
+    state.revealed = state.autoReveal && state.practice === 'zh';
+    undoStack = [];
+    syncPracticeSelect();
+    render(true);
+    save();
+    if (!testing) toast('Practising ' + deckIdx.length + ' word' + (deckIdx.length === 1 ? '' : 's') + ' for ' + r.zh + ' in ' + SKILLS[skill].toLowerCase() + '. Choose a study mode to go back to the full deck.', 5000);
+  }
+  function ladderSection() {
+    var reached = rungsReached(), next = nextRung(), maps = ladderMaps();
+    var sec = section('Ladder', 'Things you can do in Chinese. A step is reached when you know all its words in reading and listening (读 and 听); take them in any order. ' +
+      reached + ' of ' + EXTRA.ladder.length + ' reached, ' + LADDER_XP + ' XP each.');
+    var ol = el('ol', 'ladder');
+    EXTRA.ladder.forEach(function (r, i) {
+      var p = rungProgress(r, maps), on = !!state.rungs[r.id], isNext = r === next;
+      var li = el('li', 'rung' + (on ? ' on' : isNext ? ' next' : ''));
+      var head = el('div', 'rung-head');
+      var mark = el('span', 'rung-seal', on ? '梯' : String(i + 1));
+      mark.setAttribute('aria-hidden', 'true');
+      if (on) mark.setAttribute('lang', 'zh-CN');
+      head.appendChild(mark);
+      var txt = el('div', 'rung-text');
+      var zh = el('span', 'rung-zh', r.zh);
+      zh.setAttribute('lang', 'zh-CN');
+      txt.appendChild(zh);
+      var py = el('span', 'rung-py', r.py);
+      py.setAttribute('lang', 'zh-Latn-pinyin');
+      txt.appendChild(py);
+      txt.appendChild(el('span', 'rung-en', rungName(r)));
+      head.appendChild(txt);
+      head.appendChild(el('span', 'rung-count', on ? shortDate(state.rungs[r.id]) : p.done + '/' + p.total));
+      li.appendChild(head);
+      if (isNext) {
+        var bar = el('span', 'pv-goalbar');
+        var fill = el('span', 'pv-goalfill');
+        fill.style.width = pct(p.done, p.total) + '%';
+        bar.appendChild(fill);
+        li.appendChild(bar);
+        (r.sentences || []).slice(0, 2).forEach(function (s) {
+          var line = el('p', 'rung-ex', s);
+          line.setAttribute('lang', 'zh-CN');
+          li.appendChild(line);
+        });
+        var words = el('div', 'rp-words');
+        p.miss.forEach(function (m) {
+          var b = el('button', 'btn small rung-word', '');
+          b.type = 'button';
+          b.setAttribute('data-study', m.zh);
+          var w = el('span', null, m.zh);
+          w.setAttribute('lang', 'zh-CN');
+          b.appendChild(w);
+          var need = el('span', 'rung-need', (m.read ? '' : '读') + (m.listen ? '' : '听'));
+          need.setAttribute('lang', 'zh-CN');
+          b.appendChild(need);
+          b.setAttribute('aria-label', 'Study ' + m.zh + ', still to learn in ' + [m.read ? '' : 'reading', m.listen ? '' : 'listening'].filter(Boolean).join(' and '));
+          words.appendChild(b);
+        });
+        li.appendChild(words);
+      }
+      if (!on) {
+        var go = el('button', 'btn small rung-go' + (isNext ? ' primary' : ''), 'Practise');
+        go.type = 'button';
+        go.setAttribute('data-rung', r.id);
+        go.setAttribute('aria-label', 'Practise the words for ' + r.en);
+        (isNext ? li : head).appendChild(go);
+      }
+      ol.appendChild(li);
+    });
+    sec.appendChild(ol);
+    return sec;
+  }

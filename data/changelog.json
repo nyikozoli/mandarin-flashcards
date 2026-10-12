@@ -3,14 +3,16 @@
     {
       "version": "2.4",
       "date": "2026-10-12",
-      "title": "German, Spanish and Romanian",
+      "title": "More languages and a can-do ladder",
       "groups": [
         {
           "name": "",
           "items": [
             "Meanings and example sentences in German, Spanish and Romanian, next to English and Hungarian. Switch each language on or off in Settings → Translations.",
             "Every translation went through several independent reviews: accuracy, native fluency, and a side-by-side check of all three languages.",
-            "Search finds words in all five languages."
+            "Search finds words in all five languages.",
+            "A can-do ladder: real-life steps such as 打招呼 greeting people or 点菜 ordering food. Reach a step by knowing all its words in reading and listening, in any order, for 40 XP each.",
+            "A strip on the main screen shows the next step and how many words it still needs; Practise studies just those words. The progress view has a new Ladder tab."
           ]
         }
       ]

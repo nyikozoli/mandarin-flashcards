@@ -66,6 +66,8 @@
       frozen: state.frozen,
       recapWeek: state.recapWeek,
       seals: state.seals,
+      rungs: state.rungs,
+      ladderSeen: state.ladderSeen,
       petName: state.petName,
       labels: state.labels,
       langs: state.langs,
@@ -189,6 +191,11 @@
     if (saved && saved.seals && typeof saved.seals === 'object') {
       Object.keys(saved.seals).forEach(function (k) { if (SEAL_BY_ID[k] && isDay(saved.seals[k])) state.seals[k] = saved.seals[k]; });
     }
+    state.rungs = {};
+    if (saved && saved.rungs && typeof saved.rungs === 'object') {
+      Object.keys(saved.rungs).forEach(function (k) { if (/^[a-z0-9-]{1,40}$/.test(k) && isDay(saved.rungs[k])) state.rungs[k] = saved.rungs[k]; });
+    }
+    state.ladderSeen = saved && isDay(saved.ladderSeen) ? saved.ladderSeen : '';
     state.frozen = saved && Array.isArray(saved.frozen) ? saved.frozen.filter(isDay).slice(-60) : [];
     state.quests = null;
     var q = saved && saved.quests;

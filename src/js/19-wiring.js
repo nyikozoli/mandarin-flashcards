@@ -168,6 +168,9 @@
       if (!testing) toast('Your panda is now called ' + (state.petName || '宝宝') + '.');
     });
     on('btnWotdClose', 'click', dismissWotd);
+    on('btnLadderClose', 'click', dismissLadder);
+    on('btnLadderOpen', 'click', function () { openProgress('ladder'); });
+    on('btnLadderGo', 'click', function () { practiseRung(els.btnLadderGo.getAttribute('data-rung')); });
     on('btnWotdStudy', 'click', function () { var zh = els.btnWotdStudy.getAttribute('data-study'); dismissWotd(); studyWord(zh); });
     on('btnCloseTopic', 'click', function () { closeOverlay(els.topicView); });
     on('topicGrid', 'click', function (e) {
@@ -177,6 +180,8 @@
     on('pvBody', 'click', function (e) {
       var tb = e.target.closest ? e.target.closest('[data-pvtab]') : null;
       if (tb) { showPvTab(tb.getAttribute('data-pvtab')); els.pvBody.scrollTop = 0; return; }
+      var rg = e.target.closest ? e.target.closest('[data-rung]') : null;
+      if (rg) { practiseRung(rg.getAttribute('data-rung')); return; }
       if (e.target.closest && e.target.closest('[data-pet]')) { closeOverlay(els.progressView); openPet(); return; }
       var t = e.target.closest ? e.target.closest('[data-topic]') : null;
       if (t) { closeOverlay(els.progressView); setTopic(t.getAttribute('data-topic')); return; }

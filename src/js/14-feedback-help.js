@@ -60,6 +60,7 @@
   function afterAnswer(kind) {
     if (testing || kind === 'skip') return;
     checkSeals();
+    checkRungs();
     session.n++;
     if (kind === 'known') session.k++; else session.l++;
     checkMilestones();
