@@ -6,7 +6,7 @@
 //
 //   node scripts/judge.js --limit 50          trial on 50 questions spread over all levels
 //   node scripts/judge.js --level 1           every HSK 1 question
-//   node scripts/judge.js --dry-run           count requests and print one, without calling the API
+//   node scripts/judge.js --dry-run           what a run would send after the cached answers, and its cost; no API call
 //   node scripts/judge.js --control           five questions with a known answer: does the check flag the right ones?
 //
 // Options: --threshold 0.15 (distractor share that gets a second look), --model jev-latest.
@@ -24,6 +24,10 @@ const CACHE = path.join(OUT, 'judge-cache.json');
 const API = process.env.TYPESAFE_API_URL || 'https://api.typesafe.ai/v1/systemone';
 const MAX_OPTIONS = 255;
 const PARALLEL = 4;
+// For --dry-run's cost estimate: TypeSafe's list price (October 2026) and request characters per input token,
+// measured on the first full run. Output tokens are a handful per request and left out.
+const USD_PER_INPUT_TOKEN = 42 / 1e9;
+const CHARS_PER_TOKEN = 1.75;
 
 const args = process.argv.slice(2);
 const opt = (name, def) => { const i = args.indexOf('--' + name); return i === -1 ? def : args[i + 1]; };
@@ -242,11 +246,39 @@ async function runControls() {
   if (failed) process.exitCode = 1;
 }
 
+// What a run would send after the saved answers: every Choice not in the cache, plus the second checks that cached
+// answers already call for. Questions not yet asked can add a few more second checks once they are answered.
+function estimate() {
+  const plan = { send: 0, cached: 0, chars: 0, open: 0 };
+  const count = (body) => {
+    if (cache[keyOf(body)]) plan.cached++;
+    else { plan.send++; plan.chars += JSON.stringify(body).length; }
+  };
+  items.forEach((it) => {
+    const probs = {};
+    let known = true;
+    chunks(it.pool).forEach((chunk) => {
+      const body = choiceRequest(it, chunk), a = cache[keyOf(body)];
+      count(body);
+      if (a) Object.assign(probs, a.fits.probabilities);
+      else known = false;
+    });
+    if (known) it.pool.filter((w) => (probs[w.zh] || 0) >= threshold).forEach((w) => count(noulRequest(it, w)));
+    else plan.open++;
+  });
+  plan.tokens = Math.round(plan.chars / CHARS_PER_TOKEN);
+  return plan;
+}
+
 async function main() {
   const requests = items.reduce((n, it) => n + chunks(it.pool).length, 0);
   console.log(items.length + ' questions, ' + requests + ' choice requests (plus a check per suspicious distractor)');
   if (dryRun) {
-    console.log(JSON.stringify(choiceRequest(items[0], chunks(items[0].pool)[0]), null, 2).slice(0, 1500));
+    const plan = estimate();
+    console.log('To send: ' + plan.send + ' requests (' + plan.cached + ' already answered), about ' + plan.tokens.toLocaleString('en-US') +
+      ' input tokens ≈ $' + (plan.tokens * USD_PER_INPUT_TOKEN).toFixed(4) +
+      (plan.open ? '; the ' + plan.open + ' new questions may add a few second checks' : ''));
+    if (plan.send) console.log(JSON.stringify(choiceRequest(items[0], chunks(items[0].pool)[0]), null, 2).slice(0, 1500));
     return;
   }
   apiKey();
