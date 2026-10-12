@@ -29,7 +29,8 @@
   }
   // Colours each character with the tone of its syllable; 儿 used as erhua shares the previous syllable.
   // Each character sits in its own 米字格 cell and takes the tone colour of its syllable; 儿 as erhua shares the previous one.
-  function renderHanzi(node, zh, py, tappable) {
+  // `lv`, when given, is the level the text is studied at: words from a higher HSK level get their level number.
+  function renderHanzi(node, zh, py, tappable, lv) {
     node.textContent = '';
     var tones = pinyinTokens(py).filter(function (t) { return t.tone; }).map(function (t) { return t.tone; });
     var chars = Array.from(zh), parts = [], ti = 0, prev = 0;
@@ -52,7 +53,7 @@
       var into = sg.word ? wordButton(sg.word) : node;
       for (var k = 0; k < sg.len; k++) put(into, parts[at + k]);
       at += sg.len;
-      if (sg.word) node.appendChild(into);
+      if (sg.word) { markLevel(into, sg.word, lv); node.appendChild(into); }
     });
   }
   // The four marks each vowel can take; PLAIN_VOWEL reverses it, so a tone can be moved or taken off.
@@ -126,14 +127,24 @@
     b.setAttribute('aria-expanded', 'false');
     return b;
   }
+  // A word above the level the sentence is studied at gets a small level number, so a new word is no surprise.
+  function markLevel(b, w, lv) {
+    if (!lv || w.lv <= lv) return;
+    var tag = el('sup', 'w-lv', String(w.lv));
+    tag.setAttribute('aria-hidden', 'true');
+    b.appendChild(tag);
+    b.title = 'HSK ' + w.lv + ' word';
+    b.setAttribute('aria-label', w.zh + ', HSK ' + w.lv + ' word');
+  }
   // An example sentence with tappable words. The card's own word is highlighted rather than tappable.
-  function renderSentence(node, zh, headword) {
+  function renderSentence(node, zh, headword, lv) {
     node.textContent = '';
     segment(zh).forEach(function (sg) {
       if (!sg.word) { node.appendChild(document.createTextNode(sg.text)); return; }
       if (sg.word.zh === headword) { node.appendChild(el('b', 'w-head', sg.text)); return; }
       var b = wordButton(sg.word);
       b.textContent = sg.text;
+      markLevel(b, sg.word, lv);
       node.appendChild(b);
     });
   }

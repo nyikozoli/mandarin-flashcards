@@ -4,6 +4,9 @@ button.w { font: inherit; color: inherit; background: none; border: 0; border-bo
 button.w:hover { background: rgba(241, 236, 226, .07); }
 button.w[aria-expanded="true"] { background: rgba(224, 74, 47, .24); border-bottom-color: var(--cinnabar); }
 .w-head { font-weight: inherit; color: var(--pinyin); }
+/* A word above the level the sentence is studied at: its HSK level, small and raised. */
+.w-lv { margin-left: 1px; font-family: var(--ui-font); font-size: .42em; font-weight: 800; line-height: 1; color: var(--learn); vertical-align: super; }
+.hanzi button.w .w-lv { align-self: flex-start; }
 .word-pop { position: fixed; z-index: 60; width: min(320px, calc(100vw - 24px)); display: grid; gap: 6px; padding: 12px 14px 14px; background: var(--surface2); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 14px 34px rgba(4, 7, 10, .55); }
 .wp-head { display: flex; align-items: baseline; gap: 10px; padding-right: 48px; }
 .wp-zh { font-family: var(--zh-font); font-size: 30px; line-height: 1.2; color: var(--paper); }

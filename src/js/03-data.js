@@ -58,6 +58,14 @@
         s.ex.push({ zh: w.zh, py: w.py, en: w.en, hu: w.hu, tr: w.tr || {} });
       });
     });
+    // Easiest first within each level: the highest HSK level among its words, then how many words are above the
+    // sentence's level, then length. The sort is stable, so ties keep the word order.
+    list.forEach(function (s) {
+      var lvs = segment(s.zh).filter(function (sg) { return sg.word; }).map(function (sg) { return sg.word.lv; });
+      s.top = Math.max.apply(null, [s.lv].concat(lvs));
+      s.above = lvs.filter(function (l) { return l > s.lv; }).length;
+    });
+    list.sort(function (a, b) { return a.lv - b.lv || a.top - b.top || a.above - b.above || charLen(a.zh) - charLen(b.zh); });
     list.forEach(function (s, i) {
       s.n = i + 1;
       indexCard(s);

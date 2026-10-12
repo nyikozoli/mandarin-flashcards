@@ -446,6 +446,24 @@
       })();
       add('Multiple choice: one right answer', mcRes.ok, mcRes.d);
 
+      // Sentences: easiest first within a level, and a word above the level the sentence is studied at is marked.
+      var sentRes = (function () {
+        var ordered = sentCards.every(function (s, i) { var p = sentCards[i - 1]; return !p || p.lv < s.lv || (p.lv === s.lv && p.top <= s.top); });
+        var box = el('p');
+        renderSentence(box, '他是我哥哥。', '他', 1);
+        var tag = box.querySelector('.w-lv');
+        var marked = !!tag && tag.textContent === '2' && tag.parentNode.getAttribute('data-w') === '哥哥';
+        renderSentence(box, '他是我哥哥。', '他', 2);
+        var unmarked = !box.querySelector('.w-lv');
+        var s = sentCards.filter(function (x) { return x.above > 0; })[0];
+        renderHanzi(box, s.zh, s.py, true, s.lv);
+        var face = box.querySelectorAll('.w-lv').length === s.above;
+        return { ok: ordered && marked && unmarked && face,
+          d: 'easiest first within each level: ' + ordered + ', 哥哥 marked 2 in an HSK 1 sentence: ' + marked + ', not at HSK 2: ' + unmarked +
+            ', sentence card marks its ' + (s ? s.above : 0) + ' higher-level word(s): ' + face };
+      })();
+      add('Sentences: order and level marks', sentRes.ok, sentRes.d);
+
       var buildRes = (function () {
         var deckSnap = state.deck, posSnap = state.pos;
         useDeckType('sentences');

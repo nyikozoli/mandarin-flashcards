@@ -3,12 +3,15 @@
     {
       "version": "2.8",
       "date": "2026-10-12",
-      "title": "Similar words without a second right answer",
+      "title": "Easier sentences first, and one right answer in Similar words",
       "groups": [
         {
           "name": "",
           "items": [
-            "Similar words no longer offers 少 when the answer is 小: both can mean “little”, so either pick was right. The same rule as multiple choice now applies here."
+            "Similar words no longer offers 少 when the answer is 小: both can mean “little”, so either pick was right. The same rule as multiple choice now applies here.",
+            "The sentence deck starts with the easiest sentences in each level: those that use only words from that level, and the shortest first.",
+            "In a sentence, a word from a higher HSK level than the card has a small level number next to it, such as 哥哥² in an HSK 1 sentence. Tap it to see the word.",
+            "The “Travel by train and plane” ladder step now asks for 坐 (to take a train or plane) and 离开 (to leave) instead of the camera and photo words."
           ]
         }
       ]

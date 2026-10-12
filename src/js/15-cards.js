@@ -142,7 +142,7 @@
       els.cardRank.title = 'The ' + c.rk + ordinal(c.rk) + ' most frequent word in written and spoken Chinese (wordfreq)';
     }
     closeWordPop(false);
-    renderHanzi(els.cardHanzi, c.zh, c.py, !!c.sentence);
+    renderHanzi(els.cardHanzi, c.zh, c.py, !!c.sentence, c.sentence ? c.lv : 0);
     els.cardHanzi.setAttribute('data-len', String(Math.min(6, charLen(c.zh))));
     renderPinyin(els.cardPinyin, c.py);
     els.cardEn.textContent = c.en;
@@ -171,7 +171,7 @@
       sb.title = 'Read this sentence aloud';
       var zh = el('p', 'ex-zh');
       zh.setAttribute('lang', 'zh-CN');
-      if (c.sentence) zh.textContent = e.zh; else renderSentence(zh, e.zh, c.zh);
+      if (c.sentence) zh.textContent = e.zh; else renderSentence(zh, e.zh, c.zh, c.lv);
       var py = el('p', 'ex-py');
       py.setAttribute('lang', 'zh-Latn-pinyin');
       renderPinyin(py, e.py);
