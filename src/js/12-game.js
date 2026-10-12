@@ -801,11 +801,10 @@
 
   /* ---------- suggestion chip ---------- */
   // The Today row's chip stands for the one strip showing (the word of the day or the next ladder step);
-  // tapping it opens that strip as a popover. On wide screens the rail shows the ladder, so the chip skips it there.
+  // tapping it opens that strip as a popover.
   function shownStrip() { return [els.wotd, els.ladderStrip].filter(function (s) { return !s.hidden; })[0] || null; }
   function renderSuggest() {
     var s = shownStrip();
-    if (s === els.ladderStrip && !els.progressRail.hidden && getComputedStyle(els.progressRail).display !== 'none') s = null;
     els.btnSuggest.hidden = !s;
     if (!s) { closeSuggest(); return; }
     var kind = s === els.wotd ? 'wotd' : 'ladder';

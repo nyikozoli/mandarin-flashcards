@@ -1266,8 +1266,8 @@
         var open = !els.suggestPop.hidden && els.btnSuggest.getAttribute('aria-expanded') === 'true' && !els.wotd.hidden;
         els.btnWotdClose.click();
         var closed = els.suggestPop.hidden && els.wotd.hidden && els.btnSuggest.getAttribute('aria-expanded') === 'false';
-        // With the word of the day put away, the chip moves on to the ladder step (hidden where the rail shows it).
-        var next = els.btnSuggest.hidden || els.suggestSeal.className.indexOf('ladder') !== -1;
+        // With the word of the day put away, the chip moves on to the ladder step.
+        var next = !EXTRA.ladder.length || !nextRung() || state.ladderSeen === dayKey() || (!els.btnSuggest.hidden && els.suggestSeal.className.indexOf('ladder') !== -1);
         return { ok: chip && open && closed && next, d: 'chip stands for the word of the day: ' + chip + ', tap opens its strip: ' + open + ', ✕ in the strip closes both: ' + closed + ', chip moves on to the ladder: ' + next };
       })();
       add('Suggestion chip in the Today row', sugRes.ok, sugRes.d);
