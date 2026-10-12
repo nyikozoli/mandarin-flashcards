@@ -1,6 +1,6 @@
 // Asks TypeSafe's Jev model whether a fill-the-gap question has more than one right answer.
 // For every word and each of its example sentences that contain it, the candidates are the
-// distractors the app can draw (same rule as clozeTarget() in src/js/11-practice.js). Jev picks
+// distractors the app can draw (same rule as clozePool() in src/js/11-practice.js). Jev picks
 // the word that fits the gap, given the translation the app shows; a distractor with a real
 // share of the probability is then checked on its own (does the sentence still work with it?).
 //
@@ -38,11 +38,16 @@ const model = opt('model', 'jev-latest');
 const charLen = (s) => Array.from(s).length;
 const { cards } = loadCards();
 
-// The same candidate rule as clozeTarget(): same length, not in the sentence, not containing the word
-// or inside it; same level when that leaves at least three.
+// Words already known to fit a gap; the app never offers them (data/cloze-exclude.json).
+const excludeFile = path.join(ROOT, 'data', 'cloze-exclude.json');
+const EXCLUDE = fs.existsSync(excludeFile) ? JSON.parse(fs.readFileSync(excludeFile, 'utf8')).exclude : [];
+const excluded = (c, ex) => (EXCLUDE.find((k) => k.word === c.zh && k.sentence === ex.zh) || { not: [] }).not;
+
+// The same candidate rule as clozePool() in the app: same length, not in the sentence, not containing the word
+// or inside it, not excluded; same level when that leaves at least three.
 function candidates(c, ex) {
-  const len = charLen(c.zh);
-  const pool = cards.filter((w) => w !== c && charLen(w.zh) === len && !ex.zh.includes(w.zh) && !w.zh.includes(c.zh) && !c.zh.includes(w.zh));
+  const len = charLen(c.zh), not = excluded(c, ex);
+  const pool = cards.filter((w) => w !== c && charLen(w.zh) === len && !ex.zh.includes(w.zh) && !w.zh.includes(c.zh) && !c.zh.includes(w.zh) && !not.includes(w.zh));
   const same = pool.filter((w) => w.lv === c.lv);
   return same.length >= 3 ? same : pool;
 }
@@ -208,7 +213,7 @@ function report(results) {
     results.length + ' questions checked; threshold ' + threshold + '.',
     '',
     '## Also right (' + bad.length + ')',
-    'A distractor makes a correct sentence with the same meaning: exclude it for this sentence, or change the sentence.',
+    'A distractor makes a correct sentence with the same meaning: add it to data/cloze-exclude.json, or change the sentence.',
     '',
     table(bad),
     '',

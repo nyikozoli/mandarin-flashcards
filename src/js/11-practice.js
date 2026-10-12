@@ -57,18 +57,31 @@
     for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
     return a;
   }
+  // Words that also fit this sentence's gap (data/cloze-exclude.json, found with scripts/judge.js).
+  function clozeExcluded(c, ex) {
+    for (var i = 0; i < EXTRA.clozeExclude.length; i++) {
+      var k = EXTRA.clozeExclude[i];
+      if (k.word === c.zh && k.sentence === ex.zh) return k.not;
+    }
+    return [];
+  }
+  // The distractors a gap can offer: same length, never in the sentence, never containing the word (or inside it),
+  // never a word that also fits; the same level when that leaves at least three. scripts/judge.js uses the same rule.
+  function clozePool(c, ex) {
+    var len = charLen(c.zh), not = clozeExcluded(c, ex);
+    var pool = wordCards.filter(function (w) {
+      return w !== c && charLen(w.zh) === len && ex.zh.indexOf(w.zh) === -1 && w.zh.indexOf(c.zh) === -1 && c.zh.indexOf(w.zh) === -1 && not.indexOf(w.zh) === -1;
+    });
+    var same = pool.filter(function (w) { return w.lv === c.lv; });
+    return same.length >= 3 ? same : pool;
+  }
   // One of the word's example sentences with the word blanked out, and four words of the same length to choose from.
-  // Distractors never occur in the sentence and never contain the word (or sit inside it), so only one choice fits.
   function clozeTarget(c) {
     if (c.sentence) return null;
     var exs = c.ex.filter(function (e) { return e.zh.indexOf(c.zh) !== -1; });
     if (!exs.length) return null;
     var ex = exs[(c.n + state.pos) % exs.length], len = charLen(c.zh);
-    var pool = wordCards.filter(function (w) {
-      return w !== c && charLen(w.zh) === len && ex.zh.indexOf(w.zh) === -1 && w.zh.indexOf(c.zh) === -1 && c.zh.indexOf(w.zh) === -1;
-    });
-    var same = pool.filter(function (w) { return w.lv === c.lv; });
-    if (same.length >= 3) pool = same;
+    var pool = clozePool(c, ex);
     var opts = [c];
     while (opts.length < 4 && pool.length) opts.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
     return { ex: ex, blanked: ex.zh.replace(c.zh, new Array(len + 1).join('＿')), options: shuffled(opts) };

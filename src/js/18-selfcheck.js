@@ -408,6 +408,20 @@
       })();
       add('Fill the gap', clozeRes.ok, clozeRes.d);
 
+      // Words that also fit a gap (data/cloze-exclude.json) are never offered as its wrong answers.
+      var exclRes = (function () {
+        var bad = [];
+        EXTRA.clozeExclude.forEach(function (k) {
+          var c = wordCards.filter(function (w) { return w.zh === k.word; })[0];
+          var ex = c && c.ex.filter(function (e) { return e.zh === k.sentence; })[0];
+          var pool = ex ? clozePool(c, ex) : [];
+          if (pool.length < 3 || pool.some(function (w) { return k.not.indexOf(w.zh) !== -1; })) bad.push(k.word);
+        });
+        return { ok: EXTRA.clozeExclude.length > 0 && !bad.length,
+          d: EXTRA.clozeExclude.length + ' sentences; ' + (bad.length ? 'still offered: ' + bad.join(' ') : 'none offers a word that also fits') };
+      })();
+      add('Fill the gap: one right answer', exclRes.ok, exclRes.d);
+
       var buildRes = (function () {
         var deckSnap = state.deck, posSnap = state.pos;
         useDeckType('sentences');

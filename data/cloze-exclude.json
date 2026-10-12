@@ -1,0 +1,22 @@
+{
+  "about": "Fill the gap: words that also fit a sentence's gap, so they are never offered as wrong answers for it. Found with scripts/judge.js and checked by hand.",
+  "exclude": [
+    { "word": "为", "sentence": "他为我们做了很多事情。", "not": ["给"] },
+    { "word": "会", "sentence": "你会说汉语吗？", "not": ["能"] },
+    { "word": "送", "sentence": "这是我送你的生日礼物。", "not": ["给"] },
+    { "word": "让", "sentence": "妈妈让我早点儿回家。", "not": ["要"] },
+    { "word": "慢", "sentence": "慢慢吃！", "not": ["您"] },
+    { "word": "路", "sentence": "我坐三路公共汽车。", "not": ["号"] },
+    { "word": "才", "sentence": "我才学了一个月汉语。", "not": ["只"] },
+    { "word": "带", "sentence": "外面下雨了，带上伞吧。", "not": ["拿"] },
+    { "word": "担心", "sentence": "别担心，我很快就回来。", "not": ["着急"] },
+    { "word": "过去", "sentence": "过去我不喜欢吃鱼，现在很喜欢。", "not": ["以前"] },
+    { "word": "楼", "sentence": "我家住在六楼。", "not": ["层"] },
+    { "word": "明白", "sentence": "老师讲得很明白。", "not": ["清楚"] },
+    { "word": "清楚", "sentence": "这件事我也不太清楚。", "not": ["明白", "了解"] },
+    { "word": "刷", "sentence": "可以刷卡吗？", "not": ["用"] },
+    { "word": "条", "sentence": "我家有一条小狗。", "not": ["只"] },
+    { "word": "一定", "sentence": "你明天一定要来！", "not": ["必须"] },
+    { "word": "着急", "sentence": "别着急，我们还有时间。", "not": ["担心"] }
+  ]
+}

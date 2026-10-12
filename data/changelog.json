@@ -1,6 +1,19 @@
 {
   "releases": [
     {
+      "version": "2.5",
+      "date": "2026-10-12",
+      "title": "Fairer fill-the-gap questions",
+      "groups": [
+        {
+          "name": "",
+          "items": [
+            "Fill the gap no longer marks a word wrong when it also fits the sentence, such as 能 in 你＿说汉语吗. All 783 gaps were checked, and 17 had a second right answer; those words are no longer offered."
+          ]
+        }
+      ]
+    },
+    {
       "version": "2.4",
       "date": "2026-10-12",
       "title": "More languages and a can-do ladder",

@@ -51,6 +51,20 @@ if (CHANGELOG) {
     r.groups.forEach((g) => { if (!Array.isArray(g.items) || !g.items.length) throw new Error('Empty changelog group in ' + r.version); });
   });
 }
+//   data/cloze-exclude.json  words that also fit a fill-the-gap sentence: { exclude: [{ word, sentence, not: [headword] }] }
+const CLOZE_EXCLUDE = optJson(dataPath('cloze-exclude.json'));
+if (CLOZE_EXCLUDE) {
+  const byZh = new Map(cards.map((c) => [c.zh, c]));
+  (CLOZE_EXCLUDE.exclude || []).forEach((k) => {
+    const c = byZh.get(k.word), at = 'Cloze exclude ' + k.word + ' / ' + k.sentence + ': ';
+    if (!c) throw new Error(at + 'not a headword');
+    if (!c.ex.some((e) => e.zh === k.sentence) || !k.sentence.includes(k.word)) throw new Error(at + 'not an example sentence of the word that contains it');
+    if (!Array.isArray(k.not) || !k.not.length) throw new Error(at + 'no words to exclude');
+    k.not.forEach((w) => {
+      if (!byZh.has(w) || w === k.word || Array.from(w).length !== Array.from(k.word).length) throw new Error(at + w + ' is not a headword of the same length');
+    });
+  });
+}
 //   data/ladder.json  can-do steps: { rungs: [{ id, zh, py, en, hu, words: [headword], sentences: [example sentence] }] }
 const LADDER = optJson(dataPath('ladder.json'));
 if (LADDER) {
@@ -97,7 +111,7 @@ const total = expected[1] + expected[2] + expected[3];
 const safeJson = (v) => JSON.stringify(v).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026')
   .replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
 const json = safeJson(cards);
-const extraJson = safeJson({ chars: FREQ ? FREQ.chars : {}, topics: TOPICS ? TOPICS.topics : [], hints: HINTS ? HINTS.hints : {}, news: CHANGELOG ? CHANGELOG.releases : [], ladder: LADDER ? LADDER.rungs : [] });
+const extraJson = safeJson({ chars: FREQ ? FREQ.chars : {}, topics: TOPICS ? TOPICS.topics : [], hints: HINTS ? HINTS.hints : {}, news: CHANGELOG ? CHANGELOG.releases : [], ladder: LADDER ? LADDER.rungs : [], clozeExclude: CLOZE_EXCLUDE ? CLOZE_EXCLUDE.exclude : [] });
 
 // ---------- html ----------
 // The app's source: src/index.html is the page. Its /*__STYLES__*/ and /*__SCRIPTS__*/ lines are replaced by the
