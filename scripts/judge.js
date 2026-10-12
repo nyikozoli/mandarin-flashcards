@@ -10,24 +10,16 @@
 //   node scripts/judge.js --control           five questions with a known answer: does the check flag the right ones?
 //
 // Options: --threshold 0.15 (distractor share that gets a second look), --model jev-latest.
-// The API key comes from TYPESAFE_API_KEY or .secrets/.typesafe-api-key (git-ignored). Answers
-// are cached in .validation/judge-cache.json, so a rerun only pays for new questions. The report
-// goes to .validation/judge-cloze.md and .json. This is a local tool; CI never runs it.
+// Answers are cached in .validation/judge-cache.json (see jev.js), so a rerun only pays for new
+// questions. The report goes to .validation/judge-cloze.md and .json. Local only; CI never runs it.
 const fs = require('fs');
 const path = require('path');
-const crypto = require('crypto');
 const { loadCards } = require('./cards');
+const { ROOT, OUT, apiKey, jevClient, runPool, costLine, round } = require('./jev');
 
-const ROOT = path.join(__dirname, '..');
-const OUT = path.join(ROOT, '.validation');
-const CACHE = path.join(OUT, 'judge-cache.json');
-const API = process.env.TYPESAFE_API_URL || 'https://api.typesafe.ai/v1/systemone';
 const MAX_OPTIONS = 255;
-const PARALLEL = 4;
-// For --dry-run's cost estimate: TypeSafe's list price (October 2026) and request characters per input token,
-// measured on the first full run. Output tokens are a handful per request and left out.
-const USD_PER_INPUT_TOKEN = 42 / 1e9;
-const CHARS_PER_TOKEN = 1.75;
+const jev = jevClient('judge-cache.json');
+const ask = jev.ask;
 
 const args = process.argv.slice(2);
 const opt = (name, def) => { const i = args.indexOf('--' + name); return i === -1 ? def : args[i + 1]; };
@@ -127,41 +119,7 @@ const chunks = (pool) => {
   return out;
 };
 
-// ---------- API ----------
-let cache = {};
-try { cache = JSON.parse(fs.readFileSync(CACHE, 'utf8')); } catch (e) { /* first run */ }
-const keyOf = (body) => crypto.createHash('sha256').update(API + JSON.stringify(body)).digest('hex');
-const usage = { requests: 0, cached: 0, input_tokens: 0 };
-
-function apiKey() {
-  if (process.env.TYPESAFE_API_KEY) return process.env.TYPESAFE_API_KEY.trim();
-  const file = path.join(ROOT, '.secrets', '.typesafe-api-key');
-  if (fs.existsSync(file)) return fs.readFileSync(file, 'utf8').trim();
-  throw new Error('No API key: create one at https://console.typesafe.ai and save it in .secrets/.typesafe-api-key');
-}
-
-async function ask(body) {
-  const k = keyOf(body);
-  if (cache[k]) { usage.cached++; return cache[k]; }
-  for (let attempt = 0; ; attempt++) {
-    const res = await fetch(API, {
-      method: 'POST',
-      headers: { Authorization: 'Bearer ' + apiKey(), 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      usage.requests++;
-      usage.input_tokens += (data.usage && data.usage.input_tokens) || 0;
-      cache[k] = data.answers;
-      return data.answers;
-    }
-    const retry = res.status === 429 || res.status === 529 || res.status >= 500;
-    if (!retry || attempt >= 5) throw new Error('TypeSafe API ' + res.status + ': ' + (await res.text()).slice(0, 300));
-    await new Promise((r) => setTimeout(r, 1000 * 2 ** attempt));
-  }
-}
-
+// ---------- questions to Jev ----------
 async function judge(it) {
   const probs = {};
   for (const chunk of chunks(it.pool)) {
@@ -179,27 +137,6 @@ async function judge(it) {
     answer: round(answer), candidates: it.pool.length,
     suspects: suspects.map((s) => ({ word: s.w.zh, en: meaning(s.w), p: round(s.p), works: round(s.works) })),
   };
-}
-const round = (x) => Math.round(x * 1000) / 1000;
-
-// Runs the questions a few at a time.
-async function runAll() {
-  const results = new Array(items.length);
-  let next = 0, done = 0;
-  const worker = async () => {
-    while (next < items.length) {
-      const i = next++;
-      results[i] = await judge(items[i]);
-      if (++done % 25 === 0) console.log('  ' + done + ' / ' + items.length);
-    }
-  };
-  try {
-    await Promise.all(Array.from({ length: PARALLEL }, worker));
-  } finally {
-    fs.mkdirSync(OUT, { recursive: true });
-    fs.writeFileSync(CACHE, JSON.stringify(cache));
-  }
-  return results;
 }
 
 // ---------- report ----------
@@ -241,7 +178,7 @@ async function runControls() {
     console.log((flagged === it.also ? 'ok   ' : 'FAIL ') + r.blanked + '  ' + it.c.zh + ' p ' + r.answer + ' | ' + it.other.zh +
       ' p ' + (s ? s.p : '<' + threshold) + ', works ' + works + ' → ' + (flagged ? 'flagged' : 'not flagged') + (it.also ? ' (should be flagged)' : ' (should not)'));
   }
-  fs.writeFileSync(CACHE, JSON.stringify(cache));
+  jev.save();
   console.log(items.length - failed + ' / ' + items.length + ' controls passed');
   if (failed) process.exitCode = 1;
 }
@@ -251,14 +188,14 @@ async function runControls() {
 function estimate() {
   const plan = { send: 0, cached: 0, chars: 0, open: 0 };
   const count = (body) => {
-    if (cache[keyOf(body)]) plan.cached++;
+    if (jev.cached(body)) plan.cached++;
     else { plan.send++; plan.chars += JSON.stringify(body).length; }
   };
   items.forEach((it) => {
     const probs = {};
     let known = true;
     chunks(it.pool).forEach((chunk) => {
-      const body = choiceRequest(it, chunk), a = cache[keyOf(body)];
+      const body = choiceRequest(it, chunk), a = jev.cached(body);
       count(body);
       if (a) Object.assign(probs, a.fits.probabilities);
       else known = false;
@@ -266,7 +203,6 @@ function estimate() {
     if (known) it.pool.filter((w) => (probs[w.zh] || 0) >= threshold).forEach((w) => count(noulRequest(it, w)));
     else plan.open++;
   });
-  plan.tokens = Math.round(plan.chars / CHARS_PER_TOKEN);
   return plan;
 }
 
@@ -275,18 +211,16 @@ async function main() {
   console.log(items.length + ' questions, ' + requests + ' choice requests (plus a check per suspicious distractor)');
   if (dryRun) {
     const plan = estimate();
-    console.log('To send: ' + plan.send + ' requests (' + plan.cached + ' already answered), about ' + plan.tokens.toLocaleString('en-US') +
-      ' input tokens ≈ $' + (plan.tokens * USD_PER_INPUT_TOKEN).toFixed(4) +
-      (plan.open ? '; the ' + plan.open + ' new questions may add a few second checks' : ''));
+    console.log(costLine(plan) + (plan.open ? '; the ' + plan.open + ' new questions may add a few second checks' : ''));
     if (plan.send) console.log(JSON.stringify(choiceRequest(items[0], chunks(items[0].pool)[0]), null, 2).slice(0, 1500));
     return;
   }
   apiKey();
   if (control) return runControls();
-  const results = await runAll();
+  const results = await runPool(items, judge, jev);
   fs.writeFileSync(path.join(OUT, 'judge-cloze.json'), JSON.stringify(results, null, 2));
   fs.writeFileSync(path.join(OUT, 'judge-cloze.md'), report(results));
-  console.log('API requests ' + usage.requests + ' (cached ' + usage.cached + '), input tokens ' + usage.input_tokens);
+  console.log(jev.summary());
   console.log('Report: .validation/judge-cloze.md');
 }
 
