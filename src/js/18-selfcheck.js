@@ -1240,6 +1240,19 @@
             ', Listening tile switches to listening and updates the button: ' + listen + ', Build the sentence switches to the sentence deck: ' + build + ', menu change updates the button: ' + back };
       })();
       add('Practice style picker', pickerRes.ok, pickerRes.d);
+      var railRes = (function () {
+        if (!EXTRA.ladder.length) return { ok: els.progressRail.hidden, d: 'no ladder data: the rail stays hidden' };
+        renderRail();
+        var rungs = els.railRungs.children, nr = nextRung();
+        var drawn = rungs.length === EXTRA.ladder.length && els.railRungs.querySelectorAll('.rail-rung.on').length === rungsReached() &&
+          els.railRungs.querySelectorAll('.rail-rung.next').length === (nr ? 1 : 0) && els.railCount.textContent === rungsReached() + '/' + EXTRA.ladder.length;
+        var rank = els.railRankName.textContent === RANKS[rankOf(state.xp)][1] && els.railNext.textContent === (nr ? nr.zh : '');
+        els.railLadder.click();
+        var opens = !els.progressView.hidden && !!els.pvBody.querySelector('[data-pvtab="ladder"][aria-pressed="true"]');
+        closeOverlay(els.progressView);
+        return { ok: drawn && rank && opens, d: EXTRA.ladder.length + ' rungs with reached and next marked: ' + drawn + ', rank and next step shown: ' + rank + ', tap opens the Ladder tab: ' + opens };
+      })();
+      add('Progress rail (wide screens)', railRes.ok, railRes.d);
 
       add('Progress overview renders', pvOk && els.progressView.hidden, 'Ring, ' + lvRows + ' level bars, 14-day chart and ' + cells + ' word squares (' + known2 + ' known).');
 

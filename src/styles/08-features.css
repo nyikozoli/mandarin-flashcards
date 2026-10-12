@@ -264,3 +264,24 @@ body.labels-zh .practice-name .lbl .zl, body.labels-zh .pk-tile .lbl .zl { color
 .pk-tile { flex: 0 1 auto; min-width: 0; max-width: 100%; min-height: 0; }
 .pk-tile .lbl { flex-wrap: nowrap; white-space: nowrap; }
 .pk-tile .pk-ask { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Progress rail: only on wide screens, in the margin right of the one-column page. The ladder is drawn as rungs
+   between two stiles, step 1 at the bottom. */
+.rail { display: none; }
+@media (min-width: 1200px) {
+  .rail:not([hidden]) { position: fixed; z-index: 4; right: max(16px, calc((100vw - 920px) / 4 - 36px)); top: 50%; transform: translateY(-50%); width: 72px; max-height: calc(100vh - 48px); display: flex; flex-direction: column; align-items: center; gap: 14px; }
+}
+@media (min-width: 1440px) { .rail:not([hidden]) { right: max(16px, calc((100vw - 1080px) / 4 - 36px)); } }
+.rail button { border: 0; background: transparent; color: var(--text); padding: 6px 4px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%; }
+.rail button:hover { background: var(--surface); }
+.rail-rank-seal { width: 48px; height: 48px; display: grid; place-items: center; border-radius: 8px; background: var(--cinnabar); color: var(--paper); font-family: var(--kai-font); font-size: 19px; line-height: 1.05; box-shadow: inset 0 0 0 2px var(--cinnabar), inset 0 0 0 3.5px rgba(241, 236, 226, .6); writing-mode: vertical-rl; letter-spacing: .05em; }
+.rail-xp { width: 48px; height: 5px; border-radius: 999px; background: var(--surface2); overflow: hidden; }
+.rail-xp-fill { display: block; height: 100%; background: var(--learn); }
+.rail-next { font-family: var(--zh-font); font-size: 15px; color: var(--known); writing-mode: vertical-rl; letter-spacing: .12em; min-height: 1em; }
+.rail-rungs { display: flex; flex-direction: column-reverse; gap: 5px; padding: 4px 8px; border-left: 2px solid var(--line); border-right: 2px solid var(--line); min-height: 0; overflow: hidden; }
+.rail-rung { position: relative; display: block; width: 32px; height: 6px; border-radius: 2px; background: var(--surface3); overflow: hidden; }
+.rail-rung.on { background: var(--known); }
+.rail-rung.next { background: var(--surface2); box-shadow: 0 0 0 1.5px var(--known); }
+.rail-rung-fill { position: absolute; inset: 0 auto 0 0; background: var(--learn); }
+.rail-count { font-size: 12.5px; font-weight: 700; color: var(--soft); font-variant-numeric: tabular-nums; }
+@media (max-height: 700px) { .rail-rungs { gap: 3px; } .rail-rung { height: 5px; } }

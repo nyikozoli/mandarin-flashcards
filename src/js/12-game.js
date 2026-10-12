@@ -671,6 +671,7 @@
   // The main-screen strip: the next step and how many words it still needs. It waits while the what's-new notice or
   // the word of the day is showing, and ✕ hides it until tomorrow.
   function renderLadderStrip() {
+    renderRail();
     var r = nextRung();
     els.ladderStrip.hidden = !r || state.ladderSeen === dayKey() || !els.newsStrip.hidden || !els.wotd.hidden;
     if (els.ladderStrip.hidden) return;
@@ -775,4 +776,30 @@
     });
     sec.appendChild(ol);
     return sec;
+  }
+
+  /* ---------- progress rail (wide screens) ---------- */
+  // A narrow ladder beside the page: the XP rank on top, then the can-do steps climbing upward, step 1 at the bottom.
+  // Reached steps are green, the next one fills as its words become known. CSS shows it only from 1200px.
+  function renderRail() {
+    els.progressRail.hidden = !EXTRA.ladder.length;
+    if (els.progressRail.hidden) return;
+    var r = rankOf(state.xp), next = RANKS[r + 1];
+    els.railRankName.textContent = RANKS[r][1];
+    els.railXp.style.width = (next ? pct(state.xp - RANKS[r][0], next[0] - RANKS[r][0]) : 100) + '%';
+    els.railRank.setAttribute('aria-label', 'Rank: ' + RANKS[r][2] + ', ' + state.xp + ' XP' + (next ? ', ' + (next[0] - state.xp) + ' XP to ' + next[2] : '') + '. Open your stats');
+    els.railRank.title = RANKS[r][1] + ' ' + RANKS[r][2] + ' · ' + state.xp.toLocaleString('en-US') + ' XP' + (next ? ' · ' + (next[0] - state.xp).toLocaleString('en-US') + ' to ' + next[1] : '');
+    var maps = ladderMaps(), nr = nextRung(), box = els.railRungs;
+    box.textContent = '';
+    EXTRA.ladder.forEach(function (rg, i) {
+      var p = rungProgress(rg, maps), on = !!state.rungs[rg.id];
+      var bar = el('span', 'rail-rung' + (on ? ' on' : rg === nr ? ' next' : ''));
+      if (rg === nr) { var f = el('span', 'rail-rung-fill'); f.style.width = pct(p.done, p.total) + '%'; bar.appendChild(f); }
+      bar.title = (i + 1) + '. ' + rg.zh + ' · ' + rungName(rg) + ' · ' + (on ? 'reached' : p.done + '/' + p.total + ' words');
+      box.appendChild(bar);
+    });
+    var reached = rungsReached();
+    els.railCount.textContent = reached + '/' + EXTRA.ladder.length;
+    els.railNext.textContent = nr ? nr.zh : '';
+    els.railLadder.setAttribute('aria-label', 'Ladder: ' + reached + ' of ' + EXTRA.ladder.length + ' steps reached' + (nr ? ', next: ' + nr.en : '') + '. Open the ladder');
   }

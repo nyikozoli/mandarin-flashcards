@@ -169,6 +169,8 @@
     });
     on('btnWotdClose', 'click', dismissWotd);
     on('btnLadderClose', 'click', dismissLadder);
+    on('railLadder', 'click', function () { openProgress('ladder'); });
+    on('railRank', 'click', function () { openProgress('collection'); });
     on('btnLadderOpen', 'click', function () { openProgress('ladder'); });
     on('btnLadderGo', 'click', function () { practiseRung(els.btnLadderGo.getAttribute('data-rung')); });
     on('btnWotdStudy', 'click', function () { var zh = els.btnWotdStudy.getAttribute('data-study'); dismissWotd(); studyWord(zh); });

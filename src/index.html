@@ -224,6 +224,11 @@
   <p class="kbd-hint"><span><kbd>Space</kbd> skip</span><span><kbd>S</kbd> speak</span><span><kbd>↑</kbd><kbd>↓</kbd> flip</span><span><kbd>1</kbd>–<kbd>4</kbd> choose</span><span><kbd>H</kbd> <kbd>E</kbd> hard, easy</span><span><kbd>T</kbd> type</span><span><kbd>Z</kbd> undo</span><span>more in Help</span></p>
   </div>
 
+  <aside class="rail" id="progressRail" aria-label="Your climb" hidden>
+    <button type="button" class="rail-rank" id="railRank"><span class="rail-rank-seal" id="railRankName" lang="zh-CN"></span><span class="rail-xp"><span class="rail-xp-fill" id="railXp"></span></span></button>
+    <button type="button" class="rail-ladder" id="railLadder"><span class="rail-next" id="railNext" lang="zh-CN"></span><span class="rail-rungs" id="railRungs" aria-hidden="true"></span><span class="rail-count" id="railCount"></span></button>
+  </aside>
+
   <footer>
     <p class="footnote" id="footnote">Works offline. Progress is saved in this browser.</p>
   </footer>
@@ -517,7 +522,7 @@
           <dt>Your panda</dt><dd>The panda at the top left lives on your studying. Every answer feeds it a bamboo leaf, your daily goal fills its belly, and all your answers together make it grow from newborn to sage. Tap it to see how it is doing and to give it a name.</dd>
           <dt>Word of the day</dt><dd>Each day a useful word you do not know yet appears above the card. “Study it” opens it; ✕ hides it until tomorrow.</dd>
           <dt>Daily quests</dt><dd>Three small goals each day, shown in the progress view. Each finished quest gives 30 XP; all three give 50 XP more and a 🧊 streak freeze. You can save two, and a saved freeze keeps your streak alive over a missed day. Every Monday a short recap of last week appears.</dd>
-          <dt>Ladder (阶梯)</dt><dd>Real-life steps such as greeting people, ordering food or asking the way, each with a small set of words. A step is reached when you know all its words in reading and listening (读 and 听); take them in any order, each one is worth 40 XP. The strip on the main screen shows the next step and how many words it still needs; Practise studies just those words. The Ladder tab in the progress view shows every step.</dd>
+          <dt>Ladder (阶梯)</dt><dd>Real-life steps such as greeting people, ordering food or asking the way, each with a small set of words. A step is reached when you know all its words in reading and listening (读 and 听); take them in any order, each one is worth 40 XP. The strip on the main screen shows the next step and how many words it still needs; Practise studies just those words. The Ladder tab in the progress view shows every step, and on wide screens a narrow ladder on the right shows your climb and your rank.</dd>
           <dt>Seals and challenges</dt><dd>The progress view collects 20 red seals (印章) for milestones such as 100 words, a 7-day streak or a passed exam, each worth 50 XP. Its challenges are a 60-second blitz (as many meanings as you can) and a 20-question exam per HSK level (pass at 80%). Challenges never change your review schedule.</dd>
           <dt>Character hints</dt><dd>The back of a word card explains its characters where a well-established explanation exists (about 180 characters): a picture (山 mountain peaks), a combination of meanings (休 a person resting by a tree), or a meaning part plus a sound part (妈 = 女 woman + 马 mǎ for the sound).</dd>
           <dt>Topics</dt><dd>The button under the level row picks a topic (food, travel, time…). Every study mode then works inside it, and a topic's seal turns red when you know all its words.</dd>
