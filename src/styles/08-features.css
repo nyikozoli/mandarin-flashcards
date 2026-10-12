@@ -259,3 +259,8 @@ body.labels-zh .practice-name .lbl .zl, body.labels-zh .pk-tile .lbl .zl { color
 @media (max-width: 420px) { .card-meta { font-size: 14px; } .card-meta .meta-left, .card-meta .meta-right { gap: 6px; } .card-meta .rank-tag { font-size: 12.5px; padding: 2px 8px; } .card-meta .status-tag { font-size: 13px; padding: 3px 10px; } .card-meta .sm { width: 22px; height: 22px; font-size: 13px; } }
 @media (max-width: 360px) { .card-meta { font-size: 13px; } .card-meta .rank-tag { font-size: 11.5px; padding: 2px 7px; } .card-meta .status-tag { font-size: 12.5px; padding: 3px 8px; } .card-meta .sm { width: 21px; height: 21px; font-size: 12.5px; } }
 @media (min-width: 960px) { .card-meta { font-size: 15.5px; } .card-meta .rank-tag { font-size: 14px; } .card-meta .status-tag { font-size: 14.5px; } .card-meta .sm { width: 27px; height: 27px; font-size: 15.5px; } }
+/* Practice tiles size to their text on one line and grow to fill each row. */
+.pk-tiles { display: flex; flex-wrap: wrap; gap: 8px; }
+.pk-tile { flex: 1 1 auto; min-width: 0; max-width: 100%; min-height: 0; }
+.pk-tile .lbl { flex-wrap: nowrap; white-space: nowrap; }
+.pk-tile .pk-ask { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
