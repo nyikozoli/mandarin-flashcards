@@ -148,12 +148,21 @@
     renderPinyin(els.cardPinyin, c.py);
     els.cardEn.textContent = c.en;
     els.cardHu.textContent = c.hu;
-    var on = langsOn();
-    els.cardEn.parentNode.hidden = on.indexOf('en') === -1;
-    els.cardHu.parentNode.hidden = on.indexOf('hu') === -1;
+    var on = langsOn(), main = mainLang(c), lead = main !== baseLang() ? main : '';
+    els.cardMeanMain.textContent = '';
+    if (lead) {
+      var mm = el('div', 'meaning main-mean');
+      mm.appendChild(el('span', 'tag ' + lead, lead.toUpperCase()));
+      var mt = el('p', null, mean(c, lead));
+      mt.setAttribute('lang', lead);
+      mm.appendChild(mt);
+      els.cardMeanMain.appendChild(mm);
+    }
+    els.cardEn.parentNode.hidden = on.indexOf('en') === -1 || lead === 'en';
+    els.cardHu.parentNode.hidden = on.indexOf('hu') === -1 || lead === 'hu';
     els.cardMeanMore.textContent = '';
     on.forEach(function (k) {
-      if (k === 'en' || k === 'hu') return;
+      if (k === 'en' || k === 'hu' || k === lead) return;
       var m = el('div', 'meaning');
       m.appendChild(el('span', 'tag ' + k, k.toUpperCase()));
       var t = el('p', null, mean(c, k));

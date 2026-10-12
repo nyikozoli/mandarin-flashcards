@@ -128,9 +128,9 @@
   }
   // The wrong options a multiple-choice card can offer: the same level, a different meaning, no clash.
   function choicePool(c) {
-    var key = shortText(mainMeaning(c)).toLowerCase();
-    var pool = cards.filter(function (x) { return x !== c && x.lv === c.lv && shortText(mainMeaning(x)).toLowerCase() !== key && !optionClash(c, x, 'meaning'); });
-    return pool.length >= 3 ? pool : cards.filter(function (x) { return x !== c && !optionClash(c, x, 'meaning'); });
+    var lk = mainLang(c), key = shortText(mean(c, lk)).toLowerCase();
+    var pool = cards.filter(function (x) { return x !== c && x.lv === c.lv && mean(x, lk) && shortText(mean(x, lk)).toLowerCase() !== key && !optionClash(c, x, 'meaning'); });
+    return pool.length >= 3 ? pool : cards.filter(function (x) { return x !== c && mean(x, lk) && !optionClash(c, x, 'meaning'); });
   }
   function buildChoices(c) {
     var pool = choicePool(c);
@@ -138,14 +138,14 @@
     while (opts.length < 4 && pool.length) opts.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
     for (var i = opts.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = opts[i]; opts[i] = opts[j]; opts[j] = t; }
     els.choiceBox.textContent = '';
+    // The asked card's main language is the answer; a second one, if on, sits below it smaller.
+    var ls = langsFor(c);
     opts.forEach(function (o, k) {
       var b = el('button', 'choice');
       b.type = 'button';
       b.setAttribute('data-ok', o === c ? '1' : '0');
       b.appendChild(el('span', 'choice-num', String(k + 1)));
       var tx = el('span', 'choice-text');
-      // The first language on is the answer; a second one, if on, sits below it smaller.
-      var ls = langsOn();
       var main = el('span', 'choice-en', shortText(mean(o, ls[0])));
       main.setAttribute('lang', ls[0]);
       tx.appendChild(main);
@@ -348,10 +348,12 @@
   }
   // The meaning prompt: the first language on large, the others below it.
   function promptMeanings(c, short) {
-    langsOn().forEach(function (k, i) {
+    var base = baseLang();
+    langsFor(c).forEach(function (k, i) {
       var t = mean(c, k);
       var x = el('p', i ? 'prompt-hu' : 'prompt-en', short ? shortText(t) : t);
       x.setAttribute('lang', k);
+      if (!i && k !== base) x.insertBefore(el('span', 'tag ' + k, k.toUpperCase()), x.firstChild);
       els.cardPrompt.appendChild(x);
     });
   }
@@ -418,7 +420,7 @@
       gap.appendChild(hole);
       gap.appendChild(document.createTextNode(clozeQ.ex.zh.slice(at + c.zh.length)));
       els.cardPrompt.appendChild(gap);
-      langsOn().forEach(function (k) { var x = el('p', 'prompt-sub', mean(clozeQ.ex, k)); x.setAttribute('lang', k); els.cardPrompt.appendChild(x); });
+      langsFor(clozeQ.ex).forEach(function (k) { var x = el('p', 'prompt-sub', mean(clozeQ.ex, k)); x.setAttribute('lang', k); els.cardPrompt.appendChild(x); });
     } else if (similarQ) {
       els.cardPrompt.appendChild(el('p', 'prompt-q', 'Which one means this?'));
       promptMeanings(c, true);
@@ -427,7 +429,7 @@
       els.cardPrompt.appendChild(sb);
     } else if (buildQ) {
       els.cardPrompt.appendChild(el('p', 'prompt-q', 'Put the words in order:'));
-      langsOn().forEach(function (k) { var x = el('p', 'prompt-sub', mean(c, k)); x.setAttribute('lang', k); els.cardPrompt.appendChild(x); });
+      langsFor(c).forEach(function (k) { var x = el('p', 'prompt-sub', mean(c, k)); x.setAttribute('lang', k); els.cardPrompt.appendChild(x); });
       var bLine = el('div', 'build-line');
       bLine.setAttribute('aria-label', 'Your sentence');
       els.cardPrompt.appendChild(bLine);

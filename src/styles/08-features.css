@@ -330,3 +330,4 @@ body.labels-zh .practice-name .lbl .zl, body.labels-zh .pk-tile .lbl .zl { color
 .rh-answer { display: flex; align-items: center; gap: 10px; margin: 0 0 10px; }
 .rh-answer .rh-word { font-size: clamp(24px, 6vw, 32px); font-weight: 700; color: var(--paper); overflow-wrap: anywhere; }
 .pk-seal.pk-code { font-family: var(--ui-font); font-size: 13px; font-weight: 800; }
+#cardMeanMain { display: contents; }

@@ -9,7 +9,7 @@
   var EXPECTED_LEVELS = __EXPECTED_LEVELS__;
   var MODE_NAMES = { all: 'All cards', due: 'Due for review', learning: 'Learning only', unmarked: 'New cards only', hard: 'Hardest words' };
   var STATUS_NAMES = { known: 'Known', learning: 'Learning', unmarked: 'New' };
-  var REQUIRED_IDS = ['cardRehearse', 'optRehearseGroup', 'rehearseOpts', 'optRehearseEvery', 'optRehearseAfterGoal', 'optShareEn', 'optShareHu', 'optShareDe', 'optShareEs', 'optShareRo', 'optShareEnOut', 'optShareHuOut', 'optShareDeOut', 'optShareEsOut', 'optShareRoOut', 'btnSuggest', 'suggestSeal', 'suggestText', 'suggestPop', 'progressRail', 'railRank', 'railRankName', 'railXp', 'railLadder', 'railNext', 'railRungs', 'railCount', 'btnPractice', 'practiceSeal', 'practiceName', 'practiceAsk', 'practiceView', 'btnClosePractice', 'practiceGrid', 'ladderStrip', 'ladderZh', 'ladderEn', 'ladderLeft', 'btnLadderOpen', 'btnLadderGo', 'btnLadderClose', 'optLangEn', 'optLangHu', 'optLangDe', 'optLangEs', 'optLangRo', 'cardMeanMore', 'wordPopMore', 'cardSkills', 'confirmCompare', 'confirmActions', 'btnSyncTop', 'btnNews', 'newsView', 'btnCloseNews', 'newsBody', 'optLabels', 'btnPet', 'petMini', 'petView', 'btnClosePet', 'petBig', 'petName', 'petStageName', 'petMood', 'petFedText', 'petFed', 'petGrowText', 'petGrow', 'petRename', 'petNameInput', 'cardHints', 'quizView', 'quizTitle', 'quizBody', 'btnCloseQuiz', 'wotd', 'wotdZh', 'wotdPy', 'wotdEn', 'wotdHint', 'btnWotdStudy', 'btnWotdClose', 'extra-data', 'btnTopic', 'topicBtnZh', 'topicBtnName', 'topicView', 'btnCloseTopic', 'topicGrid', 'cardRank', 'comboTag', 'gradeRow', 'legendTones', 'optChoicePinyin', 'progressTitle', 'optFadePinyin', 'wordPop', 'wordPopZh', 'wordPopLv', 'wordPopPy', 'wordPopEn', 'wordPopHu', 'btnWordPopSpeak', 'btnWordPopClose', 'app', 'errorBanner', 'errorList', 'modeAll', 'modeLearning', 'modeUnmarked', 'countAll', 'countLearningMode',
+  var REQUIRED_IDS = ['cardMeanMain', 'cardRehearse', 'optRehearseGroup', 'rehearseOpts', 'optRehearseEvery', 'optRehearseAfterGoal', 'optShareEn', 'optShareHu', 'optShareDe', 'optShareEs', 'optShareRo', 'optShareEnOut', 'optShareHuOut', 'optShareDeOut', 'optShareEsOut', 'optShareRoOut', 'btnSuggest', 'suggestSeal', 'suggestText', 'suggestPop', 'progressRail', 'railRank', 'railRankName', 'railXp', 'railLadder', 'railNext', 'railRungs', 'railCount', 'btnPractice', 'practiceSeal', 'practiceName', 'practiceAsk', 'practiceView', 'btnClosePractice', 'practiceGrid', 'ladderStrip', 'ladderZh', 'ladderEn', 'ladderLeft', 'btnLadderOpen', 'btnLadderGo', 'btnLadderClose', 'optLangEn', 'optLangHu', 'optLangDe', 'optLangEs', 'optLangRo', 'cardMeanMore', 'wordPopMore', 'cardSkills', 'confirmCompare', 'confirmActions', 'btnSyncTop', 'btnNews', 'newsView', 'btnCloseNews', 'newsBody', 'optLabels', 'btnPet', 'petMini', 'petView', 'btnClosePet', 'petBig', 'petName', 'petStageName', 'petMood', 'petFedText', 'petFed', 'petGrowText', 'petGrow', 'petRename', 'petNameInput', 'cardHints', 'quizView', 'quizTitle', 'quizBody', 'btnCloseQuiz', 'wotd', 'wotdZh', 'wotdPy', 'wotdEn', 'wotdHint', 'btnWotdStudy', 'btnWotdClose', 'extra-data', 'btnTopic', 'topicBtnZh', 'topicBtnName', 'topicView', 'btnCloseTopic', 'topicGrid', 'cardRank', 'comboTag', 'gradeRow', 'legendTones', 'optChoicePinyin', 'progressTitle', 'optFadePinyin', 'wordPop', 'wordPopZh', 'wordPopLv', 'wordPopPy', 'wordPopEn', 'wordPopHu', 'btnWordPopSpeak', 'btnWordPopClose', 'app', 'errorBanner', 'errorList', 'modeAll', 'modeLearning', 'modeUnmarked', 'countAll', 'countLearningMode',
     'countUnmarkedMode', 'btnShuffle', 'btnUndo', 'btnReset', 'btnSelfCheck', 'btnList', 'cardCounter', 'knownCount', 'learningCount',
     'unmarkedCount', 'progressBar', 'progKnown', 'progLearning', 'progressLabel', 'stage', 'card', 'cardNumber', 'cardStatus', 'cardHanzi',
     'cardPinyin', 'btnSpeak', 'speakLabel', 'cardAnswer', 'cardEn', 'cardHu', 'cardExamples', 'revealHint', 'deckEnd', 'endEmoji', 'endTitle',
@@ -77,10 +77,27 @@
     return on.length ? on : ['en'];
   }
   function langsRehearsed() { return MEANING_LANGS.map(function (l) { return l[0]; }).filter(function (k) { return langRole(k) === 'rehearse'; }); }
-  function mainMeaning(o) { return mean(o, langsOn()[0]); }
+  // The base meaning is the first language on. A rehearsed language takes the main meaning's place on its share of
+  // cards (the base keeps at least 30%); the pick hangs on the card and the day, so it holds through undo and revisits.
+  function baseLang() { return langsOn()[0]; }
+  function mainLang(o) {
+    var base = baseLang();
+    if (!o || !o.zh) return base;
+    var rh = langsRehearsed().filter(function (k) { return k !== base && mean(o, k); });
+    var shares = rh.map(function (k) { return state.rehearse.share[k] || 0; });
+    var total = shares.reduce(function (a, b) { return a + b; }, 0);
+    if (!total) return base;
+    var scale = total > 70 ? 70 / total : 1, x = hashDay(o.zh + '|' + dayKey()) % 100, acc = 0;
+    for (var i = 0; i < rh.length; i++) { acc += shares[i] * scale; if (x < acc) return rh[i]; }
+    return base;
+  }
+  // The languages on, the main one first.
+  function langsFor(o) { var m = mainLang(o); return [m].concat(langsOn().filter(function (k) { return k !== m; })); }
+  function mainMeaning(o) { return mean(o, mainLang(o)); }
+  function baseMeaning(o) { return mean(o, baseLang()); }
   // One line per language that is on: a coloured tag and the text, in the given class.
   function meaningLines(into, o, cls, short) {
-    langsOn().forEach(function (k) {
+    langsFor(o).forEach(function (k) {
       var p = el('p', cls);
       p.setAttribute('lang', k);
       p.appendChild(el('span', 'tag ' + k, k.toUpperCase()));

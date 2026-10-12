@@ -393,7 +393,7 @@
       if (!g) type = 'meaning';
       else return { type: type, c: c, ex: g.ex, opts: g.options };
     }
-    var key = type === 'meaning' ? function (x) { return shortText(mainMeaning(x)).toLowerCase(); } : function (x) { return x.zh; };
+    var key = type === 'meaning' ? function (x) { return shortText(baseMeaning(x)).toLowerCase(); } : function (x) { return x.zh; };
     return { type: type, c: c, opts: shuffled([c].concat(pickOthers(c, pool, 3, key, type))) };
   }
   function startQuiz(kind, lv) {
@@ -458,7 +458,7 @@
       box.appendChild(py);
     } else if (q.type === 'word') {
       box.appendChild(el('p', 'qz-ask', 'Which word means'));
-      box.appendChild(el('p', 'qz-en', shortText(mainMeaning(q.c))));
+      box.appendChild(el('p', 'qz-en', shortText(baseMeaning(q.c))));
     } else if (q.type === 'listen') {
       box.appendChild(el('p', 'qz-ask', 'Which word do you hear?'));
       var lb = el('button', 'listen-btn qz-play', '🔊 Play');
@@ -486,7 +486,7 @@
       btn.appendChild(el('span', 'choice-num', String(k + 1)));
       var tx = el('span', 'choice-text');
       if (q.type === 'meaning') {
-        tx.appendChild(el('span', 'choice-en', shortText(mainMeaning(o))));
+        tx.appendChild(el('span', 'choice-en', shortText(baseMeaning(o))));
       } else {
         var oz = el('span', 'choice-zh', o.zh);
         oz.setAttribute('lang', 'zh-CN');
@@ -538,7 +538,7 @@
       b.appendChild(el('p', 'qz-ask', 'Missed:'));
       var w = el('div', 'rp-words');
       quiz.wrong.slice(0, 12).forEach(function (c) {
-        var x = el('button', 'btn small rp-word', c.zh + ' ' + shortText(mainMeaning(c)));
+        var x = el('button', 'btn small rp-word', c.zh + ' ' + shortText(baseMeaning(c)));
         x.type = 'button';
         x.setAttribute('data-study', c.zh);
         w.appendChild(x);

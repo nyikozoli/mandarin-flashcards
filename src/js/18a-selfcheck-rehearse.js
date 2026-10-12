@@ -113,3 +113,42 @@
       'pool holds only started words with Romanian: ' + onlyStarted + ', Romanian-due first: ' + dueFirst + ', tile opens the pool as a Romanian deck: ' + tile +
       ', asks "In Romanian?": ' + prompt + ', back shows the Romanian, self-graded: ' + back + ', the answer moves only the Romanian mark: ' + moved);
   } });
+
+  REHEARSE_TESTS.push({ title: 'Main meaning takes turns', run: function (add) {
+    if (!LANG_AVAILABLE.ro) { add('Main meaning takes turns', true, 'No Romanian data in this build.'); return; }
+    state.langs = { en: 'show', hu: 'show', de: 'off', es: 'off', ro: 'rehearse' };
+    state.rehearse.share = { ro: 30 };
+    rebuildSkills();
+    var withRo = wordCards.filter(function (w) { return mean(w, 'ro'); });
+    var stable = withRo.every(function (w) { return mainLang(w) === mainLang(w); });
+    var n = withRo.filter(function (w) { return mainLang(w) === 'ro'; }).length, share = n / withRo.length;
+    var weighted = share > 0.18 && share < 0.42;
+    state.rehearse.share = { ro: 0 };
+    var none = withRo.every(function (w) { return mainLang(w) === 'en'; });
+    // Two languages at 50% each: English still keeps at least 30%.
+    if (LANG_AVAILABLE.de) state.langs.de = 'rehearse';
+    state.rehearse.share = { ro: 50, de: 50 };
+    rebuildSkills();
+    var base = withRo.filter(function (w) { return mainLang(w) === 'en'; }).length / withRo.length;
+    var floor = base > 0.2;
+    var missing = mainLang({ zh: 'x', en: 'a', hu: 'b', tr: {} }) === 'en';
+    // A card whose main meaning is Romanian: the recall prompt leads with it, the challenge question does not.
+    state.langs.de = 'off';
+    state.rehearse.share = { ro: 50 };
+    rebuildSkills();
+    var c = withRo.filter(function (w) { return mainLang(w) === 'ro'; })[0];
+    state.practice = 'reverse'; useSkill('recall'); useDeckType('words');
+    state.deck = [wordCards.indexOf(c)]; state.pos = 0; state.revealed = false; render(false);
+    var lead = els.cardPrompt.querySelector('.prompt-en');
+    var prompt = !!lead && lead.getAttribute('lang') === 'ro' && lead.textContent.indexOf(mean(c, 'ro')) !== -1;
+    startQuiz('blitz', 'all');
+    quiz.q = makeQuestion('word', c, quiz.pool);
+    drawQuestion();
+    var q = els.quizBody.querySelector('.qz-en');
+    var quizBase = !!q && q.textContent === shortText(baseMeaning(c));
+    stopQuiz(); quiz = null; closeOverlay(els.quizView);
+    add('Main meaning takes turns', stable && weighted && none && floor && missing && prompt && quizBase,
+      'same language all day: ' + stable + ', about 30% Romanian (' + Math.round(share * 100) + '%): ' + weighted + ', 0% means never: ' + none +
+      ', the base keeps 30% (' + Math.round(base * 100) + '%): ' + floor + ', a missing meaning falls back: ' + missing +
+      ', the recall prompt leads with Romanian: ' + prompt + ', challenges use the base language: ' + quizBase);
+  } });
