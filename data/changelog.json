@@ -1,6 +1,19 @@
 {
   "releases": [
     {
+      "version": "2.9",
+      "date": "2026-10-12",
+      "title": "Fixes",
+      "groups": [
+        {
+          "name": "",
+          "items": [
+            "Fixed: the chip next to your daily goal could show the previous word of the day until the page was redrawn."
+          ]
+        }
+      ]
+    },
+    {
       "version": "2.8",
       "date": "2026-10-12",
       "title": "Easier sentences first, and one right answer in Similar words",

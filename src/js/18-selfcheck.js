@@ -1260,8 +1260,10 @@
       var sugRes = (function () {
         closeSuggest();
         state.wotdSeen = '';
+        // A stale word in the strip (yesterday's) must not reach the chip: it shows today's word.
+        els.wotdZh.textContent = 'stale';
         renderWotd();
-        var chip = !els.btnSuggest.hidden && els.suggestText.textContent.indexOf(els.wotdZh.textContent) === 0 && els.suggestPop.hidden;
+        var chip = !els.btnSuggest.hidden && els.suggestText.textContent.indexOf(wordOfDay().zh) === 0 && els.suggestPop.hidden;
         els.btnSuggest.click();
         var open = !els.suggestPop.hidden && els.btnSuggest.getAttribute('aria-expanded') === 'true' && !els.wotd.hidden;
         els.btnWotdClose.click();

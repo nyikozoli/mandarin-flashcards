@@ -96,14 +96,15 @@
   function renderWotd() {
     var w = wordOfDay();
     els.wotd.hidden = !w || state.wotdSeen === dayKey();
+    if (!els.wotd.hidden) {
+      els.wotdZh.textContent = w.zh;
+      renderPinyin(els.wotdPy, w.py);
+      els.wotdEn.textContent = shortText(mainMeaning(w));
+      els.wotd.title = 'Word of the day: ' + w.zh + ' ' + w.py + ', ' + langsOn().map(function (k) { return shortText(mean(w, k)); }).join(' · ');
+      els.btnWotdStudy.setAttribute('data-study', w.zh);
+    }
+    // Last, so the ladder strip and the Today chip see today's word, not the one drawn before.
     renderLadderStrip();
-    if (els.wotd.hidden) return;
-    els.wotdZh.textContent = w.zh;
-    renderPinyin(els.wotdPy, w.py);
-    els.wotdEn.textContent = shortText(mainMeaning(w));
-    els.wotd.title = 'Word of the day: ' + w.zh + ' ' + w.py + ', ' + langsOn().map(function (k) { return shortText(mean(w, k)); }).join(' · ');
-
-    els.btnWotdStudy.setAttribute('data-study', w.zh);
   }
   function dismissWotd() { state.wotdSeen = dayKey(); renderWotd(); save(); }
   // Memory hints for the characters of a word, in order (empty when there is no hint data).
