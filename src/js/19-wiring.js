@@ -286,7 +286,7 @@
       stopSpeech();
       var skillChanged = useSkill(skillOf(state.practice));
       // Similar words studies a smaller deck, so entering or leaving it rebuilds the deck.
-      var pairsChanged = (prevPractice === 'pairs') !== (state.practice === 'pairs');
+      var pairsChanged = (prevPractice === 'pairs') !== (state.practice === 'pairs') || isRehearseStyle(prevPractice) || isRehearseStyle(state.practice);
       if (type !== state.deckType) switchDeck(type, skillChanged);
       // A Due, Learning or Hardest deck was built from the previous skill's marks.
       else if ((skillChanged && state.mode !== 'all') || pairsChanged) setMode(state.mode);

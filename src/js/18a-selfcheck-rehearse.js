@@ -76,3 +76,40 @@
       'Romanian skill, style and menu entry: ' + exists + ', its marks are separate from recall: ' + separate + ', saved under skills (format 6): ' + saved +
       ', RO seal on the card: ' + seal + ', set back to Show drops the skill but keeps its marks: ' + gone);
   } });
+
+  // Marks the first n words with a meaning in k as Learning in reading, so they are in k's rehearse pool.
+  function seedRehearsePool(k, n) {
+    var picked = wordCards.filter(function (w) { return mean(w, k); }).slice(0, n);
+    var read = marksOf('read');
+    picked.forEach(function (w) { if (!read.status[w.zh]) read.status[w.zh] = 'learning'; });
+    if (state.skill === 'read') loadSkill();
+    return picked;
+  }
+  REHEARSE_TESTS.push({ title: 'Rehearse tile: Chinese → Romanian card', run: function (add) {
+    if (!LANG_AVAILABLE.ro) { add('Rehearse tile: Chinese → Romanian card', true, 'No Romanian data in this build.'); return; }
+    state.langs.ro = 'rehearse';
+    rebuildSkills();
+    var picked = seedRehearsePool('ro', 3);
+    var started = function (w) { return !!(marksOf('read').status[w.zh] || marksOf('recall').status[w.zh] || marksOf('listen').status[w.zh]); };
+    var pool = rehearsePool('ro');
+    var onlyStarted = pool.length > 0 && pool.every(function (w) { return started(w) && mean(w, 'ro') && !w.sentence; });
+    // A word due in Romanian comes first.
+    var ro = state.marks['say:ro'] || (state.marks['say:ro'] = emptyMarks()), due = picked[2];
+    ro.srs[due.zh] = { b: 1, d: dayKey() };
+    var dueFirst = rehearsePool('ro')[0] === due;
+    useDeckType('words');
+    state.mode = 'all';
+    pickPracticeStyle('rh-ro');
+    var tile = state.practice === 'rh-ro' && state.skill === 'say:ro' && state.deck.length === rehearsePool('ro').length &&
+      cards[state.deck[0]] === due;
+    var prompt = els.cardPrompt.textContent.indexOf('In Romanian?') !== -1 && !els.cardPrompt.hidden;
+    setRevealed(true);
+    var back = !els.cardRehearse.hidden && els.cardRehearse.textContent.indexOf(mean(due, 'ro')) !== -1 && !els.gradeRow.hidden;
+    var readBefore = marksOf('read').status[due.zh] || null;
+    act('learning');
+    var moved = marksOf('say:ro').status[due.zh] === 'learning' && (marksOf('read').status[due.zh] || null) === readBefore;
+    delete state.marks['say:ro'];
+    add('Rehearse tile: Chinese → Romanian card', onlyStarted && dueFirst && tile && prompt && back && moved,
+      'pool holds only started words with Romanian: ' + onlyStarted + ', Romanian-due first: ' + dueFirst + ', tile opens the pool as a Romanian deck: ' + tile +
+      ', asks "In Romanian?": ' + prompt + ', back shows the Romanian, self-graded: ' + back + ', the answer moves only the Romanian mark: ' + moved);
+  } });

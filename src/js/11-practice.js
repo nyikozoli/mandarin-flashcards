@@ -38,20 +38,20 @@
   function renderPracticeSheet() {
     var grid = els.practiceGrid, all = practiceStyles(), cur = els.optPractice.value;
     grid.textContent = '';
-    ['read', 'recall', 'listen'].forEach(function (k) {
+    Object.keys(SKILLS).forEach(function (k) {
       var st = marksOf(k).status, known = 0;
       wordCards.forEach(function (c) { if (st[c.zh] === 'known') known++; });
       var sec = el('section', 'pk-skill');
       var h = el('h3', 'pk-head');
       var seal = el('span', 'pk-seal', SKILL_ZH[k]);
-      seal.setAttribute('lang', 'zh-CN');
+      if (k.indexOf('say:') === 0) seal.classList.add('pk-code'); else seal.setAttribute('lang', 'zh-CN');
       seal.setAttribute('aria-hidden', 'true');
       h.appendChild(seal);
       h.appendChild(el('span', null, SKILLS[k]));
       h.appendChild(el('span', 'pk-known', known + ' words known'));
       sec.appendChild(h);
       var cols = el('div', 'pk-cols');
-      ['Words', 'Sentences'].forEach(function (d) {
+      (k.indexOf('say:') === 0 ? ['Rehearse'] : ['Words', 'Sentences']).forEach(function (d) {
         var col = el('div', 'pk-col'), tiles = el('div', 'pk-tiles');
         var dh = el('h4', 'pk-deck');
         dh.appendChild(styleLabel({ zh: GROUP_ZH[d], en: d }));
@@ -280,7 +280,11 @@
     return similarMap[c.zh] || [];
   }
   // In the similar-words style the deck holds only words that have a look-alike or a sound-alike.
-  function inPractice(c) { return state.practice !== 'pairs' || !!c.sentence || similarOf(c).length > 0; }
+  function inPractice(c) {
+    var rk = rehearseCode(state.practice);
+    if (rk) return !c.sentence && !!mean(c, rk) && rehearseStarted(c);
+    return state.practice !== 'pairs' || !!c.sentence || similarOf(c).length > 0;
+  }
   // Chips that show words (characters and pinyin) rather than meanings.
   function buildWordChoices(right, opts, noPinyin) {
     els.choiceBox.textContent = '';
@@ -352,7 +356,7 @@
     });
   }
   function applyPractice(c) {
-    var p = state.practice;
+    var p = practiceNow(), rh = rehearseCode(p);
     toneQ = p === 'tone' ? toneQuizTarget(c) : null;
     clozeQ = p === 'cloze' ? clozeTarget(c) : null;
     buildQ = p === 'build' ? buildTarget(c) : null;
@@ -363,6 +367,15 @@
     readingHidden = p === 'hanzi' || !!toneQ || (p === 'zh' && state.fadePinyin && wellKnown(c)) || (p === 'choice' && !state.choicePinyin);
     els.card.classList.toggle('hide-reading', readingHidden);
     els.card.classList.toggle('tone-mode', !!toneQ);
+    els.card.classList.toggle('rh-mode', !!rh);
+    els.cardRehearse.hidden = !rh;
+    els.cardRehearse.textContent = '';
+    if (rh) {
+      els.cardRehearse.appendChild(el('span', 'tag ' + rh, rh.toUpperCase()));
+      var rw = el('span', 'rh-word', mean(c, rh));
+      rw.setAttribute('lang', rh);
+      els.cardRehearse.appendChild(rw);
+    }
     els.cardPrompt.textContent = '';
     els.choiceBox.classList.toggle('tone-grid', !!toneQ);
     if (p === 'reverse') {
@@ -386,6 +399,8 @@
         tr.setAttribute('role', 'status');
         els.cardPrompt.appendChild(tr);
       }
+    } else if (rh) {
+      els.cardPrompt.appendChild(el('p', 'prompt-q', rh.toUpperCase() + ' · In ' + langName(rh) + '?'));
     } else if (p === 'listen' || toneQ) {
       var lb = el('button', 'listen-btn', toneQ ? deck().tonePlay : deck().play);
       lb.type = 'button';

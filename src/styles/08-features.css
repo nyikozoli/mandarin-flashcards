@@ -325,3 +325,8 @@ body.labels-zh .practice-name .lbl .zl, body.labels-zh .pk-tile .lbl .zl { color
 
 /* A rehearsed language's mark: its code instead of a character. */
 .sm.sm-code { font-family: var(--ui-font); font-size: 9px; font-weight: 800; letter-spacing: .02em; }
+
+/* Chinese → rehearsed language: the answer in that language, large, at the top of the back. */
+.rh-answer { display: flex; align-items: center; gap: 10px; margin: 0 0 10px; }
+.rh-answer .rh-word { font-size: clamp(24px, 6vw, 32px); font-weight: 700; color: var(--paper); overflow-wrap: anywhere; }
+.pk-seal.pk-code { font-family: var(--ui-font); font-size: 13px; font-weight: 800; }

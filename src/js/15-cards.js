@@ -64,7 +64,7 @@
     save();
   }
   // Styles where you judge yourself; the quiz styles grade the answer for you.
-  function selfGraded() { return ['zh', 'reverse', 'listen', 'hanzi'].indexOf(state.practice) !== -1 && !toneQ; }
+  function selfGraded() { var p = practiceNow(); return (['zh', 'reverse', 'listen', 'hanzi'].indexOf(p) !== -1 || isRehearseStyle(p)) && !toneQ; }
   function updateGrades() {
     var i = currentIndex();
     els.gradeRow.hidden = !state.revealed || i === null || !selfGraded();
@@ -83,8 +83,8 @@
     updateGrades();
     els.revealHint.setAttribute('aria-expanded', state.revealed ? 'true' : 'false');
     els.revealHint.setAttribute('aria-label', state.revealed ? 'Hide the answer' : 'Show the answer');
-    var p = state.practice;
-    els.cardPrompt.hidden = state.revealed || !(p === 'reverse' || p === 'listen' || toneQ || clozeQ || buildQ || similarQ);
+    var p = practiceNow();
+    els.cardPrompt.hidden = state.revealed || !(p === 'reverse' || p === 'listen' || toneQ || clozeQ || buildQ || similarQ || isRehearseStyle(p));
     els.revealHint.textContent = state.revealed
       ? 'Tap the characters to hide the meaning · swipe → know · ← learning'
       : p === 'tone'
@@ -93,6 +93,7 @@
         : p === 'build' ? (buildQ ? 'Tap the words in order; tap a placed word to take it back (Backspace)' : 'Tap the card to show the meaning')
         : p === 'cloze' ? (clozeQ ? 'Pick the word that fills the gap (keys 1–4)' : 'Tap the card to show the meaning')
         : p === 'zh' && readingHidden ? 'You know this one well: read it, then tap the card to check the pinyin'
+        : isRehearseStyle(p) ? 'Say it in ' + langName(rehearseCode(p)) + ', then tap the card to check'
         : { zh: 'Tap the card to show the meaning', reverse: isSent() ? 'Say the Chinese sentence, then tap the card to check' : 'Say it, or type the pinyin (T), then tap the card to check',
             listen: 'Listen, then tap the card to see the word', choice: 'Pick the meaning (keys 1–4), or tap the card to reveal',
             hanzi: 'Read the characters aloud, then tap the card to check the pinyin and meaning' }[p];
@@ -206,8 +207,8 @@
       els.card.classList.add('enter');
     }
     if (animate && !testing) {
-      announce('Card ' + (state.pos + 1) + ' of ' + state.deck.length + '. ' + (state.practice === 'reverse' ? 'Meaning: ' + c.en + '.' :
-        state.practice === 'listen' ? 'Listen to the ' + noun(1) + '.' :
+      announce('Card ' + (state.pos + 1) + ' of ' + state.deck.length + '. ' + (practiceNow() === 'reverse' ? 'Meaning: ' + c.en + '.' :
+        practiceNow() === 'listen' ? 'Listen to the ' + noun(1) + '.' :
         toneQ ? 'Listen to ' + c.zh + ', then pick the tone of the first syllable.' :
         buildQ ? 'Put the words in order: ' + c.en :
         similarQ ? 'Which word means: ' + shortText(mainMeaning(c)) + '?' :
@@ -215,7 +216,7 @@
         c.zh + (readingHidden ? '.' : ', ' + c.py + '.')));
     }
     // The tone quiz always speaks: hearing the word is the question.
-    if (animate && !testing && ((state.autoplay && !readingHidden && !faceHidden) || state.practice === 'listen' || state.practice === 'tone') && userHasInteracted) {
+    if (animate && !testing && ((state.autoplay && !readingHidden && !faceHidden) || practiceNow() === 'listen' || practiceNow() === 'tone') && userHasInteracted) {
       var pos = state.pos;
       setTimeout(function () { if (state.pos === pos && currentIndex() !== null) speakParts([c.zh], null); }, 280);
     }

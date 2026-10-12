@@ -15,6 +15,12 @@
         return ra.d < rb.d ? -1 : ra.d > rb.d ? 1 : ra.b - rb.b;
       });
     }
+    var rk = rehearseCode(state.practice);
+    if (mode === 'all' && rk) {
+      var order = {};
+      rehearsePool(rk).forEach(function (c, n) { order[c.zh] = n; });
+      idx.sort(function (a, b) { return order[cards[a].zh] - order[cards[b].zh]; });
+    }
     return idx;
   }
   function currentIndex() {
