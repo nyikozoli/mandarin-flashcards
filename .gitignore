@@ -1,9 +1,11 @@
 # Build output. CI builds dist/site and deploys it to GitHub Pages; nothing in dist/ is committed.
 dist/
 
-# Secrets: never in this repository, which is public. They live outside it
-# (C:\Users\nyiko\.secrets\mandarin-hsk\ on the author's machine); these patterns are a backstop.
+# Secrets: never committed; this repository is public. They live in .secrets/ (local only,
+# also listed in .git/info/exclude so it stays ignored on every branch); the other patterns are a backstop.
+.secrets/
 .supabase-*
+*-api-key
 *-db-password
 *-service-key
 *.pem

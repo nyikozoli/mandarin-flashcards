@@ -2,7 +2,7 @@
 
 Offline flashcard web app: 598 HSK 1–3 words and 777 example sentences, with pinyin, English and Hungarian, read-aloud, spaced repetition, progress tracking and optional Supabase cloud sync. The original requirements are in `docs/prd.txt`; most are hard constraints (single file, no external resources, works by double-click, visible startup validation and self-check). Cloud sync is a deliberate exception, and only in the GitHub Pages build (see below).
 
-This repository is **public** (`nyikozoli/mandarin-flashcards`). Never commit secrets. They live outside the repo in `C:\Users\nyiko\.secrets\mandarin-hsk\`; `.gitignore` is only a backstop.
+This repository is **public** (`nyikozoli/mandarin-flashcards`). Never commit secrets. They live in the git-ignored `.secrets/` folder (also in `.git/info/exclude`, so it stays ignored on every branch). Never `git add -f` there, never print a secret's value, and never let the build or a published file read from it.
 
 ## Layout
 
@@ -14,7 +14,7 @@ This repository is **public** (`nyikozoli/mandarin-flashcards`). Never commit se
 | `src/sync-config.json` | Supabase URL, public anon key and magic-link return URL. The anon key is public by design. |
 | `src/pwa/` | Service worker, manifest and icons for the Pages build. |
 | `data/` | Word data (`hsk12/`, `hsk3/`) and the official HSK lists (`lists/`). |
-| `scripts/` | `build.js`, `verify.js`, `check.js` + individual checks, `fix-hsk3.js`, `validate.py`. |
+| `scripts/` | `build.js`, `cards.js` (the word loader), `verify.js`, `check.js` + individual checks, `fix-hsk3.js`, `validate.py`, `judge.js` (local only: asks TypeSafe's Jev model whether a fill-the-gap question has a second right answer; key in `.secrets/.typesafe-api-key`, report in `.validation/`). |
 | `supabase/` | `config.toml` and `migrations/`: the `progress` table, its row-level security and `upsert_progress`. |
 | `.github/workflows/pages.yml` | CI: `npm run check`, `npm run build`, `npm run selfcheck` (both builds), deploy `dist/site` to GitHub Pages. |
 | `dist/` | Build output, git-ignored: `mandarin-flashcards.html`, `artifact.html`, `site/`. Never edit. |

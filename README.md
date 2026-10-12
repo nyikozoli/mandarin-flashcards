@@ -77,8 +77,8 @@ supabase migration list
 ```
 
 **Secrets never go in this repository; it is public.**
-- The database password and the `service_role` key live outside it, in `C:\Users\nyiko\.secrets\mandarin-hsk\`.
-- `.gitignore` also blocks `.supabase-*`, `*-db-password`, `*-service-key` and `.env*`, in case a copy lands here.
+- The database password, the `service_role` key and other API keys live in `.secrets/`, which is git-ignored and never committed.
+- `.gitignore` also blocks `.supabase-*`, `*-db-password`, `*-service-key`, `*-api-key` and `.env*`, in case a copy lands elsewhere.
 - `scripts/build.js` refuses to build if `sync-config.json` contains a `service_role` key, and `scripts/verify.js` fails the build if one reaches an output file.
 
 Row-level security is what makes the anon key safe to publish:
