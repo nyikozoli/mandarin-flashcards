@@ -610,7 +610,6 @@
         state.marks.listen = emptyMarks();
         loadSkill();
         var first = nextRung() === r0;
-        els.newsStrip.hidden = true;
         state.wotdSeen = dayKey();
         renderWotd();
         var strip = !els.ladderStrip.hidden && els.ladderZh.textContent === r0.zh && els.ladderLeft.textContent === r0.words.length + ' words to go';
@@ -782,15 +781,11 @@
         if (!EXTRA.news.length) return { ok: true, d: 'no changelog in this build' };
         var latest = latestNews();
         state.newsSeen = '';
-        renderNewsStrip();
-        var notice = !els.newsStrip.hidden && els.newsStripText.textContent.indexOf(latest.version) !== -1;
-        els.btnNewsSee.click();
+        els.btnNews.click();
         var sheet = !els.newsView.hidden && els.newsBody.querySelectorAll('.news-release').length === EXTRA.news.length &&
           els.newsBody.querySelector('.news-release.latest .news-ver').textContent === latest.version;
-        var seen = state.newsSeen === latest.version && els.newsStrip.hidden;
-        closeOverlay(els.newsView);
-        els.btnNews.click();
-        var fromSettings = !els.newsView.hidden;
+        var seen = state.newsSeen === latest.version;
+        var fromSettings = sheet;
         closeOverlay(els.newsView);
         updateFootnote();
         var foot = els.footnote.querySelector('[data-news]');
@@ -799,8 +794,8 @@
         closeOverlay(els.newsView);
         fromSettings = fromSettings && fromFooter;
         var wellFormed = EXTRA.news.every(function (r) { return r.version && r.title && r.groups.length && r.groups.every(function (g) { return g.items.length; }); });
-        return { ok: notice && sheet && seen && fromSettings && wellFormed,
-          d: 'notice for ' + latest.version + ': ' + notice + ', sheet lists ' + EXTRA.news.length + ' releases: ' + sheet + ', opening marks it seen: ' + seen +
+        return { ok: sheet && seen && fromSettings && wellFormed,
+          d: 'sheet lists ' + EXTRA.news.length + ' releases: ' + sheet + ', opening marks it seen: ' + seen +
             ', Settings and the footer open it: ' + fromSettings + ', entries well-formed: ' + wellFormed };
       })();
       add('What\'s new', newsRes.ok, newsRes.d);
@@ -1264,8 +1259,6 @@
       add('Practice style picker', pickerRes.ok, pickerRes.d);
       var sugRes = (function () {
         closeSuggest();
-        if (latestNews()) state.newsSeen = latestNews().version;
-        renderNewsStrip();
         state.wotdSeen = '';
         renderWotd();
         var chip = !els.btnSuggest.hidden && els.suggestText.textContent.indexOf(els.wotdZh.textContent) === 0 && els.suggestPop.hidden;
@@ -1366,7 +1359,7 @@
       state.practice = snap.practice;
       state.toneColors = snap.toneColors;
       state.fadePinyin = snap.fadePinyin;
-      state.newsSeen = snap.newsSeen; closeOverlay(els.newsView); renderNewsStrip();
+      state.newsSeen = snap.newsSeen; closeOverlay(els.newsView);
       state.petName = snap.petName; closeOverlay(els.petView); renderPet();
       state.seals = snap.seals; state.questDays = snap.questDays; state.blitzBest = snap.blitzBest; state.exams = snap.exams; stopQuiz(); quiz = null;
       state.quests = snap.quests; state.freezes = snap.freezes; state.frozen = snap.frozen; state.wotdSeen = snap.wotdSeen; state.rungs = snap.rungs; state.ladderSeen = snap.ladderSeen; renderWotd();

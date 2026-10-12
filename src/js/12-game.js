@@ -95,8 +95,7 @@
   }
   function renderWotd() {
     var w = wordOfDay();
-    // One strip at a time: after an update, the what's-new notice goes first.
-    els.wotd.hidden = !w || state.wotdSeen === dayKey() || !els.newsStrip.hidden;
+    els.wotd.hidden = !w || state.wotdSeen === dayKey();
     renderLadderStrip();
     if (els.wotd.hidden) return;
     els.wotdZh.textContent = w.zh;
@@ -580,21 +579,10 @@
   /* ---------- what's new ---------- */
   function latestNews() { return EXTRA.news[0] || null; }
   function fmtLongDate(k) { var p = k.split('-'); return Number(p[2]) + ' ' + MONTHS[Number(p[1]) - 1] + ' ' + p[0]; }
-  // A one-line notice after an update; first-time visitors start with it marked as seen.
-  function renderNewsStrip() {
-    var n = latestNews();
-    els.newsStrip.hidden = !n || state.newsSeen === n.version;
-    if (els.newsStrip.hidden) return;
-    els.newsStripText.textContent = '';
-    els.newsStripText.appendChild(el('b', null, 'What\u2019s new in ' + n.version + ': '));
-    els.newsStripText.appendChild(document.createTextNode(n.title));
-  }
   function markNewsSeen() {
     var n = latestNews();
     if (!n || state.newsSeen === n.version) return;
     state.newsSeen = n.version;
-    renderNewsStrip();
-    renderWotd();
     save();
   }
   function renderNews() {
@@ -668,8 +656,8 @@
     if (fresh.length) renderLadderStrip();
     return fresh;
   }
-  // The main-screen strip: the next step and how many words it still needs. It waits while the what's-new notice or
-  // the word of the day is showing, and ✕ hides it until tomorrow.
+  // The main-screen strip: the next step and how many words it still needs. It waits while the word of the day is
+  // showing, and ✕ hides it until tomorrow.
   function renderLadderStrip() {
     renderRail();
     drawLadderStrip();
@@ -677,7 +665,7 @@
   }
   function drawLadderStrip() {
     var r = nextRung();
-    els.ladderStrip.hidden = !r || state.ladderSeen === dayKey() || !els.newsStrip.hidden || !els.wotd.hidden;
+    els.ladderStrip.hidden = !r || state.ladderSeen === dayKey() || !els.wotd.hidden;
     if (els.ladderStrip.hidden) return;
     var p = rungProgress(r);
     els.ladderZh.textContent = r.zh;
@@ -812,21 +800,20 @@
   }
 
   /* ---------- suggestion chip ---------- */
-  // The Today row's chip stands for the one strip showing (what's new, the word of the day or the next ladder step);
+  // The Today row's chip stands for the one strip showing (the word of the day or the next ladder step);
   // tapping it opens that strip as a popover. On wide screens the rail shows the ladder, so the chip skips it there.
-  function shownStrip() { return [els.newsStrip, els.wotd, els.ladderStrip].filter(function (s) { return !s.hidden; })[0] || null; }
+  function shownStrip() { return [els.wotd, els.ladderStrip].filter(function (s) { return !s.hidden; })[0] || null; }
   function renderSuggest() {
     var s = shownStrip();
     if (s === els.ladderStrip && !els.progressRail.hidden && getComputedStyle(els.progressRail).display !== 'none') s = null;
     els.btnSuggest.hidden = !s;
     if (!s) { closeSuggest(); return; }
-    var kind = s === els.newsStrip ? 'news' : s === els.wotd ? 'wotd' : 'ladder';
+    var kind = s === els.wotd ? 'wotd' : 'ladder';
     els.suggestSeal.textContent = s.querySelector('.wotd-seal').textContent;
     els.suggestSeal.className = 'suggest-seal ' + kind;
-    els.suggestText.textContent = kind === 'news' ? 'What\u2019s new in ' + latestNews().version
-      : kind === 'wotd' ? els.wotdZh.textContent + ' ' + els.wotdPy.textContent
+    els.suggestText.textContent = kind === 'wotd' ? els.wotdZh.textContent + ' ' + els.wotdPy.textContent
       : els.ladderZh.textContent + ' \u00b7 ' + els.ladderLeft.textContent;
-    els.btnSuggest.setAttribute('aria-label', (kind === 'news' ? 'What\u2019s new' : kind === 'wotd' ? 'Word of the day: ' + els.wotdZh.textContent : 'Next ladder step: ' + els.ladderZh.textContent + ', ' + els.ladderLeft.textContent) + '. Show');
+    els.btnSuggest.setAttribute('aria-label', (kind === 'wotd' ? 'Word of the day: ' + els.wotdZh.textContent : 'Next ladder step: ' + els.ladderZh.textContent + ', ' + els.ladderLeft.textContent) + '. Show');
   }
   function openSuggest() {
     els.suggestPop.hidden = false;

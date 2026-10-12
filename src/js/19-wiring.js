@@ -154,8 +154,6 @@
       });
     });
     on('footnote', 'click', function (e) { if (e.target.closest && e.target.closest('[data-news]')) openNews(); });
-    on('btnNewsSee', 'click', openNews);
-    on('btnNewsClose', 'click', markNewsSeen);
     on('btnCloseNews', 'click', function () { closeOverlay(els.newsView); });
     on('btnPet', 'click', openPet);
     on('btnClosePet', 'click', function () { closeOverlay(els.petView); });
@@ -361,10 +359,6 @@
     updateTopicBtn();
     renderCombo();
     if (applyFreezes()) save();
-    renderWotd();
-    // Someone opening the app for the first time has nothing to catch up on.
-    if (!state.seenTour && latestNews()) state.newsSeen = latestNews().version;
-    renderNewsStrip();
     renderWotd();
     renderPet();
     pickVoice();

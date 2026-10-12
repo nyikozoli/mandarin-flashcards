@@ -76,8 +76,6 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
 @media (max-width: 440px), (hover: none) { .act-key { display: none; } }
 
 /* What's new */
-.news-strip { background: linear-gradient(90deg, rgba(240, 176, 63, .14), rgba(240, 176, 63, 0) 55%), var(--surface); }
-.news-strip .wotd-seal { background: var(--learn-strong); color: var(--learn-ink); }
 .news-release { padding: 4px 0 14px; border-bottom: 1px solid var(--line); }
 .news-release + .news-release { margin-top: 14px; }
 .news-head { margin: 0; display: flex; align-items: baseline; gap: 10px; font-size: 17px; }
@@ -306,7 +304,6 @@ body.labels-zh .practice-name .lbl .zl, body.labels-zh .pk-tile .lbl .zl { color
 .suggest-chip { display: inline-flex; align-items: center; gap: 7px; min-height: 44px; max-width: min(46%, 260px); padding: 4px 12px 4px 7px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--text); font-size: 13.5px; font-weight: 600; }
 .suggest-chip:hover, .suggest-chip[aria-expanded="true"] { border-color: var(--soft); }
 .suggest-seal { flex: none; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 6px; background: var(--cinnabar); color: var(--paper); font-family: var(--kai-font); font-size: 16px; line-height: 1; }
-.suggest-seal.news { background: var(--learn-strong); color: var(--learn-ink); }
 .suggest-seal.ladder { background: var(--known-strong); color: var(--known-ink); }
 .suggest-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .suggest-pop { position: absolute; z-index: 6; left: 0; right: 0; top: calc(100% + 6px); border-radius: 12px; background: var(--bg); box-shadow: 0 16px 40px rgba(0, 0, 0, .55); }
