@@ -171,26 +171,19 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
 .rung-go { flex: none; min-height: 40px; }
 .rung.next .rung-go { margin-top: 8px; }
 
-/* Wider screens: more room; from 960px two columns, the controls on the left and the card on the right; from 1440px
-   a wider app with a bigger card and wider sheets, and from 1800px wider still. On smaller screens the two wrappers
-   step aside (display: contents) and .app stays one flex column. */
+/* Wider screens: one column, like on a phone, with more room: 760px from 820px, 920px from 1100px, and from 1440px
+   1080px with a bigger card and wider sheets. The .side and .main-col wrappers only group the markup
+   (display: contents), so .app stays one flex column. */
 .side, .main-col { display: contents; }
 @media (min-width: 820px) { .app { max-width: 760px; } }
-@media (min-width: 960px) {
-  .app { max-width: 1180px; display: grid; grid-template-columns: minmax(300px, 340px) minmax(0, 1fr); align-content: start; column-gap: 24px; row-gap: 14px; }
-  .topbar, #errorBanner, .app > footer { grid-column: 1 / -1; }
-  .side { display: flex; flex-direction: column; gap: 14px; position: sticky; top: 24px; min-width: 0; }
-  .main-col { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
-  .side .deckbar-row { flex-wrap: wrap; }
-  .side .levels { flex: 1; justify-content: space-between; }
-  .side .practice { flex-basis: 100%; }
+@media (min-width: 1100px) {
+  .app { max-width: 920px; }
   .card { min-height: 540px; }
   .sheet { max-width: 820px; }
 }
-@media (min-width: 1100px) { .app { grid-template-columns: minmax(340px, 400px) minmax(0, 1fr); column-gap: 32px; } }
 @media (min-width: 1440px) {
-  .app { max-width: 1440px; grid-template-columns: minmax(380px, 440px) minmax(0, 1fr); column-gap: 40px; }
-  .card { min-height: 640px; }
+  .app { max-width: 1080px; }
+  .card { min-height: 600px; }
   .hanzi { font-size: 172px; }
   .hanzi[data-len="3"] { font-size: 136px; }
   .hanzi[data-len="4"], .hanzi[data-len="5"], .hanzi[data-len="6"] { font-size: 108px; }
@@ -203,7 +196,6 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
   .ex-zh { font-size: 24px; }
   .sheet { max-width: 1000px; }
 }
-@media (min-width: 1800px) { .app { max-width: 1680px; grid-template-columns: minmax(420px, 480px) minmax(0, 1fr); } }
 
 /* Study modes (All cards, Due, Learning, New, Hardest): the main choice on the page, so bigger than the rows below. */
 .mode { min-height: 60px; font-size: 15.5px; font-weight: 700; gap: 2px; }
@@ -216,7 +208,8 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
 /* Controls in the order you decide: how (practice style), what (modes, then level and topic), today (goal, counts,
    progress, tone key, the day's strip), and this round (counter, shuffle, undo) right above the card. */
 .deckbar .practice { flex: none; }
-.deckbar-row .levels { flex: 1; justify-content: space-between; }
+.deckbar-row .levels { flex: 1; }
+.deckbar-row .level { flex: 1; }
 .today-row { display: flex; align-items: center; gap: 10px; }
 .today-row .legend { flex: 1; min-width: 0; }
 .side > .stats { padding-top: 10px; border-top: 1px solid var(--line); }
