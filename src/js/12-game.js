@@ -786,6 +786,7 @@
     if (els.progressRail.hidden) return;
     var r = rankOf(state.xp), next = RANKS[r + 1];
     els.railRankName.textContent = RANKS[r][1];
+    els.railRankName.classList.toggle('long', RANKS[r][1].length > 2);
     els.railXp.style.width = (next ? pct(state.xp - RANKS[r][0], next[0] - RANKS[r][0]) : 100) + '%';
     els.railRank.setAttribute('aria-label', 'Rank: ' + RANKS[r][2] + ', ' + state.xp + ' XP' + (next ? ', ' + (next[0] - state.xp) + ' XP to ' + next[2] : '') + '. Open your stats');
     els.railRank.title = RANKS[r][1] + ' ' + RANKS[r][2] + ' · ' + state.xp.toLocaleString('en-US') + ' XP' + (next ? ' · ' + (next[0] - state.xp).toLocaleString('en-US') + ' to ' + next[1] : '');
@@ -798,7 +799,9 @@
       bar.title = (i + 1) + '. ' + rg.zh + ' · ' + rungName(rg) + ' · ' + (on ? 'reached' : p.done + '/' + p.total + ' words');
       box.appendChild(bar);
     });
-    var reached = rungsReached();
+    var reached = rungsReached(), part = nr ? rungProgress(nr, maps) : null;
+    // How far up the ladder the gradient behind the rungs reaches: steps reached plus the share of the next one.
+    box.style.setProperty('--climb', Math.min(100, (reached + (part ? part.done / part.total : 0)) / EXTRA.ladder.length * 100).toFixed(1) + '%');
     els.railCount.textContent = reached + '/' + EXTRA.ladder.length;
     els.railNext.textContent = nr ? nr.zh : '';
     els.railLadder.setAttribute('aria-label', 'Ladder: ' + reached + ' of ' + EXTRA.ladder.length + ' steps reached' + (nr ? ', next: ' + nr.en : '') + '. Open the ladder');

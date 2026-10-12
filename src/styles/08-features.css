@@ -293,3 +293,6 @@ body.labels-zh .practice-name .lbl .zl, body.labels-zh .pk-tile .lbl .zl { color
   .rail-rung { height: 7px; flex: none; }
 }
 @media (min-width: 1200px) and (max-height: 760px) { .rail-rungs { gap: 3px; } .rail-rung { height: 4px; } .rail .rail-next { display: none; } }
+/* A soft green wash rising behind the rungs to the share of the ladder climbed, fading out at its top edge. */
+.rail-rungs { --climb: 0%; background: linear-gradient(to top, rgba(79, 209, 161, .34) 0%, rgba(79, 209, 161, .14) calc(var(--climb) - 4%), rgba(79, 209, 161, 0) var(--climb)); }
+.rail-rank-seal.long { writing-mode: horizontal-tb; font-size: 14px; letter-spacing: 0; }
