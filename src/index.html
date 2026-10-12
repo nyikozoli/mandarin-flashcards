@@ -79,6 +79,7 @@
     <ul id="errorList"></ul>
   </div>
 
+  <div class="side">
   <nav class="deckbar" aria-label="Choose what to study">
     <div class="modes" role="radiogroup" aria-label="Study mode">
       <button type="button" class="mode" id="modeAll" role="radio" aria-checked="true" data-mode="all"><span data-lbl>All cards</span> <span class="count" id="countAll">0</span></button>
@@ -164,8 +165,10 @@
     <button type="button" class="btn small" id="btnLadderGo">Practise</button>
     <button type="button" class="icon-btn small" id="btnLadderClose" aria-label="Hide the ladder step until tomorrow">✕</button>
   </section>
+  </div>
   <div id="srLive" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
 
+  <div class="main-col">
   <main class="stage" id="stage">
     <article id="card" class="card" role="group" aria-roledescription="flashcard" aria-label="Flashcard">
       <div class="stamp stamp-know" aria-hidden="true"><span lang="zh-CN">会</span><small>I know it</small></div>
@@ -216,6 +219,7 @@
     <button type="button" class="act know" id="btnKnown" aria-label="I know it (Right arrow)"><span class="act-seal" lang="zh-CN" aria-hidden="true">会</span><span class="act-text"><span class="act-label" data-lbl>I know it</span></span><span class="act-key" aria-hidden="true">→</span></button>
   </nav>
   <p class="kbd-hint"><span><kbd>Space</kbd> skip</span><span><kbd>S</kbd> speak</span><span><kbd>↑</kbd><kbd>↓</kbd> flip</span><span><kbd>1</kbd>–<kbd>4</kbd> choose</span><span><kbd>H</kbd> <kbd>E</kbd> hard, easy</span><span><kbd>T</kbd> type</span><span><kbd>Z</kbd> undo</span><span>more in Help</span></p>
+  </div>
 
   <footer>
     <p class="footnote" id="footnote">Works offline. Progress is saved in this browser.</p>

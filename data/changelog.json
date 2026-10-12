@@ -1,6 +1,20 @@
 {
   "releases": [
     {
+      "version": "2.6",
+      "date": "2026-10-12",
+      "title": "Room to breathe on big screens",
+      "groups": [
+        {
+          "name": "",
+          "items": [
+            "On wide screens the study controls sit in a column on the left and the card gets the rest of the width; mid-sized screens get a wider single column.",
+            "The progress, word list and other sheets are wider on large screens."
+          ]
+        }
+      ]
+    },
+    {
       "version": "2.5",
       "date": "2026-10-12",
       "title": "Fairer fill-the-gap questions",

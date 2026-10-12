@@ -170,3 +170,36 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
 .rung-need { color: var(--learn-strong); font-size: 11px; }
 .rung-go { flex: none; min-height: 40px; }
 .rung.next .rung-go { margin-top: 8px; }
+
+/* Wider screens: more room; from 960px two columns, the controls on the left and the card on the right; from 1440px
+   a wider app with a bigger card and wider sheets. On smaller screens the two wrappers step aside (display: contents)
+   and .app stays one flex column. */
+.side, .main-col { display: contents; }
+@media (min-width: 820px) { .app { max-width: 760px; } }
+@media (min-width: 960px) {
+  .app { max-width: 1180px; display: grid; grid-template-columns: minmax(300px, 340px) minmax(0, 1fr); align-content: start; column-gap: 24px; row-gap: 14px; }
+  .topbar, #errorBanner, .app > footer { grid-column: 1 / -1; }
+  .side { display: flex; flex-direction: column; gap: 14px; position: sticky; top: 24px; min-width: 0; }
+  .main-col { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  .side .deckbar-row { flex-wrap: wrap; }
+  .side .levels { flex: 1; justify-content: space-between; }
+  .side .practice { flex-basis: 100%; }
+  .card { min-height: 540px; }
+  .sheet { max-width: 820px; }
+}
+@media (min-width: 1100px) { .app { grid-template-columns: minmax(340px, 400px) minmax(0, 1fr); column-gap: 32px; } }
+@media (min-width: 1440px) {
+  .app { max-width: 1440px; grid-template-columns: minmax(380px, 440px) minmax(0, 1fr); column-gap: 40px; }
+  .card { min-height: 640px; }
+  .hanzi { font-size: 172px; }
+  .hanzi[data-len="3"] { font-size: 136px; }
+  .hanzi[data-len="4"], .hanzi[data-len="5"], .hanzi[data-len="6"] { font-size: 108px; }
+  .pinyin { font-size: 40px; }
+  .card.sentence .hanzi { font-size: 52px; }
+  .card.sentence .pinyin { font-size: 25px; }
+  .prompt-zh { font-size: 40px; }
+  .prompt-en { font-size: 28px; }
+  .prompt-hu { font-size: 22px; }
+  .ex-zh { font-size: 24px; }
+  .sheet { max-width: 1000px; }
+}

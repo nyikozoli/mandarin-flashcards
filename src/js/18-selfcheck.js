@@ -1186,6 +1186,13 @@
              ', page behind a panel is locked: ' + locked + ', controls without a name: ' + (unnamed.length ? unnamed.join(', ') : 'none') + ', pinyin marked as pinyin: ' + pinyinLang };
       })();
       add('Accessibility basics', a11yRes.ok, a11yRes.d);
+      var side = document.querySelector('.side'), mainCol = document.querySelector('.main-col');
+      var wide = window.matchMedia('(min-width: 1100px)').matches;
+      var placed = !!side && !!mainCol && side.contains(document.querySelector('.deckbar')) && mainCol.contains(els.stage) && mainCol.contains(els.btnKnown);
+      var shown = !!side && getComputedStyle(side).display === (wide ? 'flex' : 'contents');
+      add('Layout: controls and card columns', placed && shown && document.documentElement.scrollWidth <= window.innerWidth,
+        'controls in the side column, card and answer buttons in the main column: ' + placed + ', ' + (wide ? 'two columns at this width' : 'one column at this width') + ': ' + shown +
+        ', no sideways scroll: ' + (document.documentElement.scrollWidth <= window.innerWidth));
 
       add('Progress overview renders', pvOk && els.progressView.hidden, 'Ring, ' + lvRows + ' level bars, 14-day chart and ' + cells + ' word squares (' + known2 + ' known).');
 

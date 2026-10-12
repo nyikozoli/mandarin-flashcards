@@ -14,7 +14,7 @@ This repository is **public** (`nyikozoli/mandarin-flashcards`). Never commit se
 | `src/sync-config.json` | Supabase URL, public anon key and magic-link return URL. The anon key is public by design. |
 | `src/pwa/` | Service worker, manifest and icons for the Pages build. |
 | `data/` | Word data (`hsk12/`, `hsk3/`) and the official HSK lists (`lists/`). |
-| `scripts/` | `build.js`, `cards.js` (the word loader), `verify.js`, `check.js` + individual checks, `fix-hsk3.js`, `validate.py`, `judge.js` (local only: asks TypeSafe's Jev model whether a fill-the-gap question has a second right answer; key in `.secrets/.typesafe-api-key`, report in `.validation/`). |
+| `scripts/` | `build.js`, `cards.js` (the word loader), `verify.js`, `check.js` + individual checks, `fix-hsk3.js`, `validate.py`, `judge.js` and `judge-translations.js` (local only, through `jev.js`: TypeSafe's Jev model checks whether a fill-the-gap question has a second right answer, and how well each meaning in all five languages matches the Chinese; `--control` first, `--dry-run` for the cost; key in `.secrets/.typesafe-api-key`, reports and answer caches in `.validation/`). Jev misses some wrong Romanian single-word glosses and flags good translations near its threshold: review its findings by hand. |
 | `supabase/` | `config.toml` and `migrations/`: the `progress` table, its row-level security and `upsert_progress`. |
 | `.github/workflows/pages.yml` | CI: `npm run check`, `npm run build`, `npm run selfcheck` (both builds), deploy `dist/site` to GitHub Pages. |
 | `dist/` | Build output, git-ignored: `mandarin-flashcards.html`, `artifact.html`, `site/`. Never edit. |
@@ -60,7 +60,7 @@ This repository is **public** (`nyikozoli/mandarin-flashcards`). Never commit se
 2. `npm run selfcheck` runs the in-app self-check in headless Chrome or Edge (Node 22+; `CHROME_PATH` to pick a browser) and fails on any failed check. CI runs it on the single file and on `dist/site/index.html`. To look at it yourself, open `dist/mandarin-flashcards.html` and run `await window.__mandarinApp.runSelfCheck().done`, or use Settings → Run self-check. Every check must pass.
    - The Claude browser pane cannot open local files over 512 KB, and the build is now larger. Start the `dist` preview server instead (`.claude/launch.json`, git-ignored: `python -m http.server 8766 --directory dist`) and open http://localhost:8766/mandarin-flashcards.html. Served over http, "Progress storage" passes too.
    - To test the Pages build, serve the repo root over http (pick a port other than 8765) and open `/dist/site/`.
-3. For layout changes, check a 375px and a 320px wide viewport. Nothing may scroll sideways. The installed iPhone app runs under a translucent status bar: keep the `env(safe-area-inset-*)` padding on `.app`, `.overlay` and fixed bars.
+3. For layout changes, check a 375px and a 320px wide viewport, and a wide one (1440px). Nothing may scroll sideways. From 1100px the page has two columns: `.side` (deck controls, stats, strips) and `.main-col` (card, answer bar); below that both wrappers are `display: contents` and `.app` is one flex column. The installed iPhone app runs under a translucent status bar: keep the `env(safe-area-inset-*)` padding on `.app`, `.overlay` and fixed bars.
 4. For a migration, test it in a throwaway Postgres container before `supabase db push`. The local `postgres:16-alpine` image works with a stub `auth` schema: `auth.users` and an `auth.uid()` that reads `request.jwt.claim.sub`.
 
 ## Content rules
