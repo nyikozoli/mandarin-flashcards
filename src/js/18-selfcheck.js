@@ -184,6 +184,10 @@
       activity: JSON.parse(JSON.stringify(state.activity)), milestones: state.milestones.slice(), seenTour: state.seenTour
     };
     var undoSnap = undoStack.slice();
+    var langsSnap = JSON.parse(JSON.stringify(state.langs)), rehearseSnap = JSON.parse(JSON.stringify(state.rehearse));
+    state.langs = readLangs(null);
+    state.rehearse = readRehearse({ every: 0 });
+    rebuildSkills();
     var diagWasOpen = !els.diagView.hidden;
     var tourWasOpen = !els.tourView.hidden;
     els.tourView.hidden = true;
@@ -1359,6 +1363,7 @@
       state.level = snap.level;
       state.srs = snap.srs;
       state.misses = snap.misses;
+      state.langs = langsSnap; state.rehearse = rehearseSnap; rebuildSkills(); syncSettingsUI();
       state.practice = snap.practice;
       state.toneColors = snap.toneColors;
       state.fadePinyin = snap.fadePinyin;

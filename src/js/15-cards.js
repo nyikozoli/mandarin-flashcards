@@ -20,8 +20,8 @@
     stopSpeech();
     var finish = function () {
       state.pos += 1;
-      maybeInterject(kind);
       state.revealed = state.autoReveal;
+      maybeInterject(kind);
       render(true);
       save();
       afterAnswer(kind);
@@ -70,12 +70,11 @@
   // Styles where you judge yourself; the quiz styles grade the answer for you.
   function selfGraded() { var p = practiceNow(); return (['zh', 'reverse', 'listen', 'hanzi'].indexOf(p) !== -1 || isRehearseStyle(p)) && !toneQ; }
   function updateGrades() {
-    var i = currentIndex();
-    els.gradeRow.hidden = !state.revealed || i === null || !selfGraded();
+    var c = cardOnScreen();
+    els.gradeRow.hidden = !state.revealed || !c || !selfGraded();
     if (els.gradeRow.hidden) return;
-    var c = cards[i];
     Array.prototype.forEach.call(els.gradeRow.querySelectorAll('.grade'), function (b) {
-      var wait = fmtWait(SRS_DAYS[nextBox(c, b.getAttribute('data-grade'))]);
+      var wait = fmtWait(SRS_DAYS[withSkill(skillNow(), function () { return nextBox(c, b.getAttribute('data-grade')); })]);
       b.querySelector('small').textContent = wait;
       var gname = { hard: 'Hard', good: 'Good', easy: 'Easy' }[b.getAttribute('data-grade')];
       b.setAttribute('aria-label', gname + ': next review in ' + (wait === 'today' ? 'today' : wait.replace(' d', ' days').replace(' mo', ' months')));
@@ -218,7 +217,7 @@
       ps.type = 'button';
       els.cardExamples.appendChild(ps);
     }
-    var s = statusOf(c);
+    var s = withSkill(skillNow(), function () { return statusOf(c); });
     els.cardStatus.textContent = s === 'unmarked' ? 'New' : STATUS_NAMES[s];
     els.cardStatus.className = 'status-tag' + (s === 'unmarked' ? '' : ' ' + s);
     els.cardSkills.textContent = '';

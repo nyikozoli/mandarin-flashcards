@@ -136,6 +136,8 @@
     return out;
   }
   function restore(saved) {
+    roundReturn = null;
+    rehearseCard = null;
     var byZh = {};
     cards.forEach(function (c, i) { byZh[c.zh] = i; });
     var has = function (k) { return Object.prototype.hasOwnProperty.call(byZh, k); };

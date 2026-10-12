@@ -210,7 +210,7 @@
     if (p === -1) {
       if (!inLevel(cards[i])) {
         state.level = 'all'; state.topic = 'all'; updateTopicBtn();
-        if (!inPractice(cards[i])) { state.practice = 'choice'; syncPracticeSelect(); }
+        if (!inPractice(cards[i])) { state.practice = isRehearseStyle(state.practice) ? 'zh' : 'choice'; useSkill(skillOf(state.practice)); syncPracticeSelect(); }
       }
       state.mode = 'all';
       state.deck = buildDeck('all');

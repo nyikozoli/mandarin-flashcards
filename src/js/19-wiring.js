@@ -10,7 +10,7 @@
     on('btnSpeak', 'click', function (e) { e.stopPropagation(); speakCurrent(); });
     on('cardExamples', 'click', function (e) {
       var p = e.target.closest ? e.target.closest('.ex-practice') : null;
-      if (p) { e.stopPropagation(); practiceSentencesOf(cards[currentIndex()]); return; }
+      if (p) { e.stopPropagation(); practiceSentencesOf(cardOnScreen()); return; }
       var b = e.target.closest ? e.target.closest('.ex-speak') : null;
       if (!b) return;
       e.stopPropagation();
@@ -348,7 +348,8 @@
     document.addEventListener('keydown', function (e) { if (e.key === 'Tab') pointerFocus = null; }, true);
     initSwipe();
     if (speechSupported && 'onvoiceschanged' in synth) {
-      synth.addEventListener ? synth.addEventListener('voiceschanged', pickVoice) : (synth.onvoiceschanged = pickVoice);
+      var onVoices = function () { pickVoice(); refreshSpeakButtons(); };
+      synth.addEventListener ? synth.addEventListener('voiceschanged', onVoices) : (synth.onvoiceschanged = onVoices);
     }
     window.addEventListener('pagehide', stopSpeech);
   }

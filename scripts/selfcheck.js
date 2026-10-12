@@ -75,6 +75,18 @@ async function main() {
     const loaded = event('Page.loadEventFired');
     await send('Page.navigate', { url: pathToFileURL(file).href });
     await loaded;
+    // SELFCHECK_SEED=<file.json>: merge these fields into the saved progress, then reload, so the checks run on that state.
+    if (process.env.SELFCHECK_SEED) {
+      const seed = fs.readFileSync(process.env.SELFCHECK_SEED, 'utf8');
+      await send('Runtime.evaluate', { expression: `(() => {
+        const k = Object.keys(localStorage).find((x) => /\.progress\.v1$/.test(x)) || 'mandarin300.progress.v1';
+        const o = JSON.parse(localStorage.getItem(k) || '{}');
+        localStorage.setItem(k, JSON.stringify(Object.assign(o, ${seed})));
+      })()` });
+      const reloaded = event('Page.loadEventFired');
+      await send('Page.reload');
+      await reloaded;
+    }
 
     const expr = `(async () => {
       for (let i = 0; i < 100 && !(window.__mandarinApp && window.__mandarinApp.runSelfCheck); i++) await new Promise((r) => setTimeout(r, 100));

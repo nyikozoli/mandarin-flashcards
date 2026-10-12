@@ -31,6 +31,7 @@
     if (!MODE_NAMES[mode]) mode = 'all';
     stopSpeech();
     rehearseCard = null;
+    roundReturn = null;
     state.mode = mode;
     state.deck = buildDeck(mode);
     state.pos = 0;

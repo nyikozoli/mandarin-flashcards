@@ -84,6 +84,7 @@
   function noun(n) { return deck().noun[n === 1 ? 0 : 1]; }
   function useDeckType(t) {
     rehearseCard = null;
+    roundReturn = null;
     state.deckType = t === 'sentences' ? 'sentences' : 'words';
     fixStyleForDeck();
     cards = isSent() ? sentCards : wordCards;
@@ -92,7 +93,14 @@
   }
   // Styles that exist for one deck only, and the style of the same skill to use on the other deck.
   var DECK_ONLY = { tone: ['words', 'listen'], cloze: ['words', 'choice'], build: ['sentences', 'reverse'], pairs: ['words', 'choice'] };
-  function fixStyleForDeck() { var o = DECK_ONLY[state.practice]; if (o && o[0] !== state.deckType) state.practice = o[1]; }
+  function fixStyleForDeck() {
+    var o = DECK_ONLY[state.practice];
+    if (!o || o[0] === state.deckType) return;
+    var was = state.practice;
+    state.practice = o[1];
+    // Only a rehearse style's fallback crosses skills (to reading), so only then does the skill follow.
+    if (isRehearseStyle(was)) useSkill(skillOf(state.practice));
+  }
   // Opens a short sentence deck with just this word's example sentences, in the current practice
   // style (so “汉字 only” gives character-reading practice). Picking a study mode goes back to the full deck.
   function practiceSentencesOf(word) {
@@ -147,10 +155,12 @@
   }
   // After a language's role changes: settings, the card and the save follow.
   function langsChanged() {
+    var before = state.practice;
     rebuildSkills();
     syncSettingsUI();
-    render(false);
-    save();
+    // Leaving a rehearse style (its language set back to Show) leaves its pool as the deck: rebuild it.
+    if (state.practice !== before) setMode(state.mode);
+    else { render(false); save(); }
   }
   function announce(msg) {
     if (testing || !els.srLive) return;

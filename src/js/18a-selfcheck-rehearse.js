@@ -3,6 +3,9 @@
   // settings, the practice style and the deck back after every entry.
   var REHEARSE_TESTS = [];
   function resetRehearseTestState(keep) {
+    // Every skill's marks go back too, so later checks see the deck as it was.
+    state.marks = JSON.parse(JSON.stringify(keep.marks));
+    loadSkill();
     state.langs = JSON.parse(JSON.stringify(keep.langs));
     state.rehearse = JSON.parse(JSON.stringify(keep.rehearse));
     rebuildSkills();
@@ -11,8 +14,11 @@
     syncSettingsUI();
   }
   function rehearseTests(add) {
-    var keep = { langs: JSON.parse(JSON.stringify(state.langs)), rehearse: JSON.parse(JSON.stringify(state.rehearse)),
+    stashSkill();
+    var keep = { marks: JSON.parse(JSON.stringify(state.marks)), langs: JSON.parse(JSON.stringify(state.langs)), rehearse: JSON.parse(JSON.stringify(state.rehearse)),
       practice: state.practice, deckType: state.deckType, deck: state.deck.slice(), pos: state.pos, revealed: state.revealed };
+    add('Self-check runs with the default languages', langsRehearsed().length === 0 && state.rehearse.every === 0,
+      'rehearsed while the checks ran: ' + (langsRehearsed().join(', ') || 'none') + ', rehearse cards every: ' + state.rehearse.every);
     REHEARSE_TESTS.forEach(function (t) {
       try { t.run(add); } catch (e) { add(t.title, false, 'The test stopped with an error: ' + e.message); }
       resetRehearseTestState(keep);
@@ -265,4 +271,112 @@
     delete state.marks['say:ro'];
     add('Rehearse progress and sync counts', shown && note && recap,
       'progress lists Romanian next to the skills: ' + shown + ', the sync conflict cards count Romanian: ' + note + ', the weekly recap counts rehearse answers: ' + recap);
+  } });
+
+  REHEARSE_TESTS.push({ title: 'Controls act on the rehearse card on screen', run: function (add) {
+    if (!LANG_AVAILABLE.ro) { add('Controls act on the rehearse card on screen', true, 'No Romanian data in this build.'); return; }
+    state.langs.ro = 'rehearse';
+    state.rehearse.every = 6;
+    rebuildSkills();
+    seedRehearsePool('ro', 3);
+    useDeckType('words');
+    state.practice = 'zh'; useSkill('read');
+    state.deck = [0, 1, 2, 3, 4]; state.pos = 0;
+    rehearseCard = null; rehearsedThisSession = []; sinceRehearse = 5;
+    act('known');
+    var c = rehearseCard ? wordByZh(rehearseCard.zh) : null;
+    if (!c) { add('Controls act on the rehearse card on screen', false, 'no rehearse card came up'); return; }
+    var onScreen = cardOnScreen() === c;
+    var ro = state.marks['say:ro'] || (state.marks['say:ro'] = emptyMarks());
+    ro.status[c.zh] = 'learning';
+    ro.srs[c.zh] = { b: 3, d: addDays(7) };
+    marksOf('read').status[c.zh] = 'known';
+    marksOf('read').srs[c.zh] = { b: 0, d: dayKey() };
+    loadSkill();
+    state.revealed = true;
+    render(false);
+    var tag = els.cardStatus.textContent === 'Learning';
+    var ring = !!els.cardSkills.querySelector('.sm.sm-code.active') && !els.cardSkills.querySelector('.sm:not(.sm-code).active');
+    var goodBtn = els.gradeRow.querySelector('[data-grade="good"] small');
+    var grades = !!goodBtn && goodBtn.textContent === fmtWait(SRS_DAYS[4]);
+    var spoke = true;
+    if (speechSupported) {
+      lastUtterance = null;
+      speakCurrent();
+      spoke = !!lastUtterance && lastUtterance.text === c.zh;
+      stopSpeech();
+    }
+    var exBtn = els.cardExamples.querySelector('.ex-practice');
+    if (exBtn) exBtn.click();
+    var sentences = !exBtn || (state.deckType === 'sentences' && state.deck.length > 0 &&
+      state.deck.every(function (i) { return c.ex.some(function (e) { return e.zh === cards[i].zh; }); }));
+    useDeckType('words');
+    delete state.marks['say:ro'];
+    add('Controls act on the rehearse card on screen', onScreen && tag && ring && grades && spoke && sentences,
+      'the card on screen is the Romanian one: ' + onScreen + ', its tag shows the Romanian mark: ' + tag + ', the RO seal has the ring: ' + ring +
+      ', grade waits follow the Romanian schedule: ' + grades + ', Read aloud reads it: ' + (speechSupported ? spoke : 'no speech') +
+      ', "Practice these sentences" opens its sentences: ' + sentences);
+  } });
+
+  REHEARSE_TESTS.push({ title: 'Leaving the rehearse style keeps the skill in step', run: function (add) {
+    if (!LANG_AVAILABLE.ro) { add('Leaving the rehearse style keeps the skill in step', true, 'No Romanian data in this build.'); return; }
+    state.langs.ro = 'rehearse';
+    rebuildSkills();
+    seedRehearsePool('ro', 3);
+    useDeckType('words');
+    state.mode = 'all';
+    pickPracticeStyle('rh-ro');
+    var c = cards[state.deck[0]];
+    practiceSentencesOf(c);
+    var sent = state.deckType === 'sentences' && state.skill === skillOf(state.practice) && state.skill !== 'say:ro';
+    useDeckType('words');
+    state.mode = 'all';
+    pickPracticeStyle('rh-ro');
+    var unstarted = wordCards.filter(function (w) { return mean(w, 'ro') && !rehearseStarted(w); })[0];
+    studyWord(unstarted.zh);
+    var study = state.skill === skillOf(state.practice) && !isRehearseStyle(state.practice);
+    // Romanian back to Show while on its tile: the style falls back and the deck is a whole deck again.
+    pickPracticeStyle('rh-ro');
+    els.optLangRo.value = 'show';
+    els.optLangRo.dispatchEvent(new Event('change'));
+    var whole = state.practice === 'zh' && state.skill === 'read' && state.deck.length === buildDeck(state.mode).length;
+    add('Leaving the rehearse style keeps the skill in step', sent && study && whole,
+      '"Practice these sentences" from the tile practises reading: ' + sent + ', "Study it" for a word outside the tile leaves the Romanian skill: ' + study +
+      ', Romanian back to Show rebuilds a whole deck: ' + whole);
+  } });
+
+  REHEARSE_TESTS.push({ title: 'Rounds and rehearse cards end cleanly', run: function (add) {
+    if (!LANG_AVAILABLE.ro) { add('Rounds and rehearse cards end cleanly', true, 'No Romanian data in this build.'); return; }
+    state.langs.ro = 'rehearse';
+    state.rehearse.every = 6;
+    rebuildSkills();
+    seedRehearsePool('ro', ROUND_SIZE + 1);
+    useDeckType('words'); state.practice = 'zh'; useSkill('read');
+    var keepSeen = state.rehearseSeen;
+    startRehearseRound('ro');
+    var inRound = !!roundReturn;
+    pickPracticeStyle('zh');
+    var cleared = inRound && !roundReturn;
+    state.rehearseSeen = keepSeen;
+    // With "Always show the meaning" on, the rehearse card still opens on its question.
+    var keepAuto = state.autoReveal;
+    state.autoReveal = true;
+    useDeckType('words'); state.practice = 'zh'; useSkill('read');
+    state.deck = [0, 1, 2, 3, 4]; state.pos = 0;
+    rehearseCard = null; rehearsedThisSession = []; sinceRehearse = 5;
+    act('known');
+    var asks = !!rehearseCard && !state.revealed;
+    state.autoReveal = keepAuto;
+    rehearseCard = null;
+    // Voices that arrive late (voiceschanged) update the speaker buttons.
+    var b = speakBtn('en', 'house');
+    b.hidden = !b.hidden;
+    document.body.appendChild(b);
+    refreshSpeakButtons();
+    var voices = b.hidden === !canSpeak('en');
+    b.parentNode.removeChild(b);
+    delete state.marks['say:ro'];
+    add('Rounds and rehearse cards end cleanly', cleared && asks && voices,
+      'changing style ends a round: ' + cleared + ', a rehearse card opens on its question with auto-reveal on: ' + asks +
+      ', speaker buttons follow late voices: ' + voices);
   } });

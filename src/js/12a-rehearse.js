@@ -7,6 +7,14 @@
   function rehearseCode(p) { return isRehearseStyle(p) ? p.slice(3) : ''; }
   // The style the card on screen is answered in: the interjected rehearse card's, or the chosen one.
   function practiceNow() { return rehearseCard ? 'rh-' + rehearseCard.code : state.practice; }
+  // The card on screen: the interjected rehearse card, or the deck's current card (null at the deck's end).
+  function cardOnScreen() {
+    if (rehearseCard) return wordByZh(rehearseCard.zh);
+    var i = currentIndex();
+    return i === null ? null : cards[i];
+  }
+  // The skill the card on screen is answered in.
+  function skillNow() { return rehearseCard ? rehearseSkill(rehearseCard.code) : state.skill; }
   function wordByZh(zh) {
     for (var i = 0; i < wordCards.length; i++) if (wordCards[i].zh === zh) return wordCards[i];
     return null;
@@ -135,7 +143,7 @@
     closeSuggest();
     stopSpeech();
     rememberDeck();
-    roundReturn = { practice: state.practice, deckType: state.deckType };
+    var back = { practice: state.practice, deckType: state.deckType };
     useDeckType('words');
     state.practice = 'rh-' + k;
     useSkill(rehearseSkill(k));
@@ -145,6 +153,8 @@
     state.shuffled = false;
     state.revealed = false;
     undoStack = [];
+    // Set last: changing deck, mode or skill ends a round (see setMode, useDeckType, useSkill).
+    roundReturn = back;
     syncPracticeSelect();
     renderLadderStrip();
     render(true);

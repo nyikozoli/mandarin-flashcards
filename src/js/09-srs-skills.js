@@ -134,6 +134,7 @@
   function useSkill(k) {
     if (!SKILLS[k]) k = 'read';
     if (k === state.skill) return false;
+    roundReturn = null;
     stashSkill();
     state.skill = k;
     loadSkill();
@@ -148,7 +149,7 @@
     var w = el('span', 'skill-marks'), parts = [];
     Object.keys(SKILLS).forEach(function (k) {
       var s = (maps[k] || {})[c.zh] || 'unmarked';
-      var m = el('span', 'sm sm-' + s + (k === state.skill ? ' active' : ''), SKILL_ZH[k]);
+      var m = el('span', 'sm sm-' + s + (k === skillNow() ? ' active' : ''), SKILL_ZH[k]);
       if (k.indexOf('say:') === 0) m.classList.add('sm-code'); else m.setAttribute('lang', 'zh-CN');
       m.setAttribute('aria-hidden', 'true');
       w.appendChild(m);

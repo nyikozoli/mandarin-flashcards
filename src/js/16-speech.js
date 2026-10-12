@@ -18,6 +18,11 @@
     return vs[0] || null;
   }
   function canSpeak(k) { return !!voiceFor(k); }
+  // Voices often arrive after start-up (voiceschanged): show or hide the speaker buttons and the voice note again.
+  function refreshSpeakButtons() {
+    Array.prototype.forEach.call(document.querySelectorAll('.mean-speak'), function (b) { b.hidden = !canSpeak(b.getAttribute('data-lang')); });
+    if (els.rehearseVoiceNote) syncSettingsUI();
+  }
   // A small speaker button for a meaning line; hidden when the device has no voice for the language.
   function speakBtn(k, text) {
     var b = el('button', 'mean-speak', '🔊');
@@ -254,14 +259,13 @@
     }, 150));
   }
   function speakCurrent() {
-    var i = currentIndex();
-    if (i === null) return;
-    var c = cards[i];
+    var c = cardOnScreen();
+    if (!c) return;
     speakParts([c.zh].concat(c.ex.map(function (e) { return e.zh; })), els.btnSpeak);
   }
   function speakExample(k, btn) {
-    var i = currentIndex();
-    if (i === null || !cards[i].ex[k]) return;
-    speakParts([cards[i].ex[k].zh], btn);
+    var c = cardOnScreen();
+    if (!c || !c.ex[k]) return;
+    speakParts([c.ex[k].zh], btn);
   }
 
