@@ -422,6 +422,26 @@
       })();
       add('Fill the gap: one right answer', exclRes.ok, exclRes.d);
 
+      // Multiple choice: no wrong option shares a sense with the answer, is a pair from data/choice-exclude.json,
+      // or, in a listening question, sounds the same.
+      var mcRes = (function () {
+        var bad = [];
+        wordCards.forEach(function (c) {
+          var pool = choicePool(c);
+          if (pool.length < 3 || pool.some(function (x) { return optionClash(c, x, 'meaning'); })) bad.push(c.zh);
+        });
+        var w = function (zh) { return wordCards.filter(function (x) { return x.zh === zh; })[0]; };
+        var rules = optionClash(w('看'), w('读'), 'meaning') && optionClash(w('他'), w('她'), 'listen') && !optionClash(w('他'), w('她'), 'meaning') &&
+          EXTRA.choiceExclude.every(function (p) { return optionClash(w(p[1]), w(p[0]), 'word'); });
+        // Five candidates, three wrong options to fill: the two that sound like 他 must be the ones left out.
+        var picked = pickOthers(w('他'), ['她', '它', '你', '我', '好'].map(w), 3, function (x) { return x.zh; }, 'listen');
+        var heard = picked.length === 3 && !picked.some(function (o) { return o.zh === '她' || o.zh === '它'; });
+        return { ok: !bad.length && rules && heard,
+          d: (bad.length ? 'clashing options for: ' + bad.slice(0, 8).join(' ') : 'no word offers a wrong option that is also right') +
+            ', 看/读 and Jev pairs kept apart, 他/她 apart only when heard: ' + rules + ', listening quiz never offers 她 or 它 for 他: ' + heard };
+      })();
+      add('Multiple choice: one right answer', mcRes.ok, mcRes.d);
+
       var buildRes = (function () {
         var deckSnap = state.deck, posSnap = state.pos;
         useDeckType('sentences');

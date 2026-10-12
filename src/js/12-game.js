@@ -377,11 +377,12 @@
   var EXAM_PASS = 80, EXAM_SIZE = 20, BLITZ_SECONDS = 60;
   var quiz = null;
   function quizPool(lv) { return wordCards.filter(function (w) { return lv === 'all' || String(w.lv) === lv; }); }
-  function pickOthers(c, pool, n, key) {
+  // n wrong options for c of question type `type`: distinct by `key`, and none that is also right (optionClash()).
+  function pickOthers(c, pool, n, key, type) {
     var k = key(c), out = [], cand = shuffled(pool);
     for (var i = 0; i < cand.length && out.length < n; i++) {
       var x = cand[i];
-      if (x !== c && key(x) !== k && !out.some(function (o) { return key(o) === key(x); })) out.push(x);
+      if (x !== c && key(x) !== k && !optionClash(c, x, type) && !out.some(function (o) { return key(o) === key(x); })) out.push(x);
     }
     return out;
   }
@@ -393,7 +394,7 @@
       else return { type: type, c: c, ex: g.ex, opts: g.options };
     }
     var key = type === 'meaning' ? function (x) { return shortText(mainMeaning(x)).toLowerCase(); } : function (x) { return x.zh; };
-    return { type: type, c: c, opts: shuffled([c].concat(pickOthers(c, pool, 3, key))) };
+    return { type: type, c: c, opts: shuffled([c].concat(pickOthers(c, pool, 3, key, type))) };
   }
   function startQuiz(kind, lv) {
     var pool = quizPool(lv);

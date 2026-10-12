@@ -23,10 +23,34 @@
     var t = String(s).split(';')[0].replace(/\s*\([^)]*\)/g, '').trim() || String(s);
     return t.length > 60 ? t.slice(0, 57) + '…' : t;
   }
-  function buildChoices(c) {
+  // A word's English senses, to spot two words that can mean the same: split at ';' and ',', without notes in
+  // brackets, a leading "to" or an article. scripts/judge-choice.js uses the same rule.
+  var SENSES = {};
+  function senses(c) {
+    if (!SENSES[c.zh]) {
+      SENSES[c.zh] = c.en.split(/[;,]/).map(function (s) {
+        return s.replace(/\([^)]*\)/g, '').replace(/[()]/g, '').trim().toLowerCase().replace(/^to /, '').replace(/^(a|an|the) /, '').trim();
+      }).filter(function (s) { return s.length > 1; });
+    }
+    return SENSES[c.zh];
+  }
+  // True when word x must not be a wrong option for word c: the two share a sense, Jev found they can mean the same
+  // (data/choice-exclude.json), or, when the question is heard ('listen'), they sound the same.
+  function optionClash(c, x, type) {
+    if (c.sentence || x.sentence) return false;
+    if (type === 'listen' && c.py.toLowerCase().replace(/[\s'’-]/g, '') === x.py.toLowerCase().replace(/[\s'’-]/g, '')) return true;
+    var s = senses(x);
+    if (senses(c).some(function (v) { return s.indexOf(v) !== -1; })) return true;
+    return EXTRA.choiceExclude.some(function (p) { return (p[0] === c.zh && p[1] === x.zh) || (p[0] === x.zh && p[1] === c.zh); });
+  }
+  // The wrong options a multiple-choice card can offer: the same level, a different meaning, no clash.
+  function choicePool(c) {
     var key = shortText(mainMeaning(c)).toLowerCase();
-    var pool = cards.filter(function (x) { return x !== c && x.lv === c.lv && shortText(mainMeaning(x)).toLowerCase() !== key; });
-    if (pool.length < 3) pool = cards.filter(function (x) { return x !== c; });
+    var pool = cards.filter(function (x) { return x !== c && x.lv === c.lv && shortText(mainMeaning(x)).toLowerCase() !== key && !optionClash(c, x, 'meaning'); });
+    return pool.length >= 3 ? pool : cards.filter(function (x) { return x !== c && !optionClash(c, x, 'meaning'); });
+  }
+  function buildChoices(c) {
+    var pool = choicePool(c);
     var opts = [c];
     while (opts.length < 4 && pool.length) opts.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
     for (var i = opts.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = opts[i]; opts[i] = opts[j]; opts[j] = t; }

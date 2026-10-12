@@ -65,6 +65,14 @@ if (CLOZE_EXCLUDE) {
     });
   });
 }
+//   data/choice-exclude.json  pairs of words that can mean the same, never each other's wrong option: { pairs: [[a, b]] }
+const CHOICE_EXCLUDE = optJson(dataPath('choice-exclude.json'));
+if (CHOICE_EXCLUDE) {
+  const heads = new Set(cards.map((c) => c.zh));
+  (CHOICE_EXCLUDE.pairs || []).forEach((p) => {
+    if (!Array.isArray(p) || p.length !== 2 || p[0] === p[1] || !heads.has(p[0]) || !heads.has(p[1])) throw new Error('Choice exclude: not a pair of two headwords: ' + JSON.stringify(p));
+  });
+}
 //   data/ladder.json  can-do steps: { rungs: [{ id, zh, py, en, hu, words: [headword], sentences: [example sentence] }] }
 const LADDER = optJson(dataPath('ladder.json'));
 if (LADDER) {
@@ -111,7 +119,7 @@ const total = expected[1] + expected[2] + expected[3];
 const safeJson = (v) => JSON.stringify(v).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026')
   .replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
 const json = safeJson(cards);
-const extraJson = safeJson({ chars: FREQ ? FREQ.chars : {}, topics: TOPICS ? TOPICS.topics : [], hints: HINTS ? HINTS.hints : {}, news: CHANGELOG ? CHANGELOG.releases : [], ladder: LADDER ? LADDER.rungs : [], clozeExclude: CLOZE_EXCLUDE ? CLOZE_EXCLUDE.exclude : [] });
+const extraJson = safeJson({ chars: FREQ ? FREQ.chars : {}, topics: TOPICS ? TOPICS.topics : [], hints: HINTS ? HINTS.hints : {}, news: CHANGELOG ? CHANGELOG.releases : [], ladder: LADDER ? LADDER.rungs : [], clozeExclude: CLOZE_EXCLUDE ? CLOZE_EXCLUDE.exclude : [], choiceExclude: CHOICE_EXCLUDE ? CHOICE_EXCLUDE.pairs : [] });
 
 // ---------- html ----------
 // The app's source: src/index.html is the page. Its /*__STYLES__*/ and /*__SCRIPTS__*/ lines are replaced by the
