@@ -1,6 +1,19 @@
 {
   "releases": [
     {
+      "version": "2.7",
+      "date": "2026-10-12",
+      "title": "Bigger study modes",
+      "groups": [
+        {
+          "name": "",
+          "items": [
+            "The study modes at the top (All cards, Due, Learning, New, Hardest) are bigger and easier to tap, with larger counts."
+          ]
+        }
+      ]
+    },
+    {
       "version": "2.6",
       "date": "2026-10-12",
       "title": "Room to breathe on big screens",

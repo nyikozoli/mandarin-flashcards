@@ -204,3 +204,11 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
   .sheet { max-width: 1000px; }
 }
 @media (min-width: 1800px) { .app { max-width: 1680px; grid-template-columns: minmax(420px, 480px) minmax(0, 1fr); } }
+
+/* Study modes (All cards, Due, Learning, New, Hardest): the main choice on the page, so bigger than the rows below. */
+.mode { min-height: 60px; font-size: 15.5px; font-weight: 700; gap: 2px; }
+.mode .lbl .zl { font-size: .8em; }
+.mode .count { font-size: 13px; font-weight: 700; }
+@media (max-width: 420px) { .mode { min-height: 56px; font-size: 13.5px; padding: 4px 1px; } .mode .count { font-size: 12.5px; } }
+@media (max-width: 360px) { .mode { font-size: 12.5px; } }
+@media (min-width: 960px) { .mode { min-height: 66px; font-size: 16.5px; } .mode .count { font-size: 13.5px; } }
