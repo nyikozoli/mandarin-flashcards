@@ -192,7 +192,7 @@
     if (saved && saved.activity && typeof saved.activity === 'object') {
       Object.keys(saved.activity).forEach(function (k) {
         var a = saved.activity[k];
-        if (/^\d{4}-\d{2}-\d{2}$/.test(k) && a && typeof a === 'object') state.activity[k] = { k: Math.max(0, parseInt(a.k, 10) || 0), l: Math.max(0, parseInt(a.l, 10) || 0) };
+        if (/^\d{4}-\d{2}-\d{2}$/.test(k) && a && typeof a === 'object') state.activity[k] = { k: Math.max(0, parseInt(a.k, 10) || 0), l: Math.max(0, parseInt(a.l, 10) || 0), r: Math.max(0, parseInt(a.r, 10) || 0) };
       });
     }
     state.topic = saved && typeof saved.topic === 'string' && topicById(saved.topic) ? saved.topic : 'all';

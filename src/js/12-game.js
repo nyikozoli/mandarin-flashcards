@@ -202,11 +202,11 @@
   }
   // Last week's numbers, or null when there was nothing that week.
   function weekRecap(start) {
-    var d = new Date(start + 'T12:00:00'), k = 0, l = 0, days = 0, best = null;
+    var d = new Date(start + 'T12:00:00'), k = 0, l = 0, r = 0, days = 0, best = null;
     for (var i = 0; i < 7; i++) {
       var key = dayKey(d), a = state.activity[key];
       if (a && a.k + a.l > 0) {
-        k += a.k; l += a.l; days++;
+        k += a.k; l += a.l; r += a.r || 0; days++;
         if (!best || a.k + a.l > best.n) best = { day: WEEKDAYS[d.getDay()], n: a.k + a.l };
       }
       d.setDate(d.getDate() + 1);
@@ -214,7 +214,7 @@
     if (!days) return null;
     var end = dayKey(d), learned = 0;
     wordCards.forEach(function (w) { var x = state.learned[w.zh]; if (x && x >= start && x < end) learned++; });
-    return { cards: k + l, accuracy: Math.round(k / (k + l) * 100), days: days, best: best, learned: learned };
+    return { cards: k + l, accuracy: Math.round(k / (k + l) * 100), days: days, best: best, learned: learned, rehearse: r };
   }
   function maybeShowRecap() {
     var thisWeek = weekStart();
@@ -236,6 +236,7 @@
       row.appendChild(tile);
     });
     b.appendChild(row);
+    if (r.rehearse) b.appendChild(el('p', 'sum-line', 'Rehearsed languages: ' + r.rehearse + ' cards.'));
     b.appendChild(el('p', 'sum-line', r.days >= 5 ? 'A strong week. Keep the rhythm going.' : 'A new week: three quests are waiting today.'));
     openOverlay(els.summaryView, els.btnSummaryClose);
   }

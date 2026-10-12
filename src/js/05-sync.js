@@ -353,6 +353,16 @@
   // Both copies are shown with their last-modified date and their known/learning counts,
   // because only one of them survives. sync.conflict pauses auto-push until the user picks,
   // so a debounced save cannot resolve the race silently in the background.
+  // " · 12 Romanian known" for every rehearse skill in a snapshot's skills; '' when there are none.
+  function rehearseNote(skills) {
+    var parts = [];
+    MEANING_LANGS.forEach(function (l) {
+      var m = skills && skills[rehearseSkill(l[0])], n = 0;
+      if (m && m.status) Object.keys(m.status).forEach(function (z) { if (m.status[z] === 'known') n++; });
+      if (n) parts.push(n + ' ' + langName(l[0]) + ' known');
+    });
+    return parts.length ? ' · ' + parts.join(' · ') : '';
+  }
   function offerConflict(remote) {
     if (!remote) {
       renderSyncUI();
@@ -372,16 +382,16 @@
     var keepDevice = function () { doPush('replaced the cloud copy', remote.updated_at); };
     // Both choices are offered; the newer copy is the main button. Newer is not always the
     // one you want (a phone with older but fuller progress), so the other stays one tap away.
-    var copy = function (label, iso, c, newer) {
+    var copy = function (label, iso, c, newer, note) {
       var w = fmtWhen(iso).split(' · ');
-      return { label: label, when: w[0], ago: w[1] || '', counts: c.known + ' known · ' + c.learning + ' learning', newer: newer };
+      return { label: label, when: w[0], ago: w[1] || '', counts: c.known + ' known · ' + c.learning + ' learning' + (note || ''), newer: newer };
     };
     askConfirm(
       cloudNewer ? 'The cloud copy is newer' : 'This device is newer',
       'Both copies changed since this device last synced. Keep one; the other is replaced and cannot be undone.',
       cloudNewer ? 'Keep the cloud copy' : 'Keep this device', cloudNewer ? keepCloud : keepDevice,
       cloudNewer ? 'Keep this device' : 'Keep the cloud copy', cloudNewer ? keepDevice : keepCloud,
-      { tone: 'primary', compare: [copy('In the cloud', remote.updated_at, rc, cloudNewer), copy('On this device', ls, lc, !cloudNewer)] });
+      { tone: 'primary', compare: [copy('In the cloud', remote.updated_at, rc, cloudNewer, rehearseNote(remote.data && remote.data.skills)), copy('On this device', ls, lc, !cloudNewer, rehearseNote(progressSnapshot().skills))] });
   }
   // Decide between pulling, pushing and asking. Only asks when the cloud copy changed
   // since this device last saw it, or when this device has never synced.

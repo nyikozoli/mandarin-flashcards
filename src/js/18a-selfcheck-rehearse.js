@@ -246,3 +246,23 @@
       'speaker hidden without a voice: ' + btn + ', "Off" reads no meaning: ' + off + ', "Always" reads the main one: ' + always +
       ', a Romanian part is spoken as ro-RO: ' + (speechSupported ? tagged : 'no speech in this browser'));
   } });
+
+  REHEARSE_TESTS.push({ title: 'Rehearse progress and sync counts', run: function (add) {
+    if (!LANG_AVAILABLE.ro) { add('Rehearse progress and sync counts', true, 'No Romanian data in this build.'); return; }
+    state.langs.ro = 'rehearse';
+    rebuildSkills();
+    var picked = seedRehearsePool('ro', 2);
+    (state.marks['say:ro'] || (state.marks['say:ro'] = emptyMarks())).status[picked[0].zh] = 'known';
+    openProgress('progress');
+    var line = els.pvBody.querySelector('.pv-skills');
+    var shown = !!line && line.textContent.indexOf('Romanian') !== -1;
+    closeOverlay(els.progressView);
+    var note = rehearseNote(progressSnapshot().skills).indexOf('1 Romanian known') !== -1;
+    var day = '2001-01-01';
+    state.activity[day] = { k: 1, l: 0, r: 3 };
+    var recap = weekRecap(day).rehearse === 3;
+    delete state.activity[day];
+    delete state.marks['say:ro'];
+    add('Rehearse progress and sync counts', shown && note && recap,
+      'progress lists Romanian next to the skills: ' + shown + ', the sync conflict cards count Romanian: ' + note + ', the weekly recap counts rehearse answers: ' + recap);
+  } });

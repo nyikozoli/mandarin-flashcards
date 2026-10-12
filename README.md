@@ -5,6 +5,7 @@ Offline flashcards for 598 HSK 1–3 words and their 777 example sentences, with
 - **Learning aids:** character memory hints, topics, and word frequency.
 - **Motivation and games:** daily quests, a 60-second blitz, level exams, seals to collect, and a panda that grows as you study.
 - **Interface:** labels in 中文 + English.
+- **Rehearse languages you know:** English, Hungarian, German, Spanish or Romanian alongside the Chinese, with their own marks, cards mixed into the deck, a round after the daily goal, and read-aloud.
 
 What changed in each version is in `data/changelog.json` and in the app under Settings → What's new.
 

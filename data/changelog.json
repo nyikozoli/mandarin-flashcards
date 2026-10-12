@@ -1,6 +1,22 @@
 {
   "releases": [
     {
+      "version": "3.0",
+      "date": "2026-10-12",
+      "title": "Rehearse the languages you know",
+      "groups": [
+        {
+          "name": "",
+          "items": [
+            "Rehearse a language you already know: in Settings → Translations each language is Off, Show or Rehearse.",
+            "A rehearsed language gets its own marks: cards show the Chinese and ask for the word in that language, every few cards in the word deck, as a 5-card round after the daily goal, as a practice style and as a daily quest.",
+            "A rehearsed language also takes turns as the main meaning, on the share of cards its slider sets.",
+            "Meanings and example translations can be read aloud in English, Hungarian, German, Spanish and Romanian; Settings → Voice can read the meaning after the Chinese."
+          ]
+        }
+      ]
+    },
+    {
       "version": "2.9",
       "date": "2026-10-12",
       "title": "Fixes",

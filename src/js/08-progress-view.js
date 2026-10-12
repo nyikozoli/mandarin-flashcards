@@ -35,6 +35,7 @@
     var a = state.activity[key] || (state.activity[key] = { k: 0, l: 0 });
     var before = a.k + a.l;
     if (kind === 'known') a.k++; else a.l++;
+    if (isRehearseAnswer()) a.r = (a.r || 0) + 1;
     var keys = Object.keys(state.activity).sort();
     while (keys.length > 400) delete state.activity[keys.shift()];
   }
@@ -270,8 +271,16 @@
     panes.today.appendChild(questSection());
     panes.progress.appendChild(hero);
     panes.progress.appendChild(legend());
+    var rhLine = langsRehearsed().map(function (k) {
+      var pool = rehearsePool(k), st = marksOf(rehearseSkill(k)), kn = 0, le = 0, today = dayKey(), due = 0;
+      pool.forEach(function (c) {
+        if (st.status[c.zh] === 'known') kn++; else if (st.status[c.zh] === 'learning') le++;
+        if (st.srs[c.zh] && st.srs[c.zh].d <= today) due++;
+      });
+      return ' ' + langName(k) + ': ' + kn + ' known, ' + le + ' learning, ' + (pool.length - kn - le) + ' new, ' + due + ' due.';
+    }).join('');
     panes.progress.appendChild(el('p', 'pv-skills', 'Known ' + noun(2) + ' per skill: reading ' + knownIn('read') + ', recall ' + knownIn('recall') +
-      ', listening ' + knownIn('listen') + '. The practice style you pick decides which one you are training.'));
+      ', listening ' + knownIn('listen') + '. The practice style you pick decides which one you are training.' + rhLine));
     panes.progress.appendChild(readingSection());
     panes.collection.appendChild(statsSection());
     var visit = el('button', 'btn small pv-visit', '🐼 Visit ' + (state.petName || '宝宝'));
