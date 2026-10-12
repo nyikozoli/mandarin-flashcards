@@ -79,12 +79,14 @@
   function langsRehearsed() { return MEANING_LANGS.map(function (l) { return l[0]; }).filter(function (k) { return langRole(k) === 'rehearse'; }); }
   // The base meaning is the first language on. A rehearsed language takes the main meaning's place on its share of
   // cards (the base keeps at least 30%); the pick hangs on the card and the day, so it holds through undo and revisits.
+  // A rehearsed language's share of main meanings (percent); 30 until the slider sets it.
+  function shareOf(k) { var v = state.rehearse.share[k]; return typeof v === 'number' ? v : 30; }
   function baseLang() { return langsOn()[0]; }
   function mainLang(o) {
     var base = baseLang();
     if (!o || !o.zh) return base;
     var rh = langsRehearsed().filter(function (k) { return k !== base && mean(o, k); });
-    var shares = rh.map(function (k) { return state.rehearse.share[k] || 0; });
+    var shares = rh.map(shareOf);
     var total = shares.reduce(function (a, b) { return a + b; }, 0);
     if (!total) return base;
     var scale = total > 70 ? 70 / total : 1, x = hashDay(o.zh + '|' + dayKey()) % 100, acc = 0;

@@ -60,7 +60,7 @@
   function pickRehearseLang() {
     var ls = langsRehearsed();
     if (!ls.length) return '';
-    var w = ls.map(function (k) { return Math.max(1, state.rehearse.share[k] || 0); });
+    var w = ls.map(function (k) { return Math.max(1, shareOf(k)); });
     var x = Math.random() * w.reduce(function (a, b) { return a + b; }, 0);
     for (var i = 0; i < ls.length; i++) { x -= w[i]; if (x < 0) return ls[i]; }
     return ls[ls.length - 1];
@@ -114,7 +114,7 @@
       if (h.miss) state.misses[h.zh] = h.miss; else delete state.misses[h.zh];
     });
     var a = state.activity[h.day];
-    if (a && (h.kind === 'known' || h.kind === 'learning')) { if (h.kind === 'known') a.k = Math.max(0, a.k - 1); else a.l = Math.max(0, a.l - 1); }
+    if (a && (h.kind === 'known' || h.kind === 'learning')) { if (h.kind === 'known') a.k = Math.max(0, a.k - 1); else a.l = Math.max(0, a.l - 1); a.r = Math.max(0, (a.r || 0) - 1); }
     rehearseCard = { zh: h.zh, code: h.rehearse };
     state.revealed = false;
     stopSpeech();

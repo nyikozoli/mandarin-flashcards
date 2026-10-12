@@ -134,7 +134,7 @@
       els['optLang' + K].value = role;
       els['optLang' + K].closest('.lang-row').hidden = !LANG_AVAILABLE[k];
       share.hidden = out.hidden = role !== 'rehearse';
-      share.value = String(state.rehearse.share[k] != null ? state.rehearse.share[k] : 30);
+      share.value = String(shareOf(k));
       out.textContent = share.value + '%';
     });
     els.rehearseOpts.hidden = !langsRehearsed().length;

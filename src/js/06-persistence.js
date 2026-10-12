@@ -159,6 +159,8 @@
     state.rehearse = readRehearse(saved && saved.rehearse);
     rebuildSkills();
     if (saved && PRACTICE[saved.practice]) state.practice = saved.practice;
+    // A rehearse style saved by a copy where that language was rehearsed: its deck was built from that language's marks.
+    var rehearseGone = !!(saved && isRehearseStyle(saved.practice) && state.practice !== saved.practice);
     fixStyleForDeck();
     if (saved && Array.isArray(saved.milestones)) state.milestones = saved.milestones.filter(function (m) { return typeof m === 'string'; }).slice(-500);
     var readMarks = function (src) {
@@ -250,7 +252,7 @@
         if (typeof z === 'string' && has(z) && !used[z]) { used[z] = true; deck.push(byZh[z]); }
       });
     }
-    var deckOk = deck.length > 0 && (state.mode !== 'all' || deck.length === buildDeck('all').length) && deck.every(function (i) { return inLevel(cards[i]); });
+    var deckOk = !rehearseGone && deck.length > 0 && (state.mode !== 'all' || deck.length === buildDeck('all').length) && deck.every(function (i) { return inLevel(cards[i]); });
     if (deckOk) {
       state.deck = deck;
       state.pos = clampInt(saved.pos, 0, deck.length);

@@ -6,7 +6,7 @@
     if (i === null) return false;
     var c = cards[i];
     var entry = { pos: state.pos, zh: c.zh, prev: state.status[c.zh] || null, srs: state.srs[c.zh] || null,
-      miss: state.misses[c.zh] || 0, day: dayKey(), kind: kind, requeued: false };
+      miss: state.misses[c.zh] || 0, day: dayKey(), kind: kind, requeued: false, r: isRehearseStyle(state.practice) };
     undoStack.push(entry);
     if (undoStack.length > 200) undoStack.shift();
     if (kind === 'known' || kind === 'learning') {
@@ -60,7 +60,7 @@
     if (h.miss) state.misses[h.zh] = h.miss; else delete state.misses[h.zh];
     if (h.requeued) state.deck.pop();
     var a = state.activity[h.day];
-    if (a && (h.kind === 'known' || h.kind === 'learning')) { if (h.kind === 'known') a.k = Math.max(0, a.k - 1); else a.l = Math.max(0, a.l - 1); }
+    if (a && (h.kind === 'known' || h.kind === 'learning')) { if (h.kind === 'known') a.k = Math.max(0, a.k - 1); else a.l = Math.max(0, a.l - 1); if (h.r) a.r = Math.max(0, (a.r || 0) - 1); }
     state.pos = Math.min(h.pos, state.deck.length);
     state.revealed = state.autoReveal;
     stopSpeech();
@@ -182,11 +182,8 @@
       m.appendChild(t);
       els.cardMeanMore.appendChild(m);
     });
-    [[els.cardEn, 'en'], [els.cardHu, 'hu']].forEach(function (x) {
-      var box = x[0].parentNode, old = box.querySelector('.mean-speak');
-      if (old) box.removeChild(old);
-      box.appendChild(speakBtn(x[1], mean(c, x[1])));
-    });
+    setSpeaker(els.cardEn, 'en', c.en);
+    setSpeaker(els.cardHu, 'hu', c.hu);
     Array.prototype.forEach.call(els.cardMeanMore.querySelectorAll('.meaning'), function (m) {
       var p = m.querySelector('p');
       m.appendChild(speakBtn(p.getAttribute('lang'), p.textContent));

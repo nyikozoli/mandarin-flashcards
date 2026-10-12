@@ -147,7 +147,8 @@
   function skillMarks(c, maps) {
     maps = maps || skillMaps();
     var w = el('span', 'skill-marks'), parts = [];
-    Object.keys(SKILLS).forEach(function (k) {
+    // Rehearse skills are words only, so sentences show just the three skills.
+    Object.keys(SKILLS).filter(function (k) { return !c.sentence || k.indexOf('say:') !== 0; }).forEach(function (k) {
       var s = (maps[k] || {})[c.zh] || 'unmarked';
       var m = el('span', 'sm sm-' + s + (k === skillNow() ? ' active' : ''), SKILL_ZH[k]);
       if (k.indexOf('say:') === 0) m.classList.add('sm-code'); else m.setAttribute('lang', 'zh-CN');

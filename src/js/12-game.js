@@ -128,7 +128,10 @@
     sentence: { label: function (q) { return q.goal + ' sentence cards'; } },
     combo: { label: function (q) { return 'Reach a ' + q.goal + ' combo'; } },
     topic: { label: function (q) { return q.goal + ' answers inside one topic'; } },
-    rehearse: { label: function (q) { return 'Answer ' + q.goal + ' ' + langName(langsRehearsed()[0] || 'ro') + ' cards'; } }
+    rehearse: { label: function (q) {
+      var ls = langsRehearsed();
+      return ls.length === 1 ? 'Answer ' + q.goal + ' ' + langName(ls[0]) + ' cards' : 'Answer ' + q.goal + ' cards in a rehearsed language';
+    } }
   };
   function makeQuests(k) {
     var h = hashDay(k), pool = ['fresh', 'listen', 'recall', 'sentence', 'combo'];
@@ -148,7 +151,15 @@
   function todaysQuests() {
     var k = dayKey();
     if (!state.quests || state.quests.day !== k) state.quests = makeQuests(k);
-    return state.quests;
+    // A rehearse quest whose languages were all switched off today gives way to another quest.
+    var qs = state.quests;
+    if (!langsRehearsed().length) qs.list.forEach(function (q, i) {
+      if (q.id !== 'rehearse') return;
+      var used = qs.list.map(function (x) { return x.id; });
+      var id = ['fresh', 'listen', 'recall', 'sentence', 'combo'].filter(function (x) { return used.indexOf(x) === -1; })[0];
+      if (id) qs.list[i] = { id: id, goal: id === 'fresh' ? 5 : 10, n: 0 };
+    });
+    return qs;
   }
   // Called for every graded answer. prev is the card's mark before the answer.
   function questEvent(kind, c, prev) {

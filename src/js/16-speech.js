@@ -18,6 +18,11 @@
     return vs[0] || null;
   }
   function canSpeak(k) { return !!voiceFor(k); }
+  // True when these parts include Chinese and the device has no Chinese voice.
+  function needsChineseVoice(parts) { return !zhVoice && parts.some(function (p) { return typeof p === 'string'; }); }
+  function speechErrorText(k, err) {
+    return 'Speech could not be played' + (err ? ' (' + err + ')' : '') + '. Your device may need a ' + (k ? langName(k) : 'Chinese') + ' voice installed.';
+  }
   // Voices often arrive after start-up (voiceschanged): show or hide the speaker buttons and the voice note again.
   function refreshSpeakButtons() {
     Array.prototype.forEach.call(document.querySelectorAll('.mean-speak'), function (b) { b.hidden = !canSpeak(b.getAttribute('data-lang')); });
@@ -32,6 +37,12 @@
     b.setAttribute('aria-label', 'Read the ' + langName(k) + ' aloud');
     b.hidden = !canSpeak(k);
     return b;
+  }
+  // Puts a single speaker button after a fixed meaning line (the card's and the word pop-up's English and Hungarian).
+  function setSpeaker(line, k, text) {
+    var box = line.parentNode, old = box.querySelector('.mean-speak');
+    if (old) box.removeChild(old);
+    box.appendChild(speakBtn(k, text));
   }
   // What to say after the Chinese on reveal: the main meaning (or the rehearse card's language), if the setting allows it.
   function meaningSpeech(c) {
@@ -177,7 +188,7 @@
     stopSpeech();
     if (!parts.length) return;
     pickVoice();
-    if (!zhVoice && !warnedNoVoice) {
+    if (needsChineseVoice(parts) && !warnedNoVoice) {
       warnedNoVoice = true;
       toast('No Chinese voice was found on this device, so the browser default voice is used with zh-CN. For correct pronunciation, install a Chinese (Mandarin) voice in your system settings.', 8000);
     }
@@ -223,7 +234,7 @@
             (zhVoice ? '. Using ' + zhVoice.name.replace(/^Microsoft\s+/, '').replace(/\s+-\s+Chinese.*$/, '') + ' instead.' : '.'), 6000);
           if (zhVoice) { speakTimers.push(setTimeout(next, 80)); return; }
         }
-        toast('Speech could not be played' + (err ? ' (' + err + ')' : '') + '. Your device may need a Chinese voice installed.', 6000);
+        toast(speechErrorText(k, err), 6000);
         finish();
         speakToken++;
       };

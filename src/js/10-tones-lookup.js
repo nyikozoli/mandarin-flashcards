@@ -160,6 +160,8 @@
     els.wordPopLv.textContent = 'HSK ' + w.lv;
     els.wordPopEn.textContent = w.en;
     els.wordPopHu.textContent = w.hu;
+    setSpeaker(els.wordPopEn, 'en', w.en);
+    setSpeaker(els.wordPopHu, 'hu', w.hu);
     var on = langsOn();
     els.wordPopEn.parentNode.hidden = on.indexOf('en') === -1;
     els.wordPopHu.parentNode.hidden = on.indexOf('hu') === -1;

@@ -380,3 +380,95 @@
       'changing style ends a round: ' + cleared + ', a rehearse card opens on its question with auto-reveal on: ' + asks +
       ', speaker buttons follow late voices: ' + voices);
   } });
+
+  REHEARSE_TESTS.push({ title: 'Rehearse quest follows the language roles', run: function (add) {
+    if (!LANG_AVAILABLE.ro || !LANG_AVAILABLE.de) { add('Rehearse quest follows the language roles', true, 'No Romanian or German data in this build.'); return; }
+    state.langs.ro = 'rehearse';
+    rebuildSkills();
+    var day = dayKey();
+    state.quests = { day: day, rewarded: false, list: [{ id: 'goal', goal: 20, n: 0 }, { id: 'rehearse', goal: 5, n: 2 }, { id: 'combo', goal: 10, n: 0 }] };
+    var one = QUESTS.rehearse.label(state.quests.list[1]) === 'Answer 5 Romanian cards';
+    state.langs.de = 'rehearse';
+    rebuildSkills();
+    var two = QUESTS.rehearse.label(state.quests.list[1]) === 'Answer 5 cards in a rehearsed language';
+    state.langs.ro = 'show'; state.langs.de = 'show';
+    rebuildSkills();
+    var ids = todaysQuests().list.map(function (q) { return q.id; });
+    var replaced = ids.length === 3 && ids.indexOf('rehearse') === -1 && ids.indexOf('goal') === 0 && ids.indexOf('combo') !== -1;
+    add('Rehearse quest follows the language roles', one && two && replaced,
+      'one language named: ' + one + ', several called "a rehearsed language": ' + two + ', switched off, the quest is replaced: ' + replaced + ' (' + ids.join(', ') + ')');
+  } });
+
+  REHEARSE_TESTS.push({ title: 'Speech messages name the right language', run: function (add) {
+    var roOnly = !needsChineseVoice([{ text: 'casă', lang: 'ro' }]);
+    var zh = needsChineseVoice(['家', { text: 'casă', lang: 'ro' }]) === !zhVoice;
+    var msg = speechErrorText('ro', 'synthesis-failed');
+    var named = msg.indexOf('Romanian voice') !== -1 && msg.indexOf('Chinese') === -1 && speechErrorText('', '').indexOf('Chinese voice') !== -1;
+    add('Speech messages name the right language', roOnly && zh && named,
+      'Romanian alone never asks for a Chinese voice: ' + roOnly + ', Chinese parts still do: ' + zh + ', the error names the language: ' + named);
+  } });
+
+  REHEARSE_TESTS.push({ title: 'Undo takes back the rehearse count', run: function (add) {
+    var day = dayKey(), c = wordCards[0];
+    var keepA = state.activity[day] ? JSON.parse(JSON.stringify(state.activity[day])) : null;
+    state.activity[day] = { k: 5, l: 1, r: 3 };
+    undoStack.push({ rehearse: 'ro', pos: state.pos, zh: c.zh, prev: null, srs: null, miss: 0, day: day, kind: 'known', requeued: false });
+    undo();
+    var interjected = state.activity[day].k === 4 && state.activity[day].r === 2;
+    rehearseCard = null;
+    undoStack.push({ pos: state.pos, zh: c.zh, prev: state.status[c.zh] || null, srs: state.srs[c.zh] || null, miss: state.misses[c.zh] || 0, day: day, kind: 'learning', requeued: false, r: true });
+    undo();
+    var tile = state.activity[day].l === 0 && state.activity[day].r === 1;
+    if (keepA) state.activity[day] = keepA; else delete state.activity[day];
+    add('Undo takes back the rehearse count', interjected && tile,
+      'undo of a mixed-in rehearse card: ' + interjected + ', undo of a rehearse-tile answer: ' + tile);
+  } });
+
+  REHEARSE_TESTS.push({ title: 'No rehearse seal on sentences', run: function (add) {
+    if (!LANG_AVAILABLE.ro) { add('No rehearse seal on sentences', true, 'No Romanian data in this build.'); return; }
+    state.langs.ro = 'rehearse';
+    rebuildSkills();
+    var onWord = !!skillMarks(wordCards[0]).querySelector('.sm-code');
+    var onSentence = !!skillMarks(sentCards[0]).querySelector('.sm-code');
+    add('No rehearse seal on sentences', onWord && !onSentence, 'RO seal on words: ' + onWord + ', on sentences: ' + onSentence);
+  } });
+
+  REHEARSE_TESTS.push({ title: 'Word pop-up speakers on every meaning', run: function (add) {
+    var a = el('button', 'w', wordCards[0].zh);
+    a.setAttribute('data-w', wordCards[0].zh);
+    els.cardExamples.appendChild(a);
+    openWordPop(a);
+    var en = !!els.wordPopEn.parentNode.querySelector('.mean-speak[data-lang="en"]');
+    var hu = !!els.wordPopHu.parentNode.querySelector('.mean-speak[data-lang="hu"]');
+    openWordPop(a);
+    var once = els.wordPopEn.parentNode.querySelectorAll('.mean-speak').length === 1;
+    closeWordPop(false);
+    a.parentNode.removeChild(a);
+    add('Word pop-up speakers on every meaning', en && hu && once, 'English: ' + en + ', Hungarian: ' + hu + ', one each after reopening: ' + once);
+  } });
+
+  REHEARSE_TESTS.push({ title: 'A saved rehearse deck that no longer fits is rebuilt', run: function (add) {
+    var snap = progressSnapshot();
+    var mod = JSON.parse(JSON.stringify(snap));
+    mod.practice = 'rh-ro';
+    mod.mode = 'due';
+    mod.langs.ro = 'show';
+    mod.deck = [wordCards[0].zh];
+    restore(mod);
+    var rebuilt = state.practice === 'zh' && state.skill === 'read' && state.deck.join() === buildDeck('due').join();
+    restore(JSON.parse(JSON.stringify(snap)));
+    render(false);
+    add('A saved rehearse deck that no longer fits is rebuilt', rebuilt, 'a Due deck saved in Romanian comes back as the reading Due deck: ' + rebuilt);
+  } });
+
+  REHEARSE_TESTS.push({ title: 'Share slider and rotation agree', run: function (add) {
+    if (!LANG_AVAILABLE.ro) { add('Share slider and rotation agree', true, 'No Romanian data in this build.'); return; }
+    state.langs.ro = 'rehearse';
+    state.rehearse.share = {};
+    rebuildSkills();
+    syncSettingsUI();
+    var withRo = wordCards.filter(function (w) { return mean(w, 'ro'); });
+    var n = withRo.filter(function (w) { return mainLang(w) === 'ro'; }).length / withRo.length;
+    var agree = els.optShareRo.value === '30' && shareOf('ro') === 30 && n > 0.18 && n < 0.42;
+    add('Share slider and rotation agree', agree, 'missing share: slider ' + els.optShareRo.value + '%, rotation ' + Math.round(n * 100) + '%');
+  } });
