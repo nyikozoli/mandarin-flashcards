@@ -246,3 +246,14 @@ body.labels-zh .practice-name .lbl .zl, body.labels-zh .pk-tile .lbl .zl { color
 .pk-deck { margin: 0; color: var(--muted); font-size: 12px; font-weight: 700; }
 .pk-ask { color: var(--muted); font-size: 12.5px; font-weight: 500; line-height: 1.35; }
 @media (max-width: 360px) { .practice-change { display: none; } .pk-tile { padding: 8px 9px; font-size: 13px; } }
+
+/* The card's top line (level and number, frequency rank, skill marks, status): a size up, easier to read. */
+.card-meta { font-size: 14.5px; }
+.card-meta .rank-tag { font-size: 13px; padding: 3px 10px; }
+.card-meta .combo-tag { font-size: 13.5px; padding: 3px 10px; }
+.card-meta .status-tag { font-size: 13.5px; padding: 4px 12px; }
+.card-meta .sm { width: 24px; height: 24px; font-size: 14px; border-radius: 5px; }
+.card-meta .skill-marks { gap: 4px; }
+@media (max-width: 420px) { .card-meta { font-size: 14px; } .card-meta .meta-left, .card-meta .meta-right { gap: 6px; } .card-meta .rank-tag { font-size: 12.5px; padding: 2px 8px; } .card-meta .status-tag { font-size: 13px; padding: 3px 10px; } .card-meta .sm { width: 22px; height: 22px; font-size: 13px; } }
+@media (max-width: 360px) { .card-meta { font-size: 13px; } .card-meta .rank-tag { font-size: 11.5px; padding: 2px 7px; } .card-meta .status-tag { font-size: 12.5px; padding: 3px 8px; } .card-meta .sm { width: 21px; height: 21px; font-size: 12.5px; } }
+@media (min-width: 960px) { .card-meta { font-size: 15.5px; } .card-meta .rank-tag { font-size: 14px; } .card-meta .status-tag { font-size: 14.5px; } .card-meta .sm { width: 27px; height: 27px; font-size: 15.5px; } }
