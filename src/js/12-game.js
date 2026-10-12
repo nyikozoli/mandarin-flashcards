@@ -810,8 +810,9 @@
     var kind = s === els.wotd ? 'wotd' : 'ladder';
     els.suggestSeal.textContent = s.querySelector('.wotd-seal').textContent;
     els.suggestSeal.className = 'suggest-seal ' + kind;
-    els.suggestText.textContent = kind === 'wotd' ? els.wotdZh.textContent + ' ' + els.wotdPy.textContent
-      : els.ladderZh.textContent + ' \u00b7 ' + els.ladderLeft.textContent;
+    els.suggestText.textContent = kind === 'wotd' ? els.wotdZh.textContent + ' ' + els.wotdPy.textContent : els.ladderZh.textContent;
+    // The ladder's count drops out on phones, where the row has no room; the popover shows it.
+    if (kind === 'ladder') els.suggestText.appendChild(el('span', 'sg-more', ' \u00b7 ' + els.ladderLeft.firstChild.textContent + ' to go'));
     els.btnSuggest.setAttribute('aria-label', (kind === 'wotd' ? 'Word of the day: ' + els.wotdZh.textContent : 'Next ladder step: ' + els.ladderZh.textContent + ', ' + els.ladderLeft.textContent) + '. Show');
   }
   function openSuggest() {
