@@ -176,6 +176,8 @@
     });
     on('btnWotdClose', 'click', dismissWotd);
     on('btnLadderClose', 'click', dismissLadder);
+    on('btnRehearseGo', 'click', function () { startRehearseRound(els.rehearseStrip.getAttribute('data-lang')); });
+    on('btnRehearseClose', 'click', function () { state.rehearseSeen = dayKey(); renderLadderStrip(); save(); });
     on('btnSuggest', 'click', function () { if (els.suggestPop.hidden) openSuggest(); else closeSuggest(); });
     // Any action in the popover (Study, Practise, See, ✕) closes it once its own handler has run.
     on('suggestPop', 'click', function (e) { if (e.target.closest && e.target.closest('button')) closeSuggest(); });

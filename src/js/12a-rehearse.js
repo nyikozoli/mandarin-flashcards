@@ -113,3 +113,54 @@
     render(true);
     save();
   }
+
+  /* ---------- a short rehearse round after the daily goal ---------- */
+  var ROUND_SIZE = 5;
+  // Where to go back to when the round's last card is answered ({ practice, deckType }); null outside a round.
+  var roundReturn = null;
+  function roundLang() {
+    return langsRehearsed().filter(function (k) { return rehearsePool(k).length >= ROUND_SIZE; })[0] || '';
+  }
+  function renderRehearseStrip() {
+    var k = state.rehearse.afterGoal && state.rehearseSeen !== dayKey() && dayAnswers(dayKey()) >= state.goal ? roundLang() : '';
+    els.rehearseStrip.hidden = !k;
+    els.rehearseStrip.setAttribute('data-lang', k);
+    els.rehearseText.textContent = k ? 'Goal done. ' + ROUND_SIZE + ' ' + langName(k) + ' cards?' : '';
+  }
+  function startRehearseRound(k) {
+    var pool = rehearsePool(k).slice(0, ROUND_SIZE);
+    if (pool.length < ROUND_SIZE) return;
+    state.rehearseSeen = dayKey();
+    OVERLAYS.forEach(function (o) { closeOverlay(els[o]); });
+    closeSuggest();
+    stopSpeech();
+    rememberDeck();
+    roundReturn = { practice: state.practice, deckType: state.deckType };
+    useDeckType('words');
+    state.practice = 'rh-' + k;
+    useSkill(rehearseSkill(k));
+    state.mode = 'all';
+    state.deck = pool.map(function (c) { return wordCards.indexOf(c); });
+    state.pos = 0;
+    state.shuffled = false;
+    state.revealed = false;
+    undoStack = [];
+    syncPracticeSelect();
+    renderLadderStrip();
+    render(true);
+    save();
+  }
+  // Called when the round's deck ends: back to the style and deck from before it.
+  function endRehearseRound() {
+    var r = roundReturn;
+    if (!r) return false;
+    roundReturn = null;
+    useDeckType(r.deckType);
+    state.practice = PRACTICE[r.practice] ? r.practice : 'zh';
+    fixStyleForDeck();
+    useSkill(skillOf(state.practice));
+    syncPracticeSelect();
+    if (recallDeck()) { render(true); save(); } else setMode('all');
+    if (!testing) toast('Round done. Back to your deck.', 3000);
+    return true;
+  }

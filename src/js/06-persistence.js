@@ -74,6 +74,7 @@
       seals: state.seals,
       rungs: state.rungs,
       ladderSeen: state.ladderSeen,
+      rehearseSeen: state.rehearseSeen,
       petName: state.petName,
       labels: state.labels,
       langs: state.langs,
@@ -225,6 +226,7 @@
       Object.keys(saved.rungs).forEach(function (k) { if (/^[a-z0-9-]{1,40}$/.test(k) && isDay(saved.rungs[k])) state.rungs[k] = saved.rungs[k]; });
     }
     state.ladderSeen = saved && isDay(saved.ladderSeen) ? saved.ladderSeen : '';
+    state.rehearseSeen = saved && isDay(saved.rehearseSeen) ? saved.rehearseSeen : '';
     state.frozen = saved && Array.isArray(saved.frozen) ? saved.frozen.filter(isDay).slice(-60) : [];
     state.quests = null;
     var q = saved && saved.quests;

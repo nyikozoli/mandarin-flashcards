@@ -331,3 +331,4 @@ body.labels-zh .practice-name .lbl .zl, body.labels-zh .pk-tile .lbl .zl { color
 .rh-answer .rh-word { font-size: clamp(24px, 6vw, 32px); font-weight: 700; color: var(--paper); overflow-wrap: anywhere; }
 .pk-seal.pk-code { font-family: var(--ui-font); font-size: 13px; font-weight: 800; }
 #cardMeanMain { display: contents; }
+.rehearse-strip .wotd-seal { background: var(--pinyin); color: var(--surface); }

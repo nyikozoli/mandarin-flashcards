@@ -239,6 +239,7 @@
   var userHasInteracted = false;
 
   function showEnd() {
+    if (roundReturn && endRehearseRound()) return;
     var n = counts();
     var total = state.deck.length;
     els.card.hidden = true;

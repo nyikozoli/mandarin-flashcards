@@ -7,6 +7,7 @@
     state.rehearse = JSON.parse(JSON.stringify(keep.rehearse));
     rebuildSkills();
     rehearseCard = null;
+    roundReturn = null;
     syncSettingsUI();
   }
   function rehearseTests(add) {
@@ -190,4 +191,36 @@
     add('Rehearse cards come up in the word deck', shown && undoBefore && marked && undone && noSentences,
       'after the 6th answer a Romanian card appears in place: ' + shown + ', undo on it brings back the Chinese card: ' + undoBefore +
       ', answering it moves only the Romanian mark: ' + marked + ', undo brings it back: ' + undone + ', none on the sentence deck: ' + noSentences);
+  } });
+
+  REHEARSE_TESTS.push({ title: 'Rehearse round after the goal, and its quest', run: function (add) {
+    if (!LANG_AVAILABLE.ro) { add('Rehearse round after the goal, and its quest', true, 'No Romanian data in this build.'); return; }
+    state.langs.ro = 'rehearse';
+    state.rehearse.afterGoal = true;
+    rebuildSkills();
+    seedRehearsePool('ro', ROUND_SIZE + 1);
+    useDeckType('words'); state.practice = 'zh'; useSkill('read');
+    state.deck = [0, 1, 2]; state.pos = 0;
+    var day = dayKey(), keepSeen = state.rehearseSeen;
+    state.activity[day] = { k: state.goal, l: 0 };
+    state.rehearseSeen = '';
+    renderRehearseStrip();
+    var strip = !els.rehearseStrip.hidden && els.rehearseText.textContent.indexOf('Romanian') !== -1;
+    els.btnRehearseGo.click();
+    var round = state.practice === 'rh-ro' && state.skill === 'say:ro' && state.deck.length === ROUND_SIZE && state.rehearseSeen === day;
+    for (var i = 0; i < ROUND_SIZE; i++) act('known');
+    var back = state.practice === 'zh' && state.skill === 'read' && !roundReturn;
+    renderRehearseStrip();
+    var once = els.rehearseStrip.hidden;
+    // The quest counts rehearse answers.
+    state.quests = { day: day, rewarded: true, list: [{ id: 'rehearse', goal: 5, n: 0 }] };
+    state.practice = 'rh-ro';
+    questEvent('known', wordCards[0], null);
+    state.practice = 'zh';
+    var quest = state.quests.list[0].n === 1 && QUESTS.rehearse.label(state.quests.list[0]).indexOf('Romanian') !== -1;
+    state.rehearseSeen = keepSeen;
+    delete state.marks['say:ro'];
+    add('Rehearse round after the goal, and its quest', strip && round && back && once && quest,
+      'goal reached offers 5 Romanian cards: ' + strip + ', the round opens them as a Romanian deck: ' + round + ', after the last card it goes back: ' + back +
+      ', offered once a day: ' + once + ', the rehearse quest counts: ' + quest);
   } });

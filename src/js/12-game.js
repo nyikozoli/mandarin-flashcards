@@ -127,11 +127,13 @@
     recall: { label: function (q) { return q.goal + ' answers in recall practice'; } },
     sentence: { label: function (q) { return q.goal + ' sentence cards'; } },
     combo: { label: function (q) { return 'Reach a ' + q.goal + ' combo'; } },
-    topic: { label: function (q) { return q.goal + ' answers inside one topic'; } }
+    topic: { label: function (q) { return q.goal + ' answers inside one topic'; } },
+    rehearse: { label: function (q) { return 'Answer ' + q.goal + ' ' + langName(langsRehearsed()[0] || 'ro') + ' cards'; } }
   };
   function makeQuests(k) {
     var h = hashDay(k), pool = ['fresh', 'listen', 'recall', 'sentence', 'combo'];
     if (EXTRA.topics.length) pool.push('topic');
+    if (langsRehearsed().some(function (l) { return rehearsePool(l).length >= 5; })) pool.push('rehearse');
     var due = Math.min(15, dueCount('all'));
     var picks = [];
     if (due >= 3) picks.push('due');
@@ -140,7 +142,7 @@
       h = Math.floor(h / pool.length) + 7;
       if (picks.indexOf(id) === -1) picks.push(id);
     }
-    var goals = { goal: state.goal, fresh: 5, due: due, listen: 10, recall: 10, sentence: 10, combo: 10, topic: 10 };
+    var goals = { goal: state.goal, fresh: 5, due: due, listen: 10, recall: 10, sentence: 10, combo: 10, topic: 10, rehearse: 5 };
     return { day: k, rewarded: false, list: ['goal'].concat(picks).map(function (id) { return { id: id, goal: goals[id], n: 0 }; }) };
   }
   function todaysQuests() {
@@ -161,6 +163,7 @@
         : q.id === 'recall' ? state.skill === 'recall'
         : q.id === 'sentence' ? !!c.sentence
         : q.id === 'topic' ? state.topic !== 'all'
+        : q.id === 'rehearse' ? isRehearseAnswer()
         : false;
       if (q.id === 'combo') q.n = Math.max(q.n, combo);
       else if (hit) q.n++;
@@ -660,6 +663,7 @@
   // The main-screen strip: the next step and how many words it still needs. It waits while the word of the day is
   // showing, and ✕ hides it until tomorrow.
   function renderLadderStrip() {
+    renderRehearseStrip();
     renderRail();
     drawLadderStrip();
     renderSuggest();
@@ -803,18 +807,18 @@
   /* ---------- suggestion chip ---------- */
   // The Today row's chip stands for the one strip showing (the word of the day or the next ladder step);
   // tapping it opens that strip as a popover.
-  function shownStrip() { return [els.wotd, els.ladderStrip].filter(function (s) { return !s.hidden; })[0] || null; }
+  function shownStrip() { return [els.rehearseStrip, els.wotd, els.ladderStrip].filter(function (s) { return !s.hidden; })[0] || null; }
   function renderSuggest() {
     var s = shownStrip();
     els.btnSuggest.hidden = !s;
     if (!s) { closeSuggest(); return; }
-    var kind = s === els.wotd ? 'wotd' : 'ladder';
+    var kind = s === els.wotd ? 'wotd' : s === els.ladderStrip ? 'ladder' : 'rehearse';
     els.suggestSeal.textContent = s.querySelector('.wotd-seal').textContent;
     els.suggestSeal.className = 'suggest-seal ' + kind;
-    els.suggestText.textContent = kind === 'wotd' ? els.wotdZh.textContent + ' ' + els.wotdPy.textContent : els.ladderZh.textContent;
+    els.suggestText.textContent = kind === 'wotd' ? els.wotdZh.textContent + ' ' + els.wotdPy.textContent : kind === 'ladder' ? els.ladderZh.textContent : els.rehearseText.textContent;
     // The ladder's count drops out on phones, where the row has no room; the popover shows it.
     if (kind === 'ladder') els.suggestText.appendChild(el('span', 'sg-more', ' \u00b7 ' + els.ladderLeft.firstChild.textContent + ' to go'));
-    els.btnSuggest.setAttribute('aria-label', (kind === 'wotd' ? 'Word of the day: ' + els.wotdZh.textContent : 'Next ladder step: ' + els.ladderZh.textContent + ', ' + els.ladderLeft.textContent) + '. Show');
+    els.btnSuggest.setAttribute('aria-label', (kind === 'wotd' ? 'Word of the day: ' + els.wotdZh.textContent : kind === 'rehearse' ? 'Rehearse round: ' + els.rehearseText.textContent : 'Next ladder step: ' + els.ladderZh.textContent + ', ' + els.ladderLeft.textContent) + '. Show');
   }
   function openSuggest() {
     els.suggestPop.hidden = false;
