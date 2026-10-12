@@ -214,6 +214,9 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
 .today-row .legend { flex: 1; min-width: 0; }
 .side > .stats { padding-top: 10px; border-top: 1px solid var(--line); }
 .round-bar { display: flex; align-items: center; gap: 6px; }
+/* The tone key sits by the card, whose colours it explains. */
+.round-bar .legend-tones { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font-size: 14.5px; font-weight: 700; }
+@media (max-width: 360px) { .round-bar .legend-tones { gap: 3px; font-size: 13px; } }
 
 /* Practice style: a button in the deck bar (the skill's seal, the style, what it asks) that opens a sheet of tiles
    grouped by skill. */
