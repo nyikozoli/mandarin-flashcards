@@ -63,7 +63,7 @@ function request(it) {
         type: 'choice',
         instructions: 'A word list for learners of Mandarin files every word under one topic. Which topic fits `word` (`pinyin`, `meaning`)? ' +
           'Rules: the most specific topic wins (an apple is Food & drink, not Shopping); pronouns, particles, conjunctions, prepositions, ' +
-          'question words and adverbs such as 很 or 也 go in Grammar & question words; Common verbs is only for verbs that fit no more specific topic.',
+          'question words and adverbs such as 很 or 也 go in Grammar & question words; Common words is only for words that fit no more specific topic.',
         criteria,
       },
     },
