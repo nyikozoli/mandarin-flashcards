@@ -122,6 +122,8 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
    negative margins keep the line as short as the text. */
 .foot-links { display: inline; }
 .foot-news { display: inline-flex; align-items: center; min-height: 44px; margin: -12px 0; padding: 0 4px; vertical-align: middle; font-size: 12px; font-weight: 600; }
+.foot-news { text-decoration: none; }
+.foot-news:hover { text-decoration: underline; }
 
 /* Every skill's mark: 读 reading, 说 recall, 听 listening. */
 .meta-right { display: inline-flex; align-items: center; gap: 8px; }
