@@ -71,7 +71,49 @@
   // tone) each keep their own marks, review schedule and miss counts. state.status / srs / misses always hold the
   // active skill's maps, so the rest of the app needs no skill logic; state.marks holds every skill, and stashSkill()
   // writes the active maps back before anything reads another skill.
+  var SKILL_ZH = { read: '读', recall: '说', listen: '听' };
+  var BASE_SKILLS = { read: 'Reading', recall: 'Recall', listen: 'Listening' };
+  // The three skills plus one per rehearsed language ('say:ro' → 'Romanian'); rebuilt by rebuildSkills().
   var SKILLS = { read: 'Reading', recall: 'Recall', listen: 'Listening' };
+  function rehearseSkill(k) { return 'say:' + k; }
+  // Rebuilds the rehearse skills and their practice styles (rh-<code>) from the language roles.
+  // A skill that goes keeps its marks in state.marks; only the menu entry and the style go.
+  function rebuildSkills() {
+    SKILLS = {};
+    Object.keys(BASE_SKILLS).forEach(function (k) { SKILLS[k] = BASE_SKILLS[k]; });
+    Object.keys(SKILL_OF).forEach(function (p) {
+      if (p.indexOf('rh-') !== 0) return;
+      delete SKILL_OF[p]; delete PRACTICE[p]; delete DECK_ONLY[p]; delete PRACTICE_ASK[p]; delete PRACTICE_ZH[p];
+    });
+    langsRehearsed().forEach(function (k) {
+      var sk = rehearseSkill(k), p = 'rh-' + k;
+      SKILLS[sk] = langName(k);
+      SKILL_ZH[sk] = k.toUpperCase();
+      SKILL_OF[p] = sk;
+      PRACTICE[p] = 'Chinese → ' + langName(k);
+      PRACTICE_ASK[p] = 'See the word, recall it in ' + langName(k);
+      PRACTICE_ZH[p] = '温习';
+      DECK_ONLY[p] = ['words', 'zh'];
+    });
+    if (!PRACTICE[state.practice]) state.practice = 'zh';
+    if (!SKILLS[state.skill]) { stashSkill(); state.skill = 'read'; loadSkill(); undoStack = []; }
+    if (state.skill !== skillOf(state.practice)) useSkill(skillOf(state.practice));
+    syncRehearseOptions();
+  }
+  // The practice menu's Rehearse group: one option per rehearsed language.
+  function syncRehearseOptions() {
+    var g = els.optRehearseGroup;
+    if (!g) return;
+    g.textContent = '';
+    langsRehearsed().forEach(function (k) {
+      var o = document.createElement('option');
+      o.value = 'rh-' + k;
+      o.textContent = 'Chinese → ' + MEANING_LANGS.filter(function (l) { return l[0] === k; })[0][1];
+      g.appendChild(o);
+    });
+    g.disabled = g.hidden = !g.children.length;
+    syncPracticeSelect();
+  }
   // Snapshot format. 2 added `skills`, 5 added `rungs`, 6 turned `langs` into roles and added rehearse skills. The server refuses
   // uploads older than the stored format, and this copy refuses to apply progress written by a newer one, so neither side drops
   // what it does not understand.
@@ -100,15 +142,14 @@
   }
   // The card's mark in every skill, as three small seals: 读 reading, 说 recall, 听 listening. Green Known, amber
   // Learning, outlined New; the skill you are practising has a ring. maps (optional) saves lookups in long lists.
-  var SKILL_ZH = { read: '读', recall: '说', listen: '听' };
-  function skillMaps() { return { read: marksOf('read').status, recall: marksOf('recall').status, listen: marksOf('listen').status }; }
+  function skillMaps() { var m = {}; Object.keys(SKILLS).forEach(function (k) { m[k] = marksOf(k).status; }); return m; }
   function skillMarks(c, maps) {
     maps = maps || skillMaps();
     var w = el('span', 'skill-marks'), parts = [];
-    ['read', 'recall', 'listen'].forEach(function (k) {
-      var s = maps[k][c.zh] || 'unmarked';
+    Object.keys(SKILLS).forEach(function (k) {
+      var s = (maps[k] || {})[c.zh] || 'unmarked';
       var m = el('span', 'sm sm-' + s + (k === state.skill ? ' active' : ''), SKILL_ZH[k]);
-      m.setAttribute('lang', 'zh-CN');
+      if (k.indexOf('say:') === 0) m.classList.add('sm-code'); else m.setAttribute('lang', 'zh-CN');
       m.setAttribute('aria-hidden', 'true');
       w.appendChild(m);
       parts.push(SKILLS[k] + ': ' + STATUS_NAMES[s]);

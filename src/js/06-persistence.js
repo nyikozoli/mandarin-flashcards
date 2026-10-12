@@ -31,6 +31,12 @@
   }
   // The reading skill stays at the top level (status, srs, misses), so older copies of the app still read it;
   // the other skills go under `skills`.
+  // Recall, listening and every rehearse skill ever used (kept while a language is set back to Show).
+  function skillsSnapshot() {
+    var out = { recall: marksOf('recall'), listen: marksOf('listen') };
+    Object.keys(state.marks).forEach(function (k) { if (k.indexOf('say:') === 0) out[k] = marksOf(k); });
+    return out;
+  }
   function progressSnapshot() {
     var read = marksOf('read');
     var other = state.deckType === 'sentences' ? 'words' : 'sentences', mem = {};
@@ -54,7 +60,7 @@
       warmup: state.warmup,
       srs: read.srs,
       misses: read.misses,
-      skills: { recall: marksOf('recall'), listen: marksOf('listen') },
+      skills: skillsSnapshot(),
       deckMemory: mem,
       topic: state.topic,
       xp: state.xp,
@@ -146,6 +152,7 @@
     state.langs = readLangs(saved && saved.langs);
     if (!MEANING_LANGS.some(function (l) { return langRole(l[0]) !== 'off'; })) state.langs.en = 'show';
     state.rehearse = readRehearse(saved && saved.rehearse);
+    rebuildSkills();
     if (saved && PRACTICE[saved.practice]) state.practice = saved.practice;
     fixStyleForDeck();
     if (saved && Array.isArray(saved.milestones)) state.milestones = saved.milestones.filter(function (m) { return typeof m === 'string'; }).slice(-500);
@@ -168,6 +175,7 @@
     };
     var sk = saved && saved.skills && typeof saved.skills === 'object' ? saved.skills : {};
     state.marks = { read: readMarks(saved), recall: readMarks(sk.recall), listen: readMarks(sk.listen) };
+    MEANING_LANGS.forEach(function (l) { var k = rehearseSkill(l[0]); if (sk[k]) state.marks[k] = readMarks(sk[k]); });
     state.skill = skillOf(state.practice);
     loadSkill();
     state.deckMemory = {};

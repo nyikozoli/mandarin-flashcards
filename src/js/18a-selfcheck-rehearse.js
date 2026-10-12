@@ -5,6 +5,7 @@
   function resetRehearseTestState(keep) {
     state.langs = JSON.parse(JSON.stringify(keep.langs));
     state.rehearse = JSON.parse(JSON.stringify(keep.rehearse));
+    rebuildSkills();
     syncSettingsUI();
   }
   function rehearseTests(add) {
@@ -46,4 +47,32 @@
     add('Translation roles: off, show, rehearse', conv && dflt && rs && truthy && lastStays && slider,
       'old on/off saves convert: ' + conv + ', defaults: ' + dflt + ', rehearse settings clamp: ' + rs + ', Off counts as off: ' + truthy +
       ', the last one stays on: ' + lastStays + ', Rehearse shows its share slider: ' + slider);
+  } });
+
+  REHEARSE_TESTS.push({ title: 'Rehearsed language as its own skill', run: function (add) {
+    if (!LANG_AVAILABLE.ro) { add('Rehearsed language as its own skill', true, 'No Romanian data in this build.'); return; }
+    state.langs.ro = 'rehearse';
+    rebuildSkills();
+    var c = wordCards.filter(function (w) { return mean(w, 'ro'); })[0];
+    var exists = SKILLS['say:ro'] === 'Romanian' && SKILL_OF['rh-ro'] === 'say:ro' && !!PRACTICE['rh-ro'] && SKILL_ZH['say:ro'] === 'RO' &&
+      !!els.optPractice.querySelector('option[value="rh-ro"]');
+    var recallBefore = marksOf('recall').status[c.zh] || null;
+    useSkill('say:ro');
+    state.status[c.zh] = 'learning';
+    useSkill('recall');
+    var separate = (marksOf('recall').status[c.zh] || null) === recallBefore && marksOf('say:ro').status[c.zh] === 'learning';
+    var snap = progressSnapshot();
+    var saved = snap.format === 6 && !!snap.skills['say:ro'] && snap.skills['say:ro'].status[c.zh] === 'learning';
+    var seal = Array.prototype.some.call(skillMarks(c).querySelectorAll('.sm'), function (s) { return s.textContent === 'RO'; });
+    // Back to Show: the skill, the menu entry and a saved rh-ro practice go; the marks stay.
+    state.practice = 'rh-ro';
+    useSkill('say:ro');
+    state.langs.ro = 'show';
+    rebuildSkills();
+    var gone = !SKILLS['say:ro'] && !els.optPractice.querySelector('option[value="rh-ro"]') && state.practice === 'zh' && state.skill === 'read' &&
+      marksOf('say:ro').status[c.zh] === 'learning';
+    delete state.marks['say:ro'];
+    add('Rehearsed language as its own skill', exists && separate && saved && seal && gone,
+      'Romanian skill, style and menu entry: ' + exists + ', its marks are separate from recall: ' + separate + ', saved under skills (format 6): ' + saved +
+      ', RO seal on the card: ' + seal + ', set back to Show drops the skill but keeps its marks: ' + gone);
   } });

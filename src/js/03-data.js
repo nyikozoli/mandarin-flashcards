@@ -142,6 +142,7 @@
   }
   // After a language's role changes: settings, the card and the save follow.
   function langsChanged() {
+    rebuildSkills();
     syncSettingsUI();
     render(false);
     save();

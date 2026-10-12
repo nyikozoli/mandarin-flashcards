@@ -322,3 +322,6 @@ body.labels-zh .practice-name .lbl .zl, body.labels-zh .pk-tile .lbl .zl { color
 .lang-row .lang-share { grid-column: 1; width: 100%; min-width: 0; }
 .lang-row output { grid-column: 2; justify-self: end; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
 .rehearse-opts { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
+
+/* A rehearsed language's mark: its code instead of a character. */
+.sm.sm-code { font-family: var(--ui-font); font-size: 9px; font-weight: 800; letter-spacing: .02em; }
