@@ -1,5 +1,88 @@
   /* ---------- practice modes ---------- */
   var PRACTICE = { zh: 'Chinese → meaning', reverse: 'Meaning → Chinese', listen: 'Listening', choice: 'Multiple choice', hanzi: 'Characters only', tone: 'Which tone?', cloze: 'Fill the gap', build: 'Build the sentence', pairs: 'Similar words' };
+  // What each style asks, for the practice style picker (menu values; sentence styles start with s-).
+  var PRACTICE_ASK = { zh: 'See the word, recall the meaning', reverse: 'See the meaning, recall the word', listen: 'Hear the word, recall the meaning',
+    choice: 'Pick the meaning from four', hanzi: 'Read the word with the pinyin hidden', tone: 'Hear the word, pick its first tone',
+    cloze: 'Pick the word a sentence is missing', pairs: 'Tell look-alikes apart, like 买 and 卖',
+    's-zh': 'Read a sentence, recall the meaning', 's-reverse': 'See the meaning, recall the sentence', 's-listen': 'Hear a sentence, recall the meaning',
+    's-choice': 'Pick the sentence\u2019s meaning from four', 's-hanzi': 'Read sentences with the pinyin hidden', 's-build': 'Put a sentence\u2019s words in order' };
+  // The practice menu's options as { value, en, zh, deck, skill }, in menu order.
+  function practiceStyles() {
+    return Array.prototype.map.call(els.optPractice.options, function (o) {
+      var g = o.parentNode;
+      // The menu's names, without its explanations in brackets or the deck the picker already shows.
+      var en = (o.getAttribute('data-en') || o.textContent).replace(/\s*\([^)]*\)$/, '').replace(/^Sentences[:,] |^Sentence (?=[a-z])/, '');
+      en = en.charAt(0).toUpperCase() + en.slice(1);
+      return { value: o.value, en: en, zh: PRACTICE_ZH[o.value] || '',
+        deck: (g && (g.getAttribute('data-en') || g.label)) || 'Words', skill: skillOf(o.value.replace(/^s-/, '')) };
+    });
+  }
+  // A label unit (Chinese over English) that follows Settings → Interface labels like the static ones.
+  function styleLabel(s) {
+    var w = el('span', 'lbl');
+    if (s.zh) { var z = el('span', 'zl', s.zh); z.setAttribute('lang', 'zh-CN'); w.appendChild(z); }
+    w.appendChild(el('span', 'el', s.en));
+    return w;
+  }
+  // The button in the deck bar: the skill's seal, the style's name and what it asks.
+  function syncPracticeButton() {
+    var v = els.optPractice.value, s = practiceStyles().filter(function (x) { return x.value === v; })[0];
+    if (!s) return;
+    els.practiceSeal.textContent = SKILL_ZH[s.skill];
+    els.practiceName.textContent = '';
+    els.practiceName.appendChild(styleLabel(s));
+    els.practiceAsk.textContent = PRACTICE_ASK[s.value] || '';
+    els.btnPractice.setAttribute('aria-label', 'Practice style: ' + s.en + ' (' + SKILLS[s.skill].toLowerCase() + '). ' + (PRACTICE_ASK[s.value] || '') + '. Change');
+  }
+  // The sheet: one section per skill, its word and sentence styles side by side as two columns of tiles.
+  function renderPracticeSheet() {
+    var grid = els.practiceGrid, all = practiceStyles(), cur = els.optPractice.value;
+    grid.textContent = '';
+    ['read', 'recall', 'listen'].forEach(function (k) {
+      var st = marksOf(k).status, known = 0;
+      wordCards.forEach(function (c) { if (st[c.zh] === 'known') known++; });
+      var sec = el('section', 'pk-skill');
+      var h = el('h3', 'pk-head');
+      var seal = el('span', 'pk-seal', SKILL_ZH[k]);
+      seal.setAttribute('lang', 'zh-CN');
+      seal.setAttribute('aria-hidden', 'true');
+      h.appendChild(seal);
+      h.appendChild(el('span', null, SKILLS[k]));
+      h.appendChild(el('span', 'pk-known', known + ' words known'));
+      sec.appendChild(h);
+      var cols = el('div', 'pk-cols');
+      ['Words', 'Sentences'].forEach(function (d) {
+        var col = el('div', 'pk-col'), tiles = el('div', 'pk-tiles');
+        var dh = el('h4', 'pk-deck');
+        dh.appendChild(styleLabel({ zh: GROUP_ZH[d], en: d }));
+        col.appendChild(dh);
+        all.filter(function (s) { return s.skill === k && s.deck === d; }).forEach(function (s) {
+        var t = el('button', 'pk-tile');
+        t.type = 'button';
+        t.setAttribute('data-style', s.value);
+        t.setAttribute('aria-pressed', s.value === cur ? 'true' : 'false');
+        t.appendChild(styleLabel(s));
+        t.appendChild(el('span', 'pk-ask', PRACTICE_ASK[s.value] || ''));
+          tiles.appendChild(t);
+        });
+        col.appendChild(tiles);
+        cols.appendChild(col);
+      });
+      sec.appendChild(cols);
+      grid.appendChild(sec);
+    });
+  }
+  function openPracticeSheet() {
+    renderPracticeSheet();
+    openOverlay(els.practiceView, els.practiceGrid.querySelector('[aria-pressed="true"]') || els.btnClosePractice);
+  }
+  // Picking a tile goes through the menu's change handler, so it switches skill and deck exactly like the menu did.
+  function pickPracticeStyle(v) {
+    closeOverlay(els.practiceView);
+    if (els.optPractice.value === v) return;
+    els.optPractice.value = v;
+    els.optPractice.dispatchEvent(new Event('change'));
+  }
   // Styles answered by picking one of the chips in #choiceBox (keys 1–4).
   var CHOICE_STYLES = { choice: true, tone: true, cloze: true, pairs: true };
   var choiceDone = false;

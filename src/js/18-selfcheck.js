@@ -1210,12 +1210,36 @@
       var placed = !!side && !!mainCol && side.contains(document.querySelector('.deckbar')) && mainCol.contains(els.stage) && mainCol.contains(els.btnKnown);
       // Grouped as you decide: practice style first, then modes, level and topic; today's numbers; the round's counter by the card.
       var deckbar = document.querySelector('.deckbar'), first = deckbar && deckbar.firstElementChild;
-      var grouped = !!first && first.contains(els.optPractice) && !!side && side.querySelector('.stats').contains(els.todayPill) && mainCol.contains(els.cardCounter) && mainCol.contains(els.btnUndo);
+      var grouped = first === els.btnPractice && !!side && side.querySelector('.stats').contains(els.todayPill) && mainCol.contains(els.cardCounter) && mainCol.contains(els.btnUndo);
       placed = placed && grouped;
       var shown = !!side && getComputedStyle(side).display === 'contents' && getComputedStyle(els.app).flexDirection === 'column';
       add('Layout: grouped controls, one column', placed && shown && document.documentElement.scrollWidth <= window.innerWidth,
         'practice style first, today block with goal and counts, card counter above the card: ' + placed + ', one column at every width: ' + shown +
         ', no sideways scroll: ' + (document.documentElement.scrollWidth <= window.innerWidth));
+      var pickerRes = (function () {
+        var before = els.optPractice.value;
+        els.btnPractice.click();
+        var open = !els.practiceView.hidden, secs = els.practiceGrid.querySelectorAll('.pk-skill');
+        var tiles = els.practiceGrid.querySelectorAll('[data-style]');
+        var all = tiles.length === els.optPractice.options.length && secs.length === 3;
+        var marked = !!els.practiceGrid.querySelector('[aria-pressed="true"][data-style="' + before + '"]');
+        // Every tile sits under the skill it trains.
+        var bySkill = Array.prototype.every.call(secs, function (sec, i) {
+          return Array.prototype.every.call(sec.querySelectorAll('[data-style]'), function (t) { return skillOf(t.getAttribute('data-style').replace(/^s-/, '')) === ['read', 'recall', 'listen'][i]; });
+        });
+        els.practiceGrid.querySelector('[data-style="listen"]').click();
+        var listen = els.practiceView.hidden && state.practice === 'listen' && state.skill === 'listen' && els.practiceSeal.textContent === '听' && els.practiceAsk.textContent === PRACTICE_ASK.listen;
+        els.btnPractice.click();
+        els.practiceGrid.querySelector('[data-style="s-build"]').click();
+        var build = state.deckType === 'sentences' && state.practice === 'build' && els.practiceSeal.textContent === '说';
+        els.optPractice.value = before;
+        els.optPractice.dispatchEvent(new Event('change'));
+        var back = els.optPractice.value === before && els.practiceName.textContent.indexOf(practiceStyles().filter(function (x) { return x.value === before; })[0].en) !== -1;
+        return { ok: open && all && marked && bySkill && listen && build && back,
+          d: 'button opens the sheet: ' + open + ', ' + tiles.length + ' tiles in 3 skill groups: ' + (all && bySkill) + ', current style marked: ' + marked +
+            ', Listening tile switches to listening and updates the button: ' + listen + ', Build the sentence switches to the sentence deck: ' + build + ', menu change updates the button: ' + back };
+      })();
+      add('Practice style picker', pickerRes.ok, pickerRes.d);
 
       add('Progress overview renders', pvOk && els.progressView.hidden, 'Ring, ' + lvRows + ' level bars, 14-day chart and ' + cells + ' word squares (' + known2 + ' known).');
 

@@ -81,7 +81,8 @@
 
   <div class="side">
   <nav class="deckbar" aria-label="Choose what to study">
-    <label class="practice" for="optPractice"><span class="visually-hidden">Practice style</span>
+    <button type="button" class="practice-btn" id="btnPractice" aria-haspopup="dialog"><span class="practice-seal" id="practiceSeal" lang="zh-CN" aria-hidden="true">读</span><span class="practice-txt"><span id="practiceName" class="practice-name"></span><small id="practiceAsk" class="practice-ask"></small></span><span class="practice-change" aria-hidden="true">Change</span></button>
+    <label class="practice" for="optPractice" hidden><span class="visually-hidden">Practice style</span>
       <select id="optPractice">
         <optgroup label="Words">
           <option value="zh">汉字 → meaning</option>
@@ -414,6 +415,19 @@
   </div>
 </div>
 
+<div id="practiceView" class="overlay" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="practiceTitle">
+    <div class="sheet-head">
+      <h2 id="practiceTitle" data-lbl="inline">Practice style</h2>
+      <button type="button" class="close-btn" id="btnClosePractice" aria-label="Close practice styles">✕</button>
+    </div>
+    <div class="pv-body">
+      <p class="pv-sub">Each style trains one skill: 读 reading, 说 recall or 听 listening. Every skill keeps its own progress.</p>
+      <div id="practiceGrid" class="pk-grid"></div>
+    </div>
+  </div>
+</div>
+
 <div id="topicView" class="overlay" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="topicTitle">
     <div class="sheet-head">
@@ -511,7 +525,7 @@
           <dt>XP, ranks, combo</dt><dd>Every answer earns XP (10 for a known card, 3 for one you are still learning, more during a combo). XP raises your rank from 新手 Newcomer to 大师 Master. Three or more right answers in a row show a 连 combo counter on the card.</dd>
           <dt>Progress per skill</dt><dd>Reading (Chinese → meaning, 汉字 only, multiple choice), recall (meaning → Chinese) and listening (listening, which tone) each keep their own Known and Learning marks and their own Due list, so a word you can read is not marked as one you can say or hear. Words and sentences also keep their own place in the deck.</dd>
           <dt>Fading pinyin</dt><dd>Settings → <b>Hide pinyin on cards I know well</b>. In Chinese → meaning, a card whose next review is a week or more away shows only its characters until you tap it, so the pinyin fades as you learn. Off by default.</dd>
-          <dt>Sentences</dt><dd>The same four styles for the 777 example sentences, in the lower half of the practice menu. Each sentence is a card of its own with its own progress, and its back shows the word it comes from.</dd>
+          <dt>Sentences</dt><dd>The same four styles for the 777 example sentences, in the Sentences tiles of the practice style sheet. Each sentence is a card of its own with its own progress, and its back shows the word it comes from.</dd>
         </dl>
       </section>
 

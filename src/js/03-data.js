@@ -106,7 +106,7 @@
     save();
     toast('Practicing the sentences for ' + word.zh + '. Choose a study mode to go back to the full deck.', 5000);
   }
-  function syncPracticeSelect() { els.optPractice.value = (isSent() ? 's-' : '') + state.practice; }
+  function syncPracticeSelect() { els.optPractice.value = (isSent() ? 's-' : '') + state.practice; syncPracticeButton(); }
   function syncSettingsUI() {
     els.optAutoReveal.checked = state.autoReveal;
     els.optTones.checked = state.toneColors;

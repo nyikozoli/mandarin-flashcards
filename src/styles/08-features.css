@@ -214,3 +214,32 @@ body.labels-zh .lbl.inline .zl { color: inherit; }
 .today-row .legend { flex: 1; min-width: 0; }
 .side > .stats { padding-top: 10px; border-top: 1px solid var(--line); }
 .round-bar { display: flex; align-items: center; gap: 6px; }
+
+/* Practice style: a button in the deck bar (the skill's seal, the style, what it asks) that opens a sheet of tiles
+   grouped by skill. */
+.practice-btn { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 54px; padding: 6px 12px 6px 7px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--text); text-align: left; }
+.practice-btn:hover { background: var(--surface2); }
+.practice-seal { flex: none; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 6px; background: var(--cinnabar); color: var(--paper); font-family: var(--kai-font); font-size: 24px; line-height: 1; box-shadow: inset 0 0 0 2px var(--cinnabar), inset 0 0 0 3.5px rgba(241, 236, 226, .6); }
+.practice-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.practice-name { font-weight: 700; font-size: 15px; }
+.practice-name .lbl, .pk-tile .lbl { flex-direction: row; align-items: baseline; flex-wrap: wrap; gap: 0 .5em; }
+.practice-name .lbl .zl, .pk-tile .lbl .zl { font-size: .86em; opacity: 1; color: var(--pinyin); letter-spacing: .03em; }
+body.labels-zh .practice-name .lbl .zl, body.labels-zh .pk-tile .lbl .zl { color: inherit; }
+.practice-ask { color: var(--muted); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.practice-change { flex: none; color: var(--muted); font-size: 13px; font-weight: 700; }
+.practice-change::after { content: " ▾"; }
+.pk-grid { display: flex; flex-direction: column; gap: 16px; margin-top: 10px; }
+.pk-head { margin: 0 0 8px; display: flex; align-items: center; gap: 8px; font-size: 15px; }
+.pk-seal { flex: none; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 6px; background: var(--surface3); color: var(--text); font-family: var(--zh-font); font-size: 15px; font-weight: 400; }
+.pk-known { margin-left: auto; color: var(--muted); font-size: 12.5px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.pk-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pk-col { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.pk-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(150px, 100%), 1fr)); gap: 8px; }
+.pk-deck .lbl { flex-direction: row; align-items: baseline; gap: .45em; }
+.pk-deck .lbl .zl { font-size: 1em; opacity: 1; }
+.pk-tile { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-height: 84px; padding: 9px 11px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface2); color: var(--text); text-align: left; font-size: 14px; font-weight: 700; }
+.pk-tile:hover { border-color: var(--muted); }
+.pk-tile[aria-pressed="true"] { border-color: var(--known); background: rgba(79, 209, 161, .1); box-shadow: inset 0 0 0 1px var(--known); }
+.pk-deck { margin: 0; color: var(--muted); font-size: 12px; font-weight: 700; }
+.pk-ask { color: var(--muted); font-size: 12.5px; font-weight: 500; line-height: 1.35; }
+@media (max-width: 360px) { .practice-change { display: none; } .pk-tile { padding: 8px 9px; font-size: 13px; } }

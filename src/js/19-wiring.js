@@ -253,7 +253,14 @@
     on('optWarmup', 'change', function () { state.warmup = els.optWarmup.checked; save(); });
     on('modeDue', 'click', function () { setMode('due'); });
     on('modeHard', 'click', function () { setMode('hard'); });
+    on('btnPractice', 'click', openPracticeSheet);
+    on('btnClosePractice', 'click', function () { closeOverlay(els.practiceView); });
+    on('practiceGrid', 'click', function (e) {
+      var t = e.target.closest ? e.target.closest('[data-style]') : null;
+      if (t) pickPracticeStyle(t.getAttribute('data-style'));
+    });
     on('optPractice', 'change', function () {
+      syncPracticeButton();
       var v = els.optPractice.value, type = v.indexOf('s-') === 0 ? 'sentences' : 'words', prevPractice = state.practice;
       var p = type === 'sentences' ? v.slice(2) : v;
       state.practice = PRACTICE[p] ? p : 'zh';
