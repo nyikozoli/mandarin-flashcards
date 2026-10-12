@@ -436,9 +436,13 @@
         // Five candidates, three wrong options to fill: the two that sound like 他 must be the ones left out.
         var picked = pickOthers(w('他'), ['她', '它', '你', '我', '好'].map(w), 3, function (x) { return x.zh; }, 'listen');
         var heard = picked.length === 3 && !picked.some(function (o) { return o.zh === '她' || o.zh === '它'; });
-        return { ok: !bad.length && rules && heard,
+        // Similar words: 少 can also mean "little", so it is not offered for 小; 卖 still is for 买.
+        var similar = similarOf(w('小')).indexOf(w('少')) === -1 && similarOf(w('买')).indexOf(w('卖')) !== -1 &&
+          wordCards.every(function (c) { return similarOf(c).every(function (x) { return !optionClash(c, x, 'meaning'); }); });
+        return { ok: !bad.length && rules && heard && similar,
           d: (bad.length ? 'clashing options for: ' + bad.slice(0, 8).join(' ') : 'no word offers a wrong option that is also right') +
-            ', 看/读 and Jev pairs kept apart, 他/她 apart only when heard: ' + rules + ', listening quiz never offers 她 or 它 for 他: ' + heard };
+            ', 看/读 and Jev pairs kept apart, 他/她 apart only when heard: ' + rules + ', listening quiz never offers 她 or 它 for 他: ' + heard +
+            ', similar words never offer 少 for 小 but keep 卖 for 买: ' + similar };
       })();
       add('Multiple choice: one right answer', mcRes.ok, mcRes.d);
 

@@ -254,7 +254,8 @@
     setTimeout(function () { if (state.pos === pos && !busy) act('known'); }, 900);
   }
   // Words that are easy to mix up with this one: the same syllables in other tones (买 mǎi / 卖 mài, 他 / 她 / 它),
-  // and a few characters that differ by a stroke. Look-alikes come first; at most three.
+  // and a few characters that differ by a stroke. Look-alikes come first; at most three; never one that can also
+  // mean the shown meaning (optionClash(), e.g. 少 for 小 "little").
   var LOOK_ALIKE = [['买', '卖'], ['大', '太'], ['白', '百'], ['在', '再'], ['找', '我'], ['小', '少'], ['米', '来'], ['看', '着']];
   var similarMap = null;
   function similarOf(c) {
@@ -273,7 +274,7 @@
           pair.forEach(function (z) { if (z !== w.zh && lex[z] && out.indexOf(lex[z]) === -1) out.push(lex[z]); });
         });
         bySound[stripTone(w.py).toLowerCase().replace(/[\s'’·-]/g, '')].forEach(function (x) { if (x !== w && out.indexOf(x) === -1) out.push(x); });
-        similarMap[w.zh] = out.slice(0, 3);
+        similarMap[w.zh] = out.filter(function (x) { return !optionClash(w, x, 'meaning'); }).slice(0, 3);
       });
     }
     return similarMap[c.zh] || [];
