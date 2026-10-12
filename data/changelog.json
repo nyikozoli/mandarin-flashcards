@@ -1,6 +1,20 @@
 {
   "releases": [
     {
+      "version": "3.1",
+      "date": "2026-10-12",
+      "title": "Stay signed in",
+      "groups": [
+        {
+          "name": "",
+          "items": [
+            "Signing out, or a sign-in that has expired, no longer signs out your other devices.",
+            "Two open tabs (or the installed app and a browser tab) no longer sign each other out after an hour."
+          ]
+        }
+      ]
+    },
+    {
       "version": "3.0",
       "date": "2026-10-12",
       "title": "Rehearse the languages you know",

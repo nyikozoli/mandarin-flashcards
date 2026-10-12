@@ -70,7 +70,7 @@
   // and runs in every build. Nothing reaches localStorage: `testing` blocks saveSyncState().
   function syncSelfTest() {
     var name = 'Cloud sync logic (simulated server)';
-    var keep = { config: SYNC_CONFIG, fetch: window.fetch, testing: testing, timer: syncTimer,
+    var keep = { config: SYNC_CONFIG, fetch: window.fetch, testing: testing, timer: syncTimer, readStored: readStoredSession,
       sync: JSON.parse(JSON.stringify(sync)), status: JSON.parse(JSON.stringify(state.status)), statusLine: els.syncStatus.textContent };
     var checks = {};
     var reply = {};
@@ -83,7 +83,7 @@
     window.fetch = function (url, init) {
       var path = String(url).slice(SYNC_CONFIG.url.length);
       var key = Object.keys(reply).filter(function (k) { return path.indexOf(k) === 0; })[0];
-      var r = key ? reply[key](init || {}) : { status: 404, body: { message: 'no route ' + path } };
+      var r = key ? reply[key](init || {}, path) : { status: 404, body: { message: 'no route ' + path } };
       if (r === 'offline') return Promise.reject(new TypeError('Failed to fetch'));
       return Promise.resolve({ ok: r.status < 300, status: r.status, text: function () { return Promise.resolve(r.body == null ? '' : JSON.stringify(r.body)); } });
     };
@@ -147,8 +147,61 @@
         } };
         return flushPush(true);
       })
+      .then(function () {
+        // Signing out ends only this device's sign-in, never the account's other devices.
+        var logoutPath = '';
+        sync.session = session(true);
+        reply = { '/auth/v1/logout': function (init, path) { logoutPath = path; return { status: 204, body: null }; } };
+        signOut(true);
+        checks['sign-out ends only this device'] = logoutPath.indexOf('scope=local') !== -1;
+      })
+      .then(function () {
+        // Another tab renewed the sign-in and saved it: this tab uses those tokens instead of the spent one.
+        var calls = 0;
+        sync.session = session(false);
+        readStoredSession = function () { var s = session(true); s.refresh_token = 'refresh-2'; return s; };
+        reply = { '/auth/v1/token': function () { calls++; return { status: 400, body: { error_description: 'Already Used' } }; }, '/auth/v1/logout': logout };
+        return ensureSession().then(function () {
+          checks['a newer sign-in from another tab is used'] = !!sync.session && sync.session.refresh_token === 'refresh-2' && calls === 0;
+        });
+      })
+      .then(function () {
+        // The token was spent by another tab a moment ago: this tab picks up the new one instead of signing out.
+        var reads = 0;
+        sync.session = session(false);
+        readStoredSession = function () {
+          reads++;
+          if (reads === 1) return session(false);
+          var s = session(true); s.refresh_token = 'refresh-3'; return s;
+        };
+        reply = { '/auth/v1/token': function () { return { status: 400, body: { error_description: 'Invalid Refresh Token: Already Used' } }; }, '/auth/v1/logout': logout };
+        return ensureSession().then(function () {
+          checks['a token spent by another tab does not sign out'] = !!sync.session && sync.session.refresh_token === 'refresh-3';
+        });
+      })
+      .then(function () {
+        // Two syncs at once share one renewal.
+        var calls = 0;
+        sync.session = session(false);
+        readStoredSession = function () { return null; };
+        reply = { '/auth/v1/token': function () { calls++; return { status: 200, body: { access_token: jwt, refresh_token: 'refresh-4', expires_in: 3600 } }; } };
+        return Promise.all([ensureSession(), ensureSession()]).then(function () {
+          checks['one renewal at a time'] = calls === 1 && !!sync.session && sync.session.refresh_token === 'refresh-4';
+        });
+      })
+      .then(function () {
+        // A sign-in or sign-out in another tab reaches this one.
+        sync.session = null;
+        readStoredSession = function () { var s = session(true); s.refresh_token = 'refresh-5'; return s; };
+        onSyncStorage({ key: SYNC_KEY });
+        var joined = !!sync.session && sync.session.refresh_token === 'refresh-5';
+        readStoredSession = function () { return null; };
+        onSyncStorage({ key: SYNC_KEY });
+        checks['other tabs follow sign-in and sign-out'] = joined && !sync.session;
+      })
       .catch(function (e) { checks['ran without errors'] = false; checks.error = e && e.message ? e.message : String(e); })
       .then(function () {
+        readStoredSession = keep.readStored;
         clearTimeout(syncTimer);
         closeOverlay(els.confirmDialog);
         confirmCallback = null; confirmAltCallback = null;
@@ -164,7 +217,7 @@
         els.syncStatus.textContent = keep.statusLine;
         var names = Object.keys(checks).filter(function (k) { return k !== 'error'; });
         var failedNames = names.filter(function (k) { return !checks[k]; });
-        var expectedChecks = 8;
+        var expectedChecks = 13;
         var ok = !failedNames.length && names.length === expectedChecks;
         return { name: name, ok: ok, info: false,
           detail: (ok ? names.join(', ') : 'Failed: ' + (failedNames.join(', ') || 'only ' + names.length + ' of ' + expectedChecks + ' steps ran')) + (checks.error ? ' — ' + checks.error : '') };

@@ -78,6 +78,19 @@
       }));
     } catch (e) { /* storage blocked: sync simply will not survive a reload */ }
   }
+  // The sign-in as this app last saved it, possibly by another tab (null when there is none or storage is blocked).
+  function readStoredSession() {
+    try {
+      var o = JSON.parse(window.localStorage.getItem(SYNC_KEY) || 'null');
+      return o && o.session && o.session.access_token ? o.session : null;
+    } catch (e) { return null; }
+  }
+  // Another tab signed in, renewed or signed out: follow it, so no tab keeps a spent token.
+  function onSyncStorage(e) {
+    if (e && e.key !== SYNC_KEY) return;
+    sync.session = readStoredSession();
+    renderSyncUI();
+  }
   function tokenFresh() {
     return !!(sync.session && sync.session.access_token && sync.session.expires_at && Date.now() < sync.session.expires_at - 30000);
   }
@@ -101,11 +114,18 @@
     signOut(true, true);
     setSyncStatus('Your sign-in expired. Sign in again to resume syncing.', true);
   }
+  // The renewal in flight, shared by everything that needs a session meanwhile (a refresh token works only once).
+  var renewing = null;
   function ensureSession() {
     if (!sync.session) return Promise.resolve(null);
+    // Another tab may have renewed the sign-in since this one loaded: its newer tokens replace ours.
+    var stored = readStoredSession();
+    if (stored && stored.refresh_token && stored.refresh_token !== sync.session.refresh_token && (stored.expires_at || 0) > (sync.session.expires_at || 0)) sync.session = stored;
     if (tokenFresh()) return Promise.resolve(sync.session);
     if (!sync.session.refresh_token) { expireSession(); return Promise.resolve(null); }
-    return syncApi('/auth/v1/token?grant_type=refresh_token', { method: 'POST', body: { refresh_token: sync.session.refresh_token } })
+    if (renewing) return renewing;
+    var used = sync.session.refresh_token;
+    renewing = syncApi('/auth/v1/token?grant_type=refresh_token', { method: 'POST', body: { refresh_token: used } })
       .then(adoptSession)
       .catch(function (e) {
         // fetch rejects with a TypeError when the network is unreachable. That is not an expired
@@ -117,10 +137,18 @@
         }
         // Only the auth server saying the refresh token is invalid ends the session. A 5xx or a
         // rate limit is the server's problem, and the token is still good for the next try.
-        if (e && (e.status === 400 || e.status === 401)) { expireSession(); return null; }
+        if (e && (e.status === 400 || e.status === 401)) {
+          // Another tab may have spent this token a moment ago and saved the new one: use that instead.
+          var other = readStoredSession();
+          if (other && other.refresh_token && other.refresh_token !== used) { sync.session = other; return tokenFresh() ? sync.session : null; }
+          expireSession();
+          return null;
+        }
         setSyncStatus('Could not reach the sign-in service (' + (e && e.message ? e.message : e) + '). Syncing will try again later.', true);
         return null;
-      });
+      })
+      .then(function (r) { renewing = null; return r; }, function (e) { renewing = null; throw e; });
+    return renewing;
   }
   function requestMagicLink(email) {
     var redirect = SYNC_CONFIG.siteUrl || (location.origin + location.pathname);
@@ -156,7 +184,8 @@
     return true;
   }
   function signOut(quiet, keepPending) {
-    if (sync.session) { try { syncApi('/auth/v1/logout', { method: 'POST' }).catch(function () {}); } catch (e) { /* best effort */ } }
+    // scope=local: end only this device's sign-in. Without it Supabase ends every session of the account.
+    if (sync.session) { try { syncApi('/auth/v1/logout?scope=local', { method: 'POST' }).catch(function () {}); } catch (e) { /* best effort */ } }
     sync.session = null; sync.remoteAt = null; sync.remoteData = null; sync.conflict = false;
     if (!keepPending) { sync.lastSyncedAt = null; sync.dirty = false; }
     clearTimeout(syncTimer);
@@ -455,6 +484,7 @@
   function initSync() {
     if (!syncEnabled()) { renderSyncUI(); return; }
     loadSyncState();
+    window.addEventListener('storage', onSyncStorage);
     // Seeded from the state restore() just loaded, so the first save() that changes nothing
     // syncable is not mistaken for an edit. A persisted dirty flag is left alone.
     sync.signature = syncSignature();
