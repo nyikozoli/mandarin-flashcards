@@ -298,6 +298,7 @@
       }
     });
     on('optTones', 'change', function () { state.toneColors = els.optTones.checked; render(false); save(); });
+    on('optTheme', 'change', function () { state.theme = THEMES[els.optTheme.value] ? els.optTheme.value : 'ink'; applyTheme(); save(); });
     on('optLabels', 'change', function () { state.labels = LABEL_MODES[els.optLabels.value] ? els.optLabels.value : 'both'; applyLabelMode(); save(); });
     on('optFadePinyin', 'change', function () { state.fadePinyin = els.optFadePinyin.checked; render(false); save(); });
     on('optChoicePinyin', 'change', function () { state.choicePinyin = els.optChoicePinyin.checked; render(false); save(); });
@@ -376,6 +377,7 @@
     upgradeLabels();
     syncSettingsUI();
     applyLabelMode();
+    applyTheme();
     wire();
     updateTopicBtn();
     renderCombo();

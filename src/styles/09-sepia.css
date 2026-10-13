@@ -1,0 +1,88 @@
+/* Sepia: a warm light theme in the spirit of Solarized Light, chosen in Settings → Colour theme (data-theme="sepia" on the root element).
+   The tokens carry most of it; the rules below replace the literal colours that only work on the dark Ink theme.
+   --paper stays "the strongest ink against the page": dark brown here, so selected pills are brown with light text. */
+:root[data-theme="sepia"] {
+  --bg: #f1e8cf;
+  --surface: #fcf5e2;
+  --surface2: #f3ead2;
+  --surface3: #e8ddc2;
+  --line: #d9cca9;
+  --text: #3a3024;
+  --soft: #574a39;
+  --muted: #6f6352;
+  --paper: #2b2216;
+  --on-seal: #fdf6e3;
+  --cinnabar: #c23a22;
+  --known: #26804f;
+  --known-strong: #23824f;
+  --known-ink: #fdf6e3;
+  --learn: #a8650c;
+  --learn-strong: #b8741a;
+  --learn-ink: #fdf6e3;
+  --accent: #c23a22;
+  --pinyin: #8a5a12;
+  --focus: #268bd2;
+  color-scheme: light;
+}
+
+/* Tone colours, darker so they read on paper */
+[data-theme="sepia"] .t1 { color: #cc3333; }
+[data-theme="sepia"] .t2 { color: #c06a00; }
+[data-theme="sepia"] .t3 { color: #2b8a3e; }
+[data-theme="sepia"] .t4 { color: #1f6fc4; }
+[data-theme="sepia"] .t5 { color: #7d7466; }
+
+/* Text that was pure white */
+[data-theme="sepia"] .ex-zh, [data-theme="sepia"] .wr-zh { color: var(--text); }
+
+/* Lighter shadows and backdrops */
+[data-theme="sepia"] .card { box-shadow: 0 10px 28px rgba(92, 70, 30, .14); }
+[data-theme="sepia"] .dialog, [data-theme="sepia"] .sheet, [data-theme="sepia"] .word-pop { box-shadow: 0 16px 44px rgba(92, 70, 30, .22); }
+[data-theme="sepia"] .suggest-pop { box-shadow: 0 12px 30px rgba(92, 70, 30, .22); }
+[data-theme="sepia"] .overlay { background: rgba(58, 46, 26, .42); }
+[data-theme="sepia"] .seal-stamp-mark { box-shadow: inset 0 0 0 6px var(--cinnabar), inset 0 0 0 9px rgba(253, 246, 227, .6), 0 18px 40px rgba(92, 70, 30, .3); }
+[data-theme="sepia"] .act.know { box-shadow: 0 6px 16px rgba(35, 130, 79, .22); }
+[data-theme="sepia"] .xp-float { text-shadow: 0 1px 4px rgba(253, 246, 227, .9); }
+[data-theme="sepia"] .actions { background: linear-gradient(180deg, rgba(241, 232, 207, 0) 0%, var(--bg) 26%); }
+
+/* Surfaces and borders that were fixed dark greys */
+[data-theme="sepia"] .ex { background: rgba(58, 46, 26, .03); }
+[data-theme="sepia"] .word-row.current { background: var(--surface3); }
+[data-theme="sepia"] .search { border-color: var(--line); background: var(--surface); }
+[data-theme="sepia"] .search::placeholder { color: var(--muted); }
+[data-theme="sepia"] kbd, [data-theme="sepia"] .kbd-hint kbd { border-color: var(--line); }
+[data-theme="sepia"] .switch, [data-theme="sepia"] .set-row, [data-theme="sepia"] .diag-item { border-bottom-color: var(--line); }
+[data-theme="sepia"] .pv-table th, [data-theme="sepia"] .pv-table td { border-bottom-color: var(--line); }
+[data-theme="sepia"] .pv-col:hover { background: rgba(58, 46, 26, .05); }
+[data-theme="sepia"] .pv-col.today .pv-seg { box-shadow: 0 0 0 1px rgba(58, 46, 26, .3) inset; }
+[data-theme="sepia"] .btn:hover:not(:disabled) { border-color: var(--muted); }
+[data-theme="sepia"] .s-unmarked, [data-theme="sepia"] .dot:not(.known):not(.learning) { background: #b3a689; }
+[data-theme="sepia"] .mode[aria-checked="true"] .count { color: rgba(241, 232, 207, .78); }
+[data-theme="sepia"] .btn.primary:hover:not(:disabled) { background: #4a3c27; border-color: #4a3c27; }
+[data-theme="sepia"] .toast { background: var(--paper); border-color: var(--paper); color: var(--bg); box-shadow: 0 12px 30px rgba(92, 70, 30, .3); }
+
+/* Word lookup underline */
+[data-theme="sepia"] button.w { border-bottom-color: rgba(58, 46, 26, .38); }
+[data-theme="sepia"] button.w:hover { background: rgba(58, 46, 26, .06); }
+[data-theme="sepia"] button.w[aria-expanded="true"] { background: rgba(194, 58, 34, .16); }
+
+/* Swipe stamps sit on the card */
+[data-theme="sepia"] .stamp { background: rgba(252, 245, 226, .85); }
+[data-theme="sepia"] .stamp-know { box-shadow: inset 0 0 0 2px rgba(252, 245, 226, .85), inset 0 0 0 3.5px var(--known); }
+[data-theme="sepia"] .stamp-learn { box-shadow: inset 0 0 0 2px rgba(252, 245, 226, .85), inset 0 0 0 3.5px var(--learn); }
+
+/* Language tags */
+[data-theme="sepia"] .tag.hu { background: #dcebd9; color: #2c5a36; }
+[data-theme="sepia"] .tag.en { background: #dde4f2; color: #2f4778; }
+[data-theme="sepia"] .tag.de { background: #f0e0c2; color: #6e4a12; }
+[data-theme="sepia"] .tag.es { background: #f4d9d4; color: #8a2e24; }
+[data-theme="sepia"] .tag.ro { background: #d6e9ec; color: #1f5866; }
+
+/* Wrong answers, errors and warnings */
+[data-theme="sepia"] .choice.wrong { border-color: #c94040; background: rgba(201, 64, 64, .1); }
+[data-theme="sepia"] .build-line.wrong, [data-theme="sepia"] .build-line.wrong .build-tile { border-color: #c94040; }
+[data-theme="sepia"] .footnote .bad, [data-theme="sepia"] .transfer-status.bad, [data-theme="sepia"] .diag-item.fail .diag-icon { color: #b3261e; }
+[data-theme="sepia"] .diag-summary.fail { background: rgba(201, 64, 64, .12); color: #9b2a22; }
+[data-theme="sepia"] .btn.danger-ghost { border-color: rgba(194, 58, 34, .55); color: #a8321e; }
+[data-theme="sepia"] .banner.error { background: #f8dcd6; border-color: #c9584a; color: #6e1d14; }
+[data-theme="sepia"] .banner.error strong { color: #4a120c; }

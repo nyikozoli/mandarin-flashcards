@@ -1,6 +1,19 @@
 {
   "releases": [
     {
+      "version": "3.2",
+      "date": "2026-10-13",
+      "title": "Sepia theme",
+      "groups": [
+        {
+          "name": "",
+          "items": [
+            "A second colour theme: Sepia, a warm light theme in the spirit of Solarized Light. Choose it in Settings → Colour theme; Ink, the dark theme, stays the default. The choice is kept on each device."
+          ]
+        }
+      ]
+    },
+    {
       "version": "3.1",
       "date": "2026-10-12",
       "title": "Stay signed in",

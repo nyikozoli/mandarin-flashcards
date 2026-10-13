@@ -141,6 +141,7 @@
     els.optRehearseEvery.value = String(state.rehearse.every);
     els.optRehearseAfterGoal.checked = state.rehearse.afterGoal;
     els.optLabels.value = state.labels;
+    els.optTheme.value = state.theme;
     els.optChoicePinyin.checked = state.choicePinyin;
     els.optVibrate.checked = state.vibrate;
     els.optWarmup.checked = state.warmup;

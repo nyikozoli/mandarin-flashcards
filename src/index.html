@@ -11,6 +11,10 @@
 /*__STYLES__*/
 </style>
 <script>
+/* The colour theme, before the page paints (the app keeps it in sync: applyTheme()). */
+try { if (localStorage.getItem('mandarin300.theme') === 'sepia') document.documentElement.setAttribute('data-theme', 'sepia'); } catch (e) { /* storage blocked: Ink */ }
+</script>
+<script>
 /* Early error reporter: shows any JavaScript error visibly on the page, even if the main script fails to load. */
 (function () {
   var queue = [];
@@ -255,6 +259,13 @@
             <option value="both">中文 + English</option>
             <option value="en">English</option>
             <option value="zh">中文 only</option>
+          </select>
+        </div>
+        <div class="set-row">
+          <label for="optTheme">Colour theme</label>
+          <select id="optTheme">
+            <option value="ink">Ink (dark)</option>
+            <option value="sepia">Sepia (light)</option>
           </select>
         </div>
         <label class="switch"><input type="checkbox" id="optAutoReveal"><span>Always show meanings</span></label>

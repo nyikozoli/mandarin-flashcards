@@ -78,6 +78,7 @@
       readMeaning: state.readMeaning,
       petName: state.petName,
       labels: state.labels,
+      theme: state.theme,
       langs: state.langs,
       rehearse: state.rehearse,
       newsSeen: state.newsSeen,
@@ -215,6 +216,7 @@
     state.questDays = saved ? clampInt(saved.questDays, 0, 100000) : 0;
     state.petName = saved && typeof saved.petName === 'string' ? saved.petName.trim().slice(0, 16) : '';
     state.labels = saved && LABEL_MODES[saved.labels] ? saved.labels : 'both';
+    state.theme = saved && THEMES[saved.theme] ? saved.theme : THEMES[state.theme] ? state.theme : 'ink';
     state.newsSeen = saved && typeof saved.newsSeen === 'string' ? saved.newsSeen.slice(0, 12) : '';
     var numMap = function (src, keys, max) {
       var out = {};

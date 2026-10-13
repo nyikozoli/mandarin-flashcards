@@ -37,6 +37,21 @@
     });
   }
   // Labels switch with a class on <body>; the practice menu, which cannot hold markup, is rewritten.
+  /* ---------- colour themes ---------- */
+  // Ink is the dark default; Sepia is a warm light theme (src/styles/09-sepia.css). The choice stays on this device
+  // (DEVICE_ONLY) and is mirrored in its own storage key, which the page reads before it paints.
+  var THEMES = { ink: { name: 'Ink (dark)', color: '#12171d', scheme: 'dark' }, sepia: { name: 'Sepia (light)', color: '#f1e8cf', scheme: 'light' } };
+  var THEME_KEY = 'mandarin300.theme';
+  function applyTheme() {
+    var t = THEMES[state.theme] ? state.theme : 'ink';
+    if (t === 'ink') document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.setAttribute('data-theme', t);
+    var tc = document.querySelector('meta[name="theme-color"]'), cs = document.querySelector('meta[name="color-scheme"]');
+    if (tc) tc.setAttribute('content', THEMES[t].color);
+    if (cs) cs.setAttribute('content', THEMES[t].scheme);
+    if (testing) return;
+    try { window.localStorage.setItem(THEME_KEY, t); } catch (e) { /* storage blocked: the theme still applies until reload */ }
+  }
   function applyLabelMode() {
     var m = state.labels;
     ['en', 'both', 'zh'].forEach(function (k) { document.body.classList.toggle('labels-' + k, m === k); });

@@ -1,6 +1,6 @@
   /* ---------- move progress between devices ---------- */
   var APP_ID = 'mandarin-hsk-flashcards';
-  var DEVICE_ONLY = ['voice', 'badVoices', 'voicesTested', 'warmup'];
+  var DEVICE_ONLY = ['voice', 'badVoices', 'voicesTested', 'warmup', 'theme'];
   function exportText() {
     var p = progressSnapshot();
     DEVICE_ONLY.forEach(function (k) { delete p[k]; });

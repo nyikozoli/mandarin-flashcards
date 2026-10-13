@@ -27,12 +27,12 @@
 .seal-grid { list-style: none; margin: 6px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
 .seal-item { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; padding: 10px 6px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface2); }
 .seal-mark { min-width: 48px; height: 48px; padding: 0 6px; display: grid; place-items: center; border-radius: 9px; border: 2px dashed var(--line); color: var(--muted); font-family: var(--kai-font); font-size: 22px; }
-.seal-item.on .seal-mark { border: 0; background: var(--cinnabar); color: var(--paper); box-shadow: inset 0 0 0 3px var(--cinnabar), inset 0 0 0 4.5px rgba(241, 236, 226, .55); transform: rotate(-4deg); }
+.seal-item.on .seal-mark { border: 0; background: var(--cinnabar); color: var(--on-seal); box-shadow: inset 0 0 0 3px var(--cinnabar), inset 0 0 0 4.5px rgba(241, 236, 226, .55); transform: rotate(-4deg); }
 .seal-name { font-size: 13px; font-weight: 700; }
 .seal-how { font-size: 11.5px; color: var(--muted); line-height: 1.3; }
 .seal-stamp { position: fixed; left: 50%; top: 38%; z-index: 110; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 10px; pointer-events: none; animation: stamp-in .45s cubic-bezier(.2, 1.6, .4, 1) both; }
 .seal-stamp.out { animation: stamp-out .5s ease forwards; }
-.seal-stamp-mark { min-width: 120px; height: 120px; padding: 0 14px; display: grid; place-items: center; border-radius: 16px; background: var(--cinnabar); color: var(--paper); font-family: var(--kai-font); font-size: 64px; box-shadow: inset 0 0 0 6px var(--cinnabar), inset 0 0 0 9px rgba(241, 236, 226, .6), 0 18px 40px rgba(0, 0, 0, .5); transform: rotate(-6deg); }
+.seal-stamp-mark { min-width: 120px; height: 120px; padding: 0 14px; display: grid; place-items: center; border-radius: 16px; background: var(--cinnabar); color: var(--on-seal); font-family: var(--kai-font); font-size: 64px; box-shadow: inset 0 0 0 6px var(--cinnabar), inset 0 0 0 9px rgba(241, 236, 226, .6), 0 18px 40px rgba(0, 0, 0, .5); transform: rotate(-6deg); }
 .seal-stamp-text { padding: 8px 14px; border-radius: 999px; background: var(--surface2); border: 1px solid var(--line); font-weight: 700; color: var(--text); }
 @keyframes stamp-in { from { opacity: 0; transform: translate(-50%, -50%) scale(2.2); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
 @keyframes stamp-out { to { opacity: 0; transform: translate(-50%, -60%) scale(.9); } }
@@ -40,7 +40,7 @@
 .ch-btn { display: grid; grid-template-columns: auto 1fr; grid-template-areas: "zh name" "zh sub"; column-gap: 10px; align-items: center; text-align: left; padding: 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface2); color: var(--text); }
 .ch-btn.passed { border-color: var(--known); }
 .ch-zh { grid-area: zh; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 8px; background: var(--surface3); font-family: var(--kai-font); font-size: 24px; }
-.ch-btn.passed .ch-zh { background: var(--cinnabar); color: var(--paper); }
+.ch-btn.passed .ch-zh { background: var(--cinnabar); color: var(--on-seal); }
 .ch-name { grid-area: name; font-weight: 700; font-size: 14px; }
 .ch-sub { grid-area: sub; font-size: 12px; color: var(--muted); }
 .qz-body { display: flex; flex-direction: column; gap: 12px; }
@@ -61,7 +61,7 @@
 .qz-again { align-self: center; margin-top: 6px; }
 /* Word of the day: one line, so the card keeps the screen. */
 .wotd { display: flex; gap: 8px; align-items: center; padding: 5px 4px 5px 6px; border-radius: 12px; border: 1px solid var(--line); background: linear-gradient(90deg, rgba(224, 74, 47, .14), rgba(224, 74, 47, 0) 55%), var(--surface); }
-.wotd-seal { flex: none; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 6px; background: var(--cinnabar); color: var(--paper); font-family: var(--kai-font); font-size: 17px; }
+.wotd-seal { flex: none; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 6px; background: var(--cinnabar); color: var(--on-seal); font-family: var(--kai-font); font-size: 17px; }
 .wotd-body { flex: 1; min-width: 0; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14px; }
 .wotd-body #wotdZh { font-family: var(--zh-font); font-size: 19px; color: var(--paper); vertical-align: -1px; }
 .wotd-py { color: var(--pinyin); font-weight: 600; }
@@ -81,12 +81,12 @@
 .topic-btn-name { max-width: 9em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-right: 4px; }
 @media (max-width: 599px) { .topic-btn-name { display: none; } }
 .topic-btn.active { border-color: var(--cinnabar); }
-.topic-btn-zh { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 7px; background: var(--cinnabar); color: var(--paper); font-family: var(--kai-font); font-size: 19px; }
+.topic-btn-zh { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 7px; background: var(--cinnabar); color: var(--on-seal); font-family: var(--kai-font); font-size: 19px; }
 .tp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
 .tp-tile { display: flex; gap: 10px; align-items: center; text-align: left; padding: 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface2); color: var(--text); min-width: 0; }
 .tp-tile[aria-pressed="true"] { border-color: var(--paper); box-shadow: inset 0 0 0 1px var(--paper); }
 .tp-seal { flex: none; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 8px; border: 2px solid var(--line); color: var(--soft); font-family: var(--kai-font); font-size: 24px; }
-.tp-seal.done { border-color: var(--cinnabar); background: var(--cinnabar); color: var(--paper); }
+.tp-seal.done { border-color: var(--cinnabar); background: var(--cinnabar); color: var(--on-seal); }
 .tp-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
 .tp-name { font-weight: 700; font-size: 14px; }
 .tp-hu { font-size: 12px; color: var(--muted); }
@@ -95,7 +95,7 @@
 .tp-count { font-size: 12px; color: var(--soft); font-variant-numeric: tabular-nums; }
 .meta-left { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; }
 .rank-tag { padding: 2px 8px; border-radius: 999px; background: var(--surface3); color: var(--soft); font-size: 11.5px; font-weight: 600; }
-.combo-tag { padding: 2px 8px; border-radius: 999px; background: var(--cinnabar); color: var(--paper); font-size: 12px; font-weight: 800; }
+.combo-tag { padding: 2px 8px; border-radius: 999px; background: var(--cinnabar); color: var(--on-seal); font-size: 12px; font-weight: 800; }
 .rp-big { display: flex; align-items: baseline; gap: 10px; margin: 6px 0 8px; }
 .rp-num { font-size: 40px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; color: var(--known); }
 .rp-of { color: var(--soft); font-size: 14px; }
@@ -110,7 +110,7 @@
 .rp-words { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .linkish { background: none; border: 0; padding: 0; color: var(--pinyin); font: inherit; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .st-rank { display: flex; gap: 12px; align-items: center; margin: 6px 0 12px; }
-.st-seal { flex: none; min-width: 56px; height: 56px; padding: 0 8px; display: grid; place-items: center; border-radius: 10px; background: var(--cinnabar); color: var(--paper); font-family: var(--kai-font); font-size: 22px; letter-spacing: .04em; }
+.st-seal { flex: none; min-width: 56px; height: 56px; padding: 0 8px; display: grid; place-items: center; border-radius: 10px; background: var(--cinnabar); color: var(--on-seal); font-family: var(--kai-font); font-size: 22px; letter-spacing: .04em; }
 .st-rank-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
 .st-rank-text .pv-goalbar { display: block; }
 .tp-seal.done, .st-seal, .wotd-seal, .topic-btn-zh, .ch-btn.passed .ch-zh, .seal-item.on .seal-mark {

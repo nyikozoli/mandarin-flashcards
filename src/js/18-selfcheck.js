@@ -1330,6 +1330,22 @@
         return { ok: chip && open && closed && next, d: 'chip stands for the word of the day: ' + chip + ', tap opens its strip: ' + open + ', ✕ in the strip closes both: ' + closed + ', chip moves on to the ladder: ' + next };
       })();
       add('Suggestion chip in the Today row', sugRes.ok, sugRes.d);
+      var themeRes = (function () {
+        var keep = state.theme, root = document.documentElement;
+        var pick = function (v) { els.optTheme.value = v; els.optTheme.dispatchEvent(new Event('change')); };
+        pick('sepia');
+        var bg = getComputedStyle(document.body).backgroundColor;
+        var sepia = state.theme === 'sepia' && root.getAttribute('data-theme') === 'sepia' && bg === 'rgb(241, 232, 207)' &&
+          document.querySelector('meta[name="theme-color"]').getAttribute('content') === THEMES.sepia.color;
+        // The red seals keep light text on both themes.
+        var seal = getComputedStyle(els.practiceSeal).color === 'rgb(253, 246, 227)';
+        var deviceOnly = DEVICE_ONLY.indexOf('theme') !== -1 && JSON.parse(exportText()).progress.theme === undefined;
+        pick('ink');
+        var ink = state.theme === 'ink' && !root.hasAttribute('data-theme') && getComputedStyle(document.body).backgroundColor === 'rgb(18, 23, 29)';
+        state.theme = keep; applyTheme(); els.optTheme.value = keep;
+        return { ok: sepia && seal && deviceOnly && ink, d: 'Sepia applies its colours and theme-color: ' + sepia + ', seals keep light text: ' + seal + ', not exported or synced: ' + deviceOnly + ', back to Ink: ' + ink };
+      })();
+      add('Colour themes: Ink and Sepia', themeRes.ok, themeRes.d);
       rehearseTests(add);
       var railRes = (function () {
         if (!EXTRA.ladder.length) return { ok: els.progressRail.hidden, d: 'no ladder data: the rail stays hidden' };
