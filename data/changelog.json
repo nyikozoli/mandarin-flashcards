@@ -3,12 +3,15 @@
     {
       "version": "3.2",
       "date": "2026-10-13",
-      "title": "Sepia theme",
+      "title": "Sepia theme and a calmer screen",
       "groups": [
         {
           "name": "",
           "items": [
-            "A second colour theme: Sepia, a warm light theme in the spirit of Solarized Light. Choose it in Settings → Colour theme; Ink, the dark theme, stays the default. The choice is kept on each device."
+            "A second colour theme: Sepia, a warm light theme in the spirit of Solarized Light. Choose it in Settings → Colour theme; Ink, the dark theme, stays the default. The choice is kept on each device.",
+            "In Sepia the 2nd, 3rd and neutral tone colours and the learning amber are darker, so small pinyin stays easy to read.",
+            "Red is kept for the seals you earn: the practice style, topic and Today chip seals are outlined now, and a topic in use fills its seal.",
+            "The Today chip says what it is (Today’s word, Next step), and the practice style tiles line up full width on phones."
           ]
         }
       ]

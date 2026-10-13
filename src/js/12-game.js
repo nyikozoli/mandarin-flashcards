@@ -827,6 +827,7 @@
     var kind = s === els.wotd ? 'wotd' : s === els.ladderStrip ? 'ladder' : 'rehearse';
     els.suggestSeal.textContent = s.querySelector('.wotd-seal').textContent;
     els.suggestSeal.className = 'suggest-seal ' + kind;
+    els.suggestCap.textContent = kind === 'wotd' ? 'Today’s word' : 'Next step';
     els.suggestText.textContent = kind === 'wotd' ? els.wotdZh.textContent + ' ' + els.wotdPy.textContent : kind === 'ladder' ? els.ladderZh.textContent : els.rehearseText.textContent;
     // The ladder's count drops out on phones, where the row has no room; the popover shows it.
     if (kind === 'ladder') els.suggestText.appendChild(el('span', 'sg-more', ' \u00b7 ' + els.ladderLeft.firstChild.textContent + ' to go'));

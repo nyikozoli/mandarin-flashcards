@@ -337,3 +337,16 @@ body.labels-zh .practice-name .lbl .zl, body.labels-zh .pk-tile .lbl .zl { color
 .mean-speak { border: 0; background: transparent; color: var(--muted); font-size: 14px; min-width: 32px; min-height: 32px; margin-left: 4px; cursor: pointer; border-radius: 8px; flex: none; }
 .mean-speak:hover, .mean-speak.speaking { color: var(--pinyin); }
 @media (pointer: coarse) { .mean-speak { min-width: 44px; min-height: 44px; } }
+
+/* Design pass: filled cinnabar is kept for earned seals and the card; the controls' seals are outlined. A topic in use
+   fills its seal, so an active filter still stands out. */
+.practice-seal, .topic-btn-zh, .suggest-seal.wotd { background: transparent; color: var(--cinnabar); box-shadow: inset 0 0 0 1.5px var(--cinnabar); }
+.topic-btn.active .topic-btn-zh { background: var(--cinnabar); color: var(--on-seal); box-shadow: inset 0 0 0 2px var(--cinnabar), inset 0 0 0 3px rgba(241, 236, 226, .5); }
+.suggest-seal.ladder { background: transparent; color: var(--known); box-shadow: inset 0 0 0 1.5px var(--known); }
+/* The Today chip says what it stands for. */
+.suggest-lines { min-width: 0; display: flex; flex-direction: column; line-height: 1.15; text-align: left; }
+.suggest-cap { color: var(--muted); font-size: 10.5px; font-weight: 600; white-space: nowrap; }
+@media (max-width: 360px) { .suggest-cap { display: none; } }
+/* Practice tiles fill the row on phones, so the list has one straight edge. */
+@media (max-width: 600px) { .pk-tile { flex: 1 1 100%; } }
+@media (max-width: 420px) { .today-row { column-gap: 6px; } .suggest-chip { padding: 5px 10px 5px 7px; gap: 6px; } .today-row .today-pill { padding-left: 9px; padding-right: 9px; } }

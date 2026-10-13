@@ -1338,7 +1338,7 @@
         var sepia = state.theme === 'sepia' && root.getAttribute('data-theme') === 'sepia' && bg === 'rgb(241, 232, 207)' &&
           document.querySelector('meta[name="theme-color"]').getAttribute('content') === THEMES.sepia.color;
         // The red seals keep light text on both themes.
-        var seal = getComputedStyle(els.practiceSeal).color === 'rgb(253, 246, 227)';
+        var seal = getComputedStyle(els.comboTag).color === 'rgb(253, 246, 227)';
         var deviceOnly = DEVICE_ONLY.indexOf('theme') !== -1 && JSON.parse(exportText()).progress.theme === undefined;
         pick('ink');
         var ink = state.theme === 'ink' && !root.hasAttribute('data-theme') && getComputedStyle(document.body).backgroundColor === 'rgb(18, 23, 29)';
