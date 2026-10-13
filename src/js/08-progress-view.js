@@ -421,7 +421,17 @@
       var prev = mapSec.querySelector('.pv-cell.picked');
       if (prev) prev.classList.remove('picked');
       cell.classList.add('picked');
+      // A small label right above the square, so the word shows where you point (the line below keeps the details).
+      tip.textContent = c.zh + ' ' + c.py;
+      tip.style.left = (cell.offsetLeft + cell.offsetWidth / 2) + 'px';
+      tip.style.top = cell.offsetTop + 'px';
+      tip.hidden = false;
     };
+    var tip = el('span', 'pv-tip');
+    tip.setAttribute('aria-hidden', 'true');
+    tip.hidden = true;
+    mapSec.appendChild(tip);
+    mapSec.addEventListener('mouseleave', function () { tip.hidden = true; });
     var lastPointer = 'mouse';
     mapSec.addEventListener('pointerdown', function (e) { lastPointer = e.pointerType || 'mouse'; });
     mapSec.addEventListener('mouseover', function (e) {

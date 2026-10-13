@@ -1373,6 +1373,18 @@
             ', level names: ' + named + ', every Travel word has a topic: ' + topics + ', Traveller seal and exam: ' + seal };
       })();
       add('Travel pack: level, brand tag, topics, seal', travelRes.ok, travelRes.d);
+      var mapRes = (function () {
+        openProgress('progress');
+        var cell = els.pvBody.querySelector('.pv-cell'), tip = els.pvBody.querySelector('.pv-tip');
+        if (cell) cell.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+        var c = cell && cards[Number(cell.getAttribute('data-index'))];
+        var shown = !!tip && !tip.hidden && !!c && tip.textContent === c.zh + ' ' + c.py && getComputedStyle(cell).cursor === 'pointer';
+        var known = els.pvBody.querySelector('.pv-cell.s-known'), fresh = els.pvBody.querySelector('.pv-cell.s-unmarked');
+        var sized = !fresh || getComputedStyle(fresh).transform !== 'none';
+        closeOverlay(els.progressView);
+        return { ok: shown && sized, d: 'pointing at a square shows its word just above it, with the hand pointer: ' + shown + ', New squares drawn smaller: ' + sized };
+      })();
+      add('Word map: hover label and sizes by status', mapRes.ok, mapRes.d);
       var sugRes = (function () {
         closeSuggest();
         state.wotdSeen = '';
