@@ -223,8 +223,8 @@
       if (src && typeof src === 'object') keys.forEach(function (k) { if (typeof src[k] === 'number') out[k] = clampInt(src[k], 0, max); });
       return out;
     };
-    state.blitzBest = numMap(saved && saved.blitzBest, ['all', '1', '2', '3'], 1000);
-    state.exams = numMap(saved && saved.exams, ['1', '2', '3'], 100);
+    state.blitzBest = numMap(saved && saved.blitzBest, ['all'].concat(LEVELS), 1000);
+    state.exams = numMap(saved && saved.exams, LEVELS, 100);
     state.seals = {};
     if (saved && saved.seals && typeof saved.seals === 'object') {
       Object.keys(saved.seals).forEach(function (k) { if (SEAL_BY_ID[k] && isDay(saved.seals[k])) state.seals[k] = saved.seals[k]; });

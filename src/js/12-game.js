@@ -295,10 +295,11 @@
     { id: 'k50', zh: '五十', en: 'Fifty', how: 'Know 50 words' },
     { id: 'k100', zh: '百', en: 'One hundred', how: 'Know 100 words' },
     { id: 'k300', zh: '三百', en: 'Three hundred', how: 'Know 300 words' },
-    { id: 'kall', zh: '全', en: 'Every word', how: 'Know all 598 words' },
+    { id: 'kall', zh: '全', en: 'Every word', how: 'Know every word in the app' },
     { id: 'hsk1', zh: '一级', en: 'HSK 1', how: 'Know every HSK 1 word' },
     { id: 'hsk2', zh: '二级', en: 'HSK 2', how: 'Know every HSK 2 word' },
     { id: 'hsk3', zh: '三级', en: 'HSK 3', how: 'Know every HSK 3 word' },
+    { id: 'travel', zh: '旅', en: 'Traveller', how: 'Know every Travel word' },
     { id: 'topic', zh: '题', en: 'Topic master', how: 'Know every word of one topic' },
     { id: 'read50', zh: '读', en: 'Reader', how: 'Be able to read 50 example sentences' },
     { id: 'read300', zh: '书', en: 'Bookworm', how: 'Be able to read 300 example sentences' },
@@ -325,6 +326,7 @@
       case 'hsk1': return levelDone('1');
       case 'hsk2': return levelDone('2');
       case 'hsk3': return levelDone('3');
+      case 'travel': return levelDone('4');
       case 'topic': return anyTopicDone();
       case 'read50': return readability().n >= 50;
       case 'read300': return readability().n >= 300;
@@ -425,7 +427,7 @@
     } else if (!testing) {
       quiz.timer = setInterval(function () { if (Date.now() >= quiz.end) finishQuiz(); else drawQuizTop(); }, 250);
     }
-    els.quizTitle.textContent = kind === 'exam' ? 'HSK ' + lv + ' exam' : '60-second blitz' + (lv === 'all' ? '' : ' · HSK ' + lv);
+    els.quizTitle.textContent = kind === 'exam' ? lvName(lv) + ' exam' : '60-second blitz' + (lv === 'all' ? '' : ' · ' + lvName(lv));
     nextQuestion();
     if (els.quizView.hidden) openOverlay(els.quizView, els.btnCloseQuiz);
   }
@@ -540,7 +542,7 @@
       state.exams[quiz.lv] = Math.max(prev, score);
       if (pass) gainXp(100);
       b.appendChild(el('p', 'qz-result' + (pass ? ' pass' : ''), score + '%'));
-      msg = pass ? 'Passed! HSK ' + quiz.lv + ' exam: ' + quiz.right + ' of ' + quiz.list.length + ' right (+100 XP).'
+      msg = pass ? 'Passed! ' + lvName(quiz.lv) + ' exam: ' + quiz.right + ' of ' + quiz.list.length + ' right (+100 XP).'
         : quiz.right + ' of ' + quiz.list.length + ' right. You need ' + EXAM_PASS + '% to pass; review the words below and try again.';
     } else {
       var best = state.blitzBest[quiz.lv] || 0, record = quiz.right > best;
@@ -576,7 +578,7 @@
     blitz.setAttribute('data-quiz', 'blitz');
     blitz.appendChild(el('span', 'ch-zh', '快'));
     blitz.appendChild(el('span', 'ch-name', '60-second blitz'));
-    blitz.appendChild(el('span', 'ch-sub', (lv === 'all' ? 'All levels' : 'HSK ' + lv) + ' · best ' + (state.blitzBest[lv] || 0)));
+    blitz.appendChild(el('span', 'ch-sub', (lv === 'all' ? 'All levels' : lvName(lv)) + ' · best ' + (state.blitzBest[lv] || 0)));
     row.appendChild(blitz);
     LEVELS.forEach(function (l) {
       var ex = el('button', 'ch-btn' + ((state.exams[l] || 0) >= EXAM_PASS ? ' passed' : ''), '');
@@ -584,7 +586,7 @@
       ex.setAttribute('data-quiz', 'exam');
       ex.setAttribute('data-lv', l);
       ex.appendChild(el('span', 'ch-zh', '考'));
-      ex.appendChild(el('span', 'ch-name', 'HSK ' + l + ' exam'));
+      ex.appendChild(el('span', 'ch-name', lvName(l) + ' exam'));
       ex.appendChild(el('span', 'ch-sub', state.exams[l] != null ? 'best ' + state.exams[l] + '%' + (state.exams[l] >= EXAM_PASS ? ' · passed' : '') : EXAM_SIZE + ' questions, pass at ' + EXAM_PASS + '%'));
       row.appendChild(ex);
     });
@@ -811,6 +813,11 @@
     var reached = rungsReached(), part = nr ? rungProgress(nr, maps) : null;
     // How far up the ladder the gradient behind the rungs reaches: steps reached plus the share of the next one.
     box.style.setProperty('--climb', Math.min(100, (reached + (part ? part.done / part.total : 0)) / EXTRA.ladder.length * 100).toFixed(1) + '%');
+    // The panda stands on the ladder at the height you have climbed.
+    var pd = el('span', 'rail-panda');
+    pd.setAttribute('aria-hidden', 'true');
+    pd.innerHTML = pandaSvg(petStage(petTotal()), petMood(), false);
+    box.appendChild(pd);
     els.railCount.textContent = reached + '/' + EXTRA.ladder.length;
     els.railNext.textContent = nr ? nr.zh : '';
     els.railLadder.setAttribute('aria-label', 'Ladder: ' + reached + ' of ' + EXTRA.ladder.length + ' steps reached' + (nr ? ', next: ' + nr.en : '') + '. Open the ladder');

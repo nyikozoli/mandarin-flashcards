@@ -122,6 +122,7 @@ try { if (localStorage.getItem('mandarin300.theme') === 'sepia') document.docume
         <button type="button" class="level" id="level1" role="radio" aria-checked="false" data-level="1" aria-label="HSK 1"><span class="lv-pre">HSK </span>1 <span class="count" id="countLv1">0</span></button>
         <button type="button" class="level" id="level2" role="radio" aria-checked="false" data-level="2" aria-label="HSK 2"><span class="lv-pre">HSK </span>2 <span class="count" id="countLv2">0</span></button>
         <button type="button" class="level" id="level3" role="radio" aria-checked="false" data-level="3" aria-label="HSK 3"><span class="lv-pre">HSK </span>3 <span class="count" id="countLv3">0</span></button>
+        <button type="button" class="level" id="level4" role="radio" aria-checked="false" data-level="4" aria-label="Travel"><span lang="zh-CN" class="lv-zh">旅</span><span class="lv-pre"> Travel</span> <span class="count" id="countLv4">0</span></button>
       </div>
       <button type="button" class="topic-btn" id="btnTopic" aria-haspopup="dialog" hidden><span class="topic-btn-zh" id="topicBtnZh" lang="zh-CN" aria-hidden="true">全</span><span class="topic-btn-name" id="topicBtnName">All topics</span></button>
     </div>
@@ -185,7 +186,7 @@ try { if (localStorage.getItem('mandarin300.theme') === 'sepia') document.docume
       <div class="stamp stamp-know" aria-hidden="true"><span lang="zh-CN">会</span><small>I know it</small></div>
       <div class="stamp stamp-learn" aria-hidden="true"><span lang="zh-CN">学</span><small>Learning</small></div>
       <div class="card-meta">
-        <span class="meta-left"><span id="cardNumber">#1</span><span id="cardRank" class="rank-tag" hidden></span><span id="comboTag" class="combo-tag" hidden></span></span>
+        <span class="meta-left"><span id="cardNumber">#1</span><span id="cardRank" class="rank-tag" hidden></span><span id="cardBrand" class="rank-tag brand-tag" title="An app or brand name" hidden>app</span><span id="comboTag" class="combo-tag" hidden></span></span>
         <span class="meta-right"><span id="cardSkills"></span><span id="cardStatus" class="status-tag">New</span></span>
       </div>
       <div id="cardPrompt" class="prompt" hidden></div>
@@ -384,6 +385,7 @@ try { if (localStorage.getItem('mandarin300.theme') === 'sepia') document.docume
       <button type="button" class="chip lvchip" data-lv="1" aria-pressed="false">HSK 1</button>
       <button type="button" class="chip lvchip" data-lv="2" aria-pressed="false">HSK 2</button>
       <button type="button" class="chip lvchip" data-lv="3" aria-pressed="false">HSK 3</button>
+      <button type="button" class="chip lvchip" id="lvChipTravel" data-lv="4" aria-pressed="false">Travel</button>
     </div>
     <p class="list-summary" id="listSummary" aria-live="polite"></p>
     <ul class="word-list" id="wordList"></ul>
@@ -561,6 +563,7 @@ try { if (localStorage.getItem('mandarin300.theme') === 'sepia') document.docume
           <dt>Ladder (阶梯)</dt><dd>Real-life steps such as greeting people, ordering food or asking the way, each with a small set of words. A step is reached when you know all its words in reading and listening (读 and 听); take them in any order, each one is worth 40 XP. The strip on the main screen shows the next step and how many words it still needs; Practise studies just those words. The Ladder tab in the progress view shows every step, and on wide screens a narrow ladder on the right shows your climb and your rank.</dd>
           <dt>Seals and challenges</dt><dd>The progress view collects 20 red seals (印章) for milestones such as 100 words, a 7-day streak or a passed exam, each worth 50 XP. Its challenges are a 60-second blitz (as many meanings as you can) and a 20-question exam per HSK level (pass at 80%). Challenges never change your review schedule.</dd>
           <dt>Character hints</dt><dd>The back of a word card explains its characters where a well-established explanation exists (about 180 characters): a picture (山 mountain peaks), a combination of meanings (休 a person resting by a tree), or a meaning part plus a sound part (妈 = 女 woman + 马 mǎ for the sound).</dd>
+          <dt>Travel (旅)</dt><dd>A pack of everyday words for modern China that are not in HSK 1–3: paying with your phone (支付宝, 扫码), apps (微信, 抖音, 滴滴), phone and internet, trains, hotels and food delivery. Pick it with the 旅 Travel level, or study it inside All. App and brand names carry a small “app” tag. It has its own exam, ladder steps and the Traveller seal.</dd>
           <dt>Topics</dt><dd>The button under the level row (on phones: the study settings line at the top) picks a topic (food, travel, time…). Every study mode then works inside it, and a topic's seal turns red when you know all its words.</dd>
           <dt>What you can read</dt><dd>The progress view counts the example sentences whose HSK words you all know, shows how much of everyday Chinese text your words cover, and suggests the next word to learn. Word frequencies come from <i>wordfreq</i> by Robyn Speer and contributors (CC BY-SA 4.0).</dd>
           <dt>XP, ranks, combo</dt><dd>Every answer earns XP (10 for a known card, 3 for one you are still learning, more during a combo). XP raises your rank from 新手 Newcomer to 大师 Master. Three or more right answers in a row show a 连 combo counter on the card.</dd>

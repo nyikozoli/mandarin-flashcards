@@ -106,7 +106,8 @@ Reading (Chinese → meaning, 汉字 only, multiple choice), recall (meaning →
 
 | File | What | How it was made |
 |---|---|---|
-| `data/topics.json` | One of 16 topics per word | Tagged by rule (most specific topic wins; function words → grammar), then reviewed |
+| `data/travel.json` | The Travel pack: about 60 modern-life words outside HSK (apps, mobile payment, phone and internet, getting around), filed as level 4 and shown as "Travel". `words` in the HSK 3 entry shape, `brands` (app and brand names, tagged "app" on the card), `topics` (each word's topic, merged into `data/topics.json`) and `ladder` (its can-do steps, added to the ladder) | Drafted by an agent from what a visitor meets every day, reviewed by a second one; German, Spanish and Romanian go into `data/i18n` like every other word |
+| `data/topics.json` | One of 17 topics per word | Tagged by rule (most specific topic wins; function words → grammar), then reviewed |
 | `data/freq.json` | Frequency rank and share of running text per word, share per character | Extracted from [wordfreq](https://github.com/rspeer/wordfreq) 3.1.1. Regenerate with `scripts/freq.py` (steps in its header). **This file is CC BY-SA 4.0**, as an adaptation of wordfreq's data. |
 | `data/i18n/<code>.json` | German, Spanish and Romanian meanings and sentence translations: `{ code, name, words: { headword: meaning }, sentences: { sentence: translation } }` | Translated from the Chinese with the English and Hungarian as sense reference, then reviewed in three rounds per language (accuracy, native fluency, a side-by-side check of all three). The build fails if a word or sentence is missing. |
 | `data/changelog.json` | Release notes, newest first: `version`, `date`, `title`, and `groups` of items | Written by hand for every user-visible change. The build checks the shape, and the footer's "What's new" link names the newest version. |

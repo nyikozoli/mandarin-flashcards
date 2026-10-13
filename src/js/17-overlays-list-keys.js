@@ -111,7 +111,7 @@
       txt.appendChild(el('span', 'wr-mean', langsOn().map(function (k) { return mean(c, k); }).join(' · ')));
       b.appendChild(txt);
       var badges = el('span', 'wr-badges');
-      badges.appendChild(el('span', 'badge lv', 'HSK ' + c.lv));
+      badges.appendChild(el('span', 'badge lv', lvName(c.lv)));
       badges.appendChild(el('span', 'badge' + (s === 'unmarked' ? '' : ' ' + s), STATUS_NAMES[s]));
       badges.appendChild(skillMarks(c, maps));
       b.appendChild(badges);
@@ -126,7 +126,7 @@
     }
     var label = shown + ' of ' + cards.length + ' words';
     if (listFilter !== 'all') label += ' · ' + STATUS_NAMES[listFilter];
-    if (listLevel !== 'all') label += ' · HSK ' + listLevel;
+    if (listLevel !== 'all') label += ' · ' + lvName(listLevel);
     var lvc = els.lvChips.querySelectorAll('.chip');
     for (var q = 0; q < lvc.length; q++) lvc[q].setAttribute('aria-pressed', lvc[q].getAttribute('data-lv') === listLevel ? 'true' : 'false');
     if (raw) label += ' · matching “' + raw + '”';

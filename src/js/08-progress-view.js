@@ -1,5 +1,5 @@
   /* ---------- levels, activity and the progress view ---------- */
-  var LEVELS = ['1', '2', '3'];
+  var LEVELS = Object.keys(EXPECTED_LEVELS).sort();
   var GOALS = [10, 20, 30, 50, 100];
   function inLevel(c) { return (state.level === 'all' || String(c.lv) === state.level) && inTopic(c) && inPractice(c); }
   function countsFor(lv) {
@@ -141,7 +141,7 @@
       cov.appendChild(el('b', null, fmtPct(cv.words)));
       cov.appendChild(document.createTextNode(' of the words in everyday Chinese text are words you know, and '));
       cov.appendChild(el('b', null, fmtPct(cv.chars)));
-      cov.appendChild(document.createTextNode(' of its characters. All 598 words would give ' + fmtPct(cv.wordsMax) + ' and ' + fmtPct(cv.charsMax) + '.'));
+      cov.appendChild(document.createTextNode(' of its characters. All ' + wordCards.length + ' words would give ' + fmtPct(cv.wordsMax) + ' and ' + fmtPct(cv.charsMax) + '.'));
       sec.appendChild(cov);
     }
     if (rd.next) {
@@ -335,8 +335,8 @@
       var row = el('button', 'pv-level' + (state.level === lv ? ' current' : ''));
       row.type = 'button';
       row.setAttribute('data-level', lv);
-      row.setAttribute('aria-label', 'HSK ' + lv + ': ' + n.known + ' of ' + n.total + ' known, ' + n.learning + ' learning. Study this level.');
-      row.appendChild(el('span', 'pv-lv-name', 'HSK ' + lv));
+      row.setAttribute('aria-label', lvName(lv) + ': ' + n.known + ' of ' + n.total + ' known, ' + n.learning + ' learning. Study this level.');
+      row.appendChild(el('span', 'pv-lv-name', lvName(lv)));
       row.appendChild(stackBar(n));
       row.appendChild(el('span', 'pv-lv-pct', pct(n.known, n.total) + '%'));
       row.appendChild(el('span', 'pv-lv-text', n.known + ' known · ' + n.learning + ' learning · ' + n.unmarked + ' new · ' + n.total + ' ' + noun(n.total)));
@@ -400,7 +400,7 @@
     var info = el('p', 'pv-info', 'Pick a square to see the word.');
     LEVELS.forEach(function (lv) {
       var n = countsFor(lv);
-      mapSec.appendChild(el('h4', 'pv-maphead', 'HSK ' + lv + ' · ' + n.known + ' / ' + n.total + ' known'));
+      mapSec.appendChild(el('h4', 'pv-maphead', lvName(lv) + ' · ' + n.known + ' / ' + n.total + ' known'));
       var grid = el('div', 'pv-grid');
       cards.forEach(function (c, i) {
         if (String(c.lv) !== lv) return;
@@ -417,7 +417,7 @@
     mapSec.appendChild(info);
     var showInfo = function (cell) {
       var c = cards[Number(cell.getAttribute('data-index'))];
-      info.textContent = c.zh + ' · ' + c.py + ' · ' + c.en + ' · ' + STATUS_NAMES[statusOf(c)] + ' · HSK ' + c.lv;
+      info.textContent = c.zh + ' · ' + c.py + ' · ' + c.en + ' · ' + STATUS_NAMES[statusOf(c)] + ' · ' + lvName(c.lv);
       var prev = mapSec.querySelector('.pv-cell.picked');
       if (prev) prev.classList.remove('picked');
       cell.classList.add('picked');

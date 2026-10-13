@@ -13,6 +13,7 @@
     { "id": "feelings", "en": "Feelings & character", "hu": "Érzések és jellem", "zh": "心" },
     { "id": "leisure", "en": "Hobbies, sports & culture", "hu": "Szabadidő, sport, kultúra", "zh": "玩" },
     { "id": "shopping", "en": "Shopping, money & clothes", "hu": "Vásárlás, pénz, ruha", "zh": "买" },
+    { "id": "modern", "en": "Apps & payment", "hu": "Alkalmazások és fizetés", "zh": "码" },
     { "id": "actions", "en": "Common words", "hu": "Gyakori szavak", "zh": "常" },
     { "id": "describing", "en": "Describing things", "hu": "Leírás (melléknevek)", "zh": "好" },
     { "id": "grammar", "en": "Grammar & question words", "hu": "Nyelvtani és kérdőszavak", "zh": "的" }

@@ -1336,6 +1336,23 @@
           (phone ? 'phone: level row folded into the summary' : 'wide: level row shown, summary short') + ': ' + fold };
       })();
       add('Study settings: level and topic in the sheet, one summary line on phones', foldRes.ok, foldRes.d);
+      var travelRes = (function () {
+        if (LEVELS.indexOf('4') === -1) return { ok: els.level4.hidden, d: 'no Travel pack in this build: its level button stays hidden' };
+        var tw = wordCards.filter(function (w) { return String(w.lv) === '4'; }), keepLv = state.level;
+        els.level4.click();
+        var filtered = !els.level4.hidden && state.level === '4' && state.deck.length > 0 && state.deck.every(function (i) { return String(cards[i].lv) === '4'; });
+        var brand = tw.filter(function (w) { return w.br; })[0], plain = tw.filter(function (w) { return !w.br; })[0], tagged = true;
+        if (brand) { studyWord(brand.zh); tagged = !els.cardBrand.hidden && els.cardNumber.textContent.indexOf(lvName(4)) === 0; }
+        if (plain) { studyWord(plain.zh); tagged = tagged && els.cardBrand.hidden; }
+        var named = lvName('4') === 'Travel' && lvName('2') === 'HSK 2';
+        var topics = tw.every(function (w) { return !!topicById(w.tp); }) && !!topicById('modern');
+        var seal = !!SEAL_BY_ID.travel && quizPool('4').length >= 8;
+        setLevel(keepLv);
+        return { ok: filtered && tagged && named && topics && seal,
+          d: tw.length + ' Travel words; the Travel level studies only them: ' + filtered + ', brand names carry the app tag: ' + tagged +
+            ', level names: ' + named + ', every Travel word has a topic: ' + topics + ', Traveller seal and exam: ' + seal };
+      })();
+      add('Travel pack: level, brand tag, topics, seal', travelRes.ok, travelRes.d);
       var sugRes = (function () {
         closeSuggest();
         state.wotdSeen = '';
@@ -1372,14 +1389,14 @@
       var railRes = (function () {
         if (!EXTRA.ladder.length) return { ok: els.progressRail.hidden, d: 'no ladder data: the rail stays hidden' };
         renderRail();
-        var rungs = els.railRungs.children, nr = nextRung();
+        var rungs = els.railRungs.querySelectorAll('.rail-rung'), nr = nextRung();
         var drawn = rungs.length === EXTRA.ladder.length && els.railRungs.querySelectorAll('.rail-rung.on').length === rungsReached() &&
           els.railRungs.querySelectorAll('.rail-rung.next').length === (nr ? 1 : 0) && els.railCount.textContent === rungsReached() + '/' + EXTRA.ladder.length;
-        var rank = els.railRankName.textContent === RANKS[rankOf(state.xp)][1] && els.railNext.textContent === (nr ? nr.zh : '');
+        var rank = !!els.railRungs.querySelector('.rail-panda svg') && els.railRankName.textContent === RANKS[rankOf(state.xp)][1] && els.railNext.textContent === (nr ? nr.zh : '');
         els.railLadder.click();
         var opens = !els.progressView.hidden && !!els.pvBody.querySelector('[data-pvtab="ladder"][aria-pressed="true"]');
         closeOverlay(els.progressView);
-        return { ok: drawn && rank && opens, d: EXTRA.ladder.length + ' rungs with reached and next marked: ' + drawn + ', rank and next step shown: ' + rank + ', tap opens the Ladder tab: ' + opens };
+        return { ok: drawn && rank && opens, d: EXTRA.ladder.length + ' rungs with reached and next marked: ' + drawn + ', panda, rank and next step shown: ' + rank + ', tap opens the Ladder tab: ' + opens };
       })();
       add('Progress rail (wide screens)', railRes.ok, railRes.d);
 

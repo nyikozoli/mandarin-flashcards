@@ -53,7 +53,7 @@
     KNOWN_STEPS.forEach(function (n) { if (known >= n) celebrate(deck().milestone + sk + 'known-' + n, '🏆 ' + n + ' ' + noun(n) + ' known' + by + '!'); });
     LEVELS.forEach(function (lv) {
       var c = countsFor(lv);
-      if (c.total && c.known === c.total) celebrate(deck().milestone + sk + 'level-' + lv, '🎓 HSK ' + lv + ' complete' + by + ': you know all ' + c.total + ' ' + noun(c.total) + '!');
+      if (c.total && c.known === c.total) celebrate(deck().milestone + sk + 'level-' + lv, '🎓 ' + lvName(lv) + ' complete' + by + ': you know all ' + c.total + ' ' + noun(c.total) + '!');
     });
   }
   var session = { n: 0, k: 0, l: 0, xp: 0, t0: Date.now() };
@@ -95,7 +95,7 @@
 
   /* ---------- help and first-visit tour ---------- */
   var TOUR = [
-    { art: 'seal', title: 'Welcome to Mandarin HSK', text: '598 words from HSK 1 to 3, with pinyin, English, Hungarian and example sentences. Here is how to use it in four quick steps.' },
+    { art: 'seal', title: 'Welcome to Mandarin HSK', text: 'The 598 words of HSK 1 to 3 and a Travel pack of everyday modern words, with pinyin, English, Hungarian and example sentences. Here is how to use it in four quick steps.' },
     { art: 'swipe', title: 'Know it? Swipe right', text: 'Swipe right or press “I know it” when you know a word. Swipe left or press “Still learning” when you don’t. Tap the card to see the meaning and examples.' },
     { art: 'speak', title: 'Listen to every word', text: 'Read aloud speaks the word and its example sentences. Colours show the tones: 1st red, 2nd orange, 3rd green, 4th blue.' },
     { art: 'due', title: 'Review at the right time', text: '“Due” brings back the words you know after 1, 3, 7, 14, 30, 60 and 120 days, and the ones you missed the same day. The practice style button above the modes switches to Listening, Multiple choice, Which tone? and the 777 example sentences.' },

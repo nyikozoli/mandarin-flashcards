@@ -33,7 +33,7 @@
     els.practiceName.appendChild(styleLabel(s));
     els.practiceAsk.textContent = PRACTICE_ASK[s.value] || '';
     // Phones show the level and topic on the same line (CSS hides it on wider screens, which keep their own controls).
-    var t = topicById(state.topic), where = (state.level === 'all' ? 'HSK all' : 'HSK ' + state.level) + ' \u00b7 ' + (t ? t.en : 'All topics');
+    var t = topicById(state.topic), where = (state.level === 'all' ? 'All levels' : lvName(state.level)) + ' \u00b7 ' + (t ? t.en : 'All topics');
     els.practiceWhere.textContent = '\u00a0\u00b7 ' + where;
     els.btnPractice.setAttribute('aria-label', 'Practice style: ' + s.en + ' (' + SKILLS[s.skill].toLowerCase() + '). ' + (PRACTICE_ASK[s.value] || '') + '. ' + where + '. Change');
   }
@@ -80,7 +80,7 @@
     var lv = els.practiceLevels;
     lv.textContent = '';
     ['all'].concat(LEVELS).forEach(function (l) {
-      var b = el('button', 'pk-level', l === 'all' ? 'All' : 'HSK ' + l);
+      var b = el('button', 'pk-level', l === 'all' ? 'All' : lvName(l));
       b.type = 'button';
       b.setAttribute('data-plevel', l);
       b.setAttribute('aria-pressed', state.level === l ? 'true' : 'false');

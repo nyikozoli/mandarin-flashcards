@@ -226,7 +226,10 @@
       closeOverlay(els.progressView);
       setLevel(b.getAttribute('data-level'));
     });
-    ['levelAll', 'level1', 'level2', 'level3'].forEach(function (id) {
+    // The Travel level's button and word-list chip only show when the build has the Travel pack.
+    els.level4.hidden = LEVELS.indexOf('4') === -1;
+    els.lvChipTravel.hidden = els.level4.hidden;
+    ['levelAll', 'level1', 'level2', 'level3', 'level4'].forEach(function (id) {
       on(id, 'click', function () { setLevel(els[id].getAttribute('data-level')); });
     });
     on('lvChips', 'click', function (e) {

@@ -133,8 +133,8 @@
     var tag = el('sup', 'w-lv', String(w.lv));
     tag.setAttribute('aria-hidden', 'true');
     b.appendChild(tag);
-    b.title = 'HSK ' + w.lv + ' word';
-    b.setAttribute('aria-label', w.zh + ', HSK ' + w.lv + ' word');
+    b.title = lvName(w.lv) + ' word';
+    b.setAttribute('aria-label', w.zh + ', ' + lvName(w.lv) + ' word');
   }
   // An example sentence with tappable words. The card's own word is highlighted rather than tappable.
   function renderSentence(node, zh, headword, lv) {
@@ -157,7 +157,7 @@
     popWord = w;
     renderHanzi(els.wordPopZh, w.zh, w.py);
     renderPinyin(els.wordPopPy, w.py);
-    els.wordPopLv.textContent = 'HSK ' + w.lv;
+    els.wordPopLv.textContent = lvName(w.lv);
     els.wordPopEn.textContent = w.en;
     els.wordPopHu.textContent = w.hu;
     setSpeaker(els.wordPopEn, 'en', w.en);

@@ -148,7 +148,8 @@
   function showCard(c, animate) {
     els.deckEnd.hidden = true;
     els.card.hidden = false;
-    els.cardNumber.textContent = 'HSK ' + c.lv + ' · ' + deck().number + c.n;
+    els.cardNumber.textContent = lvName(c.lv) + ' · ' + deck().number + c.n;
+    els.cardBrand.hidden = !c.br;
     els.cardRank.hidden = !c.rk;
     if (c.rk) {
       els.cardRank.textContent = '#' + c.rk + ' most used';
@@ -317,7 +318,7 @@
       b.setAttribute('aria-checked', on ? 'true' : 'false');
       b.tabIndex = on ? 0 : -1;
     });
-    ['levelAll', 'level1', 'level2', 'level3'].forEach(function (id) {
+    ['levelAll'].concat(LEVELS.map(function (l) { return 'level' + l; })).forEach(function (id) {
       var b = els[id];
       var on = b.getAttribute('data-level') === state.level;
       b.setAttribute('aria-checked', on ? 'true' : 'false');

@@ -42,6 +42,9 @@ const expected = loaded.expected;
 const optJson = (p) => (fs.existsSync(p) ? JSON.parse(read(p)) : null);
 const FREQ = optJson(dataPath('freq.json'));
 const TOPICS = optJson(dataPath('topics.json'));
+//   data/travel.json  the Travel pack (level 4, read by scripts/cards.js) also brings its words' topics and its ladder steps
+const TRAVEL = optJson(dataPath('travel.json'));
+if (TOPICS && TRAVEL && TRAVEL.topics) Object.assign(TOPICS.words, TRAVEL.topics);
 const HINTS = optJson(dataPath('hints.json'));
 //   data/changelog.json  release notes for the in-app "What's new" sheet, newest first
 const CHANGELOG = optJson(dataPath('changelog.json'));
@@ -75,6 +78,7 @@ if (CHOICE_EXCLUDE) {
 }
 //   data/ladder.json  can-do steps: { rungs: [{ id, zh, py, en, hu, words: [headword], sentences: [example sentence] }] }
 const LADDER = optJson(dataPath('ladder.json'));
+if (LADDER && TRAVEL && TRAVEL.ladder) LADDER.rungs = LADDER.rungs.concat(TRAVEL.ladder);
 if (LADDER) {
   const heads = new Set(cards.map((c) => c.zh));
   const exs = new Set([].concat(...cards.map((c) => c.ex.map((e) => e.zh))));
@@ -115,7 +119,7 @@ cards = cards.map((c) => {
   return o;
 });
 
-const total = expected[1] + expected[2] + expected[3];
+const total = Object.keys(expected).reduce((n, l) => n + expected[l], 0);
 const safeJson = (v) => JSON.stringify(v).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026')
   .replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
 const json = safeJson(cards);
@@ -202,7 +206,7 @@ fs.mkdirSync(path.join(ROOT, '.validation'), { recursive: true });
 fs.writeFileSync(path.join(ROOT, '.validation', 'content.json'), JSON.stringify(cards.map((c, i) => Object.assign({ n: i + 1 }, c))), 'utf8');
 
 const sentences = new Set(cards.flatMap((c) => c.ex.map((e) => e.zh))).size;
-console.log('Built ' + cards.length + ' words (HSK 1: ' + expected[1] + ', HSK 2: ' + expected[2] + ', HSK 3: ' + expected[3] + '), ' +
+console.log('Built ' + cards.length + ' words (' + Object.keys(expected).map((l) => (l === '4' ? 'Travel' : 'HSK ' + l) + ': ' + expected[l]).join(', ') + '), ' +
   sentences + ' unique example sentences, build ' + buildId + '.');
 console.log('  dist/mandarin-flashcards.html\n  dist/artifact.html\n  dist/site/ (index.html, sw.js, manifest, icons)');
 console.log('  cloud sync: ' + (SYNC_CONFIG ? SYNC_CONFIG.url + ' (site build only)' : 'disabled — src/sync-config.json is missing'));

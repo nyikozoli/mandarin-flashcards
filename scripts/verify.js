@@ -20,7 +20,7 @@ scripts.forEach((m,i)=>{
   else { try{ new vm.Script(m[2],{filename:'script'+i}); ok(true,'JS syntax ok in script #'+i+' ('+m[2].length+' chars)'); }catch(e){ ok(false,'JS syntax script #'+i+': '+e.message);} }
 });
 const exp=Number((html.match(/var EXPECTED_COUNT = (\d+);/)||[])[1]); ok(Array.isArray(data)&&data.length===exp,'vocab count = '+(data&&data.length)+' (expected '+exp+')');
-const lvc={}; data.forEach(c=>lvc[c.lv]=(lvc[c.lv]||0)+1); const lexp=JSON.parse((html.match(/var EXPECTED_LEVELS = (\{[^}]*\});/)||[])[1]); ok([1,2,3].every(l=>lvc[l]===lexp[l]),'per-level counts '+JSON.stringify(lvc)+' vs '+JSON.stringify(lexp));
+const lvc={}; data.forEach(c=>lvc[c.lv]=(lvc[c.lv]||0)+1); const lexp=JSON.parse((html.match(/var EXPECTED_LEVELS = (\{[^}]*\});/)||[])[1]); ok(Object.keys(lexp).every(l=>lvc[l]===lexp[l]),'per-level counts '+JSON.stringify(lvc)+' vs '+JSON.stringify(lexp));
 const req=['zh','py','en','hu'];
 const bad=data.filter(c=>req.some(k=>typeof c[k]!=='string'||!c[k].trim())||!Array.isArray(c.ex)||!c.ex.length||c.ex.some(e=>!e.zh||!e.py||!e.en||!e.hu));
 ok(bad.length===0,'every entry has zh/py/en/hu + >=1 example with zh/py/en/hu (bad: '+bad.length+')');

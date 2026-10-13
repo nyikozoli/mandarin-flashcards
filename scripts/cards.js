@@ -47,7 +47,26 @@ function loadCards() {
     if (!lv) throw new Error('Word is not in the HSK 1-3 lists: ' + c.zh);
     return Object.assign({ lv }, c);
   });
-  return { cards, expected: { 1: L1.length + EXTRAS.length, 2: L2.length, 3: L3.length } };
+  const expected = { 1: L1.length + EXTRAS.length, 2: L2.length, 3: L3.length };
+  // The Travel pack (data/travel.json): modern-life words outside HSK, filed as level 4. Same entry shape as
+  // HSK 3; "brands" marks app and brand names (br: 1 on the card).
+  const travelFile = dataPath('travel.json');
+  if (fs.existsSync(travelFile)) {
+    const travel = JSON.parse(read(travelFile));
+    const brands = new Set(travel.brands || []);
+    const heads = new Set(cards.map((c) => c.zh));
+    travel.words.forEach((e) => {
+      if (heads.has(e[0])) throw new Error('Travel word is already a headword: ' + e[0]);
+      heads.add(e[0]);
+      const c = Object.assign({ lv: 4 }, fromH3(e));
+      if (!c.ex.length) throw new Error('Travel word without an example sentence: ' + c.zh);
+      if (brands.has(c.zh)) c.br = 1;
+      cards.push(c);
+    });
+    brands.forEach((b) => { if (!heads.has(b)) throw new Error('Travel brand is not a travel headword: ' + b); });
+    expected[4] = travel.words.length;
+  }
+  return { cards, expected };
 }
 
 module.exports = { loadCards };

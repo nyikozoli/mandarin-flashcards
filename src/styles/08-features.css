@@ -376,3 +376,12 @@ body.labels-zh .practice-name .lbl .zl, body.labels-zh .pk-tile .lbl .zl { color
 .suggest-chip .sg-en { color: var(--soft); font-weight: 500; }
 @media (max-width: 600px) { .suggest-chip .sg-en { display: none; } }
 @media (min-width: 601px) { .today-row { flex-wrap: nowrap; } .today-row .suggest-chip { min-width: 0; } .today-row .legend { flex: none; } }
+
+/* Travel pack: the level button shows 旅 (and "Travel" where there is room); brand and app names carry a small tag. */
+.level .lv-zh { font-family: var(--zh-font); }
+.brand-tag { background: transparent; box-shadow: inset 0 0 0 1px var(--line); color: var(--muted); }
+/* A small panda stands on the rail's ladder at the height climbed (--climb), kept inside the ladder at both ends. */
+.rail-rungs { position: relative; overflow: visible; }
+.rail-panda { position: absolute; left: 50%; bottom: clamp(0px, var(--climb), calc(100% - 30px)); width: 32px; height: 32px; transform: translate(-50%, 2px); pointer-events: none; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .35)); transition: bottom .4s ease; }
+.rail-panda svg { width: 100%; height: 100%; display: block; }
+@media (prefers-reduced-motion: reduce) { .rail-panda { transition: none; } }
