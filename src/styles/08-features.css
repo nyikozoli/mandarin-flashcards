@@ -370,3 +370,9 @@ body.labels-zh .practice-name .lbl .zl, body.labels-zh .pk-tile .lbl .zl { color
 }
 /* The counts sit at the right end of the Today row, in line with the tone key above the card. */
 .today-row .legend { margin-left: auto; justify-content: flex-end; flex: 0 1 auto; }
+/* The Today chip grows on larger screens: more room for the step, a bigger seal and text. */
+@media (min-width: 601px) { .suggest-chip { max-width: min(60%, 520px); } }
+@media (min-width: 960px) { .suggest-chip { min-height: 50px; padding: 5px 18px 5px 10px; gap: 10px; font-size: 15px; } .suggest-seal { width: 32px; height: 32px; font-size: 19px; } .suggest-cap { font-size: 11.5px; } .today-row .today-pill { min-height: 50px; font-size: 14.5px; } }
+.suggest-chip .sg-en { color: var(--soft); font-weight: 500; }
+@media (max-width: 600px) { .suggest-chip .sg-en { display: none; } }
+@media (min-width: 601px) { .today-row { flex-wrap: nowrap; } .today-row .suggest-chip { min-width: 0; } .today-row .legend { flex: none; } }

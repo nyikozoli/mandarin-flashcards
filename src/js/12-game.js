@@ -831,6 +831,9 @@
     els.suggestText.textContent = kind === 'wotd' ? els.wotdZh.textContent + ' ' + els.wotdPy.textContent : kind === 'ladder' ? els.ladderZh.textContent : els.rehearseText.textContent;
     // The ladder's count drops out on phones, where the row has no room; the popover shows it.
     if (kind === 'ladder') els.suggestText.appendChild(el('span', 'sg-more', ' \u00b7 ' + els.ladderLeft.firstChild.textContent + ' to go'));
+    // Larger screens also show the meaning or the step's can-do line (sg-en, hidden on phones).
+    var en = kind === 'wotd' ? els.wotdEn.textContent : kind === 'ladder' ? els.ladderEn.textContent : '';
+    if (en) els.suggestText.appendChild(el('span', 'sg-en', ' \u00b7 ' + en));
     els.btnSuggest.setAttribute('aria-label', (kind === 'wotd' ? 'Word of the day: ' + els.wotdZh.textContent : kind === 'rehearse' ? 'Rehearse round: ' + els.rehearseText.textContent : 'Next ladder step: ' + els.ladderZh.textContent + ', ' + els.ladderLeft.textContent) + '. Show');
   }
   function openSuggest() {
