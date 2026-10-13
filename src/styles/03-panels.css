@@ -7,7 +7,7 @@
 .ring-learning { stroke: var(--learn); }
 .ring-num { fill: var(--text); font-size: 26px; font-weight: 800; font-family: var(--ui-font); }
 .ring-label { fill: var(--muted); font-size: 12px; font-family: var(--ui-font); }
-.pv-tiles { flex: 1; min-width: 220px; display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+.pv-tiles { flex: 1; min-width: 220px; display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; }
 .pv-tile { background: var(--surface2); border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px; display: flex; flex-direction: column; }
 .pv-tile-label { font-size: 12px; color: var(--muted); font-weight: 600; }
 .pv-tile-num { font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.2; }
@@ -36,8 +36,8 @@
 .seal-stamp-text { padding: 8px 14px; border-radius: 999px; background: var(--surface2); border: 1px solid var(--line); font-weight: 700; color: var(--text); }
 @keyframes stamp-in { from { opacity: 0; transform: translate(-50%, -50%) scale(2.2); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
 @keyframes stamp-out { to { opacity: 0; transform: translate(-50%, -60%) scale(.9); } }
-.ch-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-top: 6px; }
-.ch-btn { display: grid; grid-template-columns: auto 1fr; grid-template-areas: "zh name" "zh sub"; column-gap: 10px; align-items: center; text-align: left; padding: 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface2); color: var(--text); }
+.ch-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; margin-top: 6px; }
+.ch-btn { display: grid; grid-template-columns: auto 1fr; grid-template-areas: "zh name" "sub sub"; row-gap: 6px; column-gap: 10px; align-items: center; text-align: left; padding: 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface2); color: var(--text); }
 .ch-btn.passed { border-color: var(--known); }
 .ch-zh { grid-area: zh; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 8px; background: var(--surface3); font-family: var(--kai-font); font-size: 24px; }
 .ch-btn.passed .ch-zh { background: var(--cinnabar); color: var(--on-seal); }

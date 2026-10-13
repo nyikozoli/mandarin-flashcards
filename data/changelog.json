@@ -8,7 +8,8 @@
         {
           "name": "",
           "items": [
-            "Fixed an error (“Cannot read properties of undefined”) when you opened a word, such as today’s word, while studying sentences: the card showed, but progress could not be saved."
+            "Fixed an error (“Cannot read properties of undefined”) when you opened a word, such as today’s word, while studying sentences: the card showed, but progress could not be saved.",
+            "In your progress, the stat tiles and challenges stretch to fill the row, so their text no longer breaks onto a second line."
           ]
         }
       ]
