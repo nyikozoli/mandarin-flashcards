@@ -25,6 +25,9 @@ const lex = Object.fromEntries(cards.map((c) => [c.zh, c]));
 const sentEn = {};
 cards.forEach((c) => c.ex.forEach((e) => { sentEn[e.zh] = e.en; }));
 const RUNGS = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'ladder.json'), 'utf8')).rungs;
+// The Travel pack's steps join the ladder in the build, so they are checked too.
+const travelFile = path.join(ROOT, 'data', 'travel.json');
+if (fs.existsSync(travelFile)) RUNGS.push(...(JSON.parse(fs.readFileSync(travelFile, 'utf8')).ladder || []));
 
 let items = RUNGS.map((r) => ({ id: r.id, goal: r.en, words: r.words, sentences: r.sentences || [] }));
 // Known answers (--control): a step with its own content (good) and with another step's content (bad).

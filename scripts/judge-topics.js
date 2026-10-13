@@ -25,6 +25,9 @@ const jev = jevClient('judge-topics-cache.json');
 
 const { cards } = loadCards();
 const TOPICS = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'topics.json'), 'utf8'));
+// The Travel pack's words carry their topics in data/travel.json, as in the build.
+const travelFile = path.join(ROOT, 'data', 'travel.json');
+if (fs.existsSync(travelFile)) Object.assign(TOPICS.words, JSON.parse(fs.readFileSync(travelFile, 'utf8')).topics || {});
 const name = (id) => TOPICS.topics.find((t) => t.id === id).en;
 
 let items = cards.map((c) => ({ c, tag: TOPICS.words[c.zh] }));
