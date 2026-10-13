@@ -442,6 +442,55 @@
       })();
       add('Coming reviews forecast', fcRes.ok, fcRes.d);
 
+      var calRes = (function () {
+        var w = wordCards[0], v = wordCards[1], today = dayKey(), in2 = addDays(2);
+        var sv = [state.srs[w.zh], state.srs[v.zh]], actSnap = JSON.parse(JSON.stringify(state.activity)), frozenSnap = state.frozen.slice();
+        // Counted without the two test words, so their own earlier schedule does not blur the difference.
+        delete state.srs[w.zh]; delete state.srs[v.zh];
+        var before = dueByDay(), n0 = (before[today] || { n: 0 }).n, n2 = (before[in2] || { n: 0 }).n;
+        var d1 = addDays(-1), d2 = addDays(-2), d3 = addDays(-3);
+        state.activity[d1] = { k: state.goal, l: 1, r: 0 };
+        state.activity[d2] = { k: 2, l: 1, r: 0 };
+        delete state.activity[d3];
+        if (state.frozen.indexOf(d3) === -1) state.frozen.push(d3);
+        state.srs[w.zh] = { b: 1, d: addDays(-5) };
+        state.srs[v.zh] = { b: 2, d: in2 };
+        var after = dueByDay();
+        var counted = after[today].n === n0 + 1 && after[in2].n === n2 + 1 && !after[addDays(-5)];
+        // Each day is looked at in its own month, so the check works on the first days of a month too.
+        var cell = function (key) { calMonth = key.slice(0, 7); calPick = key; renderProgress(); return els.pvBody.querySelector('.cal [data-day="' + key + '"]'); };
+        openProgress('calendar');
+        var tab = els.pvBody.querySelector('[data-pvtab="calendar"]'), pane = els.pvBody.querySelector('[data-pane="calendar"]');
+        var shown = !!tab && tab.getAttribute('aria-pressed') === 'true' && !!pane && !pane.hidden && !!pane.querySelector('.cal');
+        var shades = cell(d1).classList.contains('goal') && cell(d2).classList.contains('some') && cell(d3).classList.contains('frozen');
+        var c2 = cell(in2), tc = cell(today);
+        var dueShown = c2.classList.contains('future') && c2.querySelector('.cal-due').textContent === String(n2 + 1) &&
+          tc.classList.contains('today') && tc.getAttribute('aria-current') === 'date' && tc.querySelector('.cal-due').textContent === String(n0 + 1);
+        var info = els.pvBody.querySelector('.cal-info');
+        var picked = tc.getAttribute('aria-pressed') === 'true' && tc.tabIndex === 0 && info.textContent.indexOf('Today: ') === 0 && info.textContent.indexOf((n0 + 1) + ' review') !== -1;
+        cell(d1).click();
+        var p1 = els.pvBody.querySelector('.cal [aria-pressed="true"]');
+        var clicked = !!p1 && p1.getAttribute('data-day') === d1 && els.pvBody.querySelector('.cal-info').textContent.indexOf('goal met') !== -1;
+        p1.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+        var p2 = els.pvBody.querySelector('.cal [aria-pressed="true"]');
+        var keyed = !!p2 && p2.getAttribute('data-day') === today && document.activeElement === p2;
+        cell(today);
+        var next = els.pvBody.querySelector('[data-calmove="1"]'), month0 = calMonth;
+        var navOk = !!next;
+        if (next && !next.disabled) { next.click(); navOk = calMonth !== month0 && !!els.pvBody.querySelector('.cal [data-day="' + calMonth + '-01"]'); }
+        closeOverlay(els.progressView);
+        state.activity = actSnap;
+        state.frozen = frozenSnap;
+        calMonth = null; calPick = null;
+        if (sv[0]) state.srs[w.zh] = sv[0]; else delete state.srs[w.zh];
+        if (sv[1]) state.srs[v.zh] = sv[1]; else delete state.srs[v.zh];
+        return { ok: counted && shown && shades && dueShown && picked && clicked && keyed && navOk,
+          d: 'overdue reviews count today, a review in 2 days on that day: ' + counted + '; the Calendar tab shows the month: ' + shown +
+            '; goal met, studied and freeze days shaded: ' + shades + '; reviews due on today and later days: ' + dueShown + '; today picked and described: ' + picked +
+            '; tapping a day describes it: ' + clicked + '; the right arrow moves to the next day: ' + keyed + '; next month: ' + navOk };
+      })();
+      add('Review calendar: study days, reviews due, pick a day', calRes.ok, calRes.d);
+
       var clozeRes = (function () {
         var deckSnap = state.deck, posSnap = state.pos, w = wordCards[3];
         state.practice = 'cloze';

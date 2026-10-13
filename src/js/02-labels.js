@@ -8,7 +8,7 @@
     'Hard': ['难', 'nán'], 'Good': ['好', 'hǎo'], 'Easy': ['容易', 'róngyì'],
     'Today': ['今天', 'jīntiān'], 'Progress': ['进度', 'jìndù'], 'Collection': ['成就', 'chéngjiù'], 'Ladder': ['阶梯', 'jiētī'], 'Practice style': ['练习方式', 'liànxí fāngshì'], 'Study settings': ['学习设置', 'xuéxí shèzhì'], 'Your progress': ['我的进度', 'wǒ de jìndù'],
     'Today\u2019s quests': ['每日任务', 'měirì rènwu'], 'Daily goal': ['每日目标', 'měirì mùbiāo'], 'Coming reviews': ['复习计划', 'fùxí jìhuà'],
-    'Last 14 days': ['最近两周', 'zuìjìn liǎng zhōu'], 'What you can read': ['阅读能力', 'yuèdú nénglì'], 'Your stats': ['统计', 'tǒngjì'],
+    'Last 14 days': ['最近两周', 'zuìjìn liǎng zhōu'], 'Calendar': ['日历', 'rìlì'], 'What you can read': ['阅读能力', 'yuèdú nénglì'], 'Your stats': ['统计', 'tǒngjì'],
     'Challenges': ['挑战', 'tiǎozhàn'], 'Seals': ['印章', 'yìnzhāng'], 'By topic': ['话题', 'huàtí'], 'By HSK level': ['等级', 'děngjí'],
     'Settings': ['设置', 'shèzhì'], 'What\'s new': ['新功能', 'xīn gōngnéng'], 'How it works': ['使用说明', 'shǐyòng shuōmíng'], 'Topics': ['话题', 'huàtí'], 'Your panda': ['我的熊猫', 'wǒ de xióngmāo'],
     'All words': ['全部词语', 'quánbù cíyǔ'], 'All sentences': ['全部句子', 'quánbù jùzi'],

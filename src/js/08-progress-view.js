@@ -231,6 +231,145 @@
     sec.appendChild(grid);
     return sec;
   }
+  /* ---------- review calendar ---------- */
+  // A month at a time: days before today are shaded by how much you studied (goal met, studied, a streak freeze);
+  // today and later days show how many reviews fall due in all skills, words and sentences (today also counts
+  // overdue ones), so you can plan a day off. Picking a day (tap, or arrow keys) shows its numbers below.
+  var calMonth = null, calPick = null;
+  function dueByDay() {
+    var today = dayKey(), out = {};
+    Object.keys(SKILLS).forEach(function (k) {
+      var srs = marksOf(k).srs;
+      Object.keys(srs).forEach(function (zh) {
+        var d = srs[zh].d < today ? today : srs[zh].d, o = out[d] || (out[d] = { n: 0 });
+        o.n++;
+        o[k] = (o[k] || 0) + 1;
+      });
+    });
+    return out;
+  }
+  function calDate(key) { return new Date(key + 'T12:00:00'); }
+  function calDayText(key, due) {
+    var today = dayKey(), a = state.activity[key], n = dayAnswers(key), parts = [];
+    if (key <= today) {
+      parts.push(n ? n + ' answered (' + a.k + ' known, ' + a.l + ' learning)' + (n >= state.goal ? ', goal met' : '')
+        : state.frozen.indexOf(key) !== -1 ? 'a streak freeze kept your streak' : key === today ? 'nothing answered yet' : 'no study');
+    }
+    if (key >= today) {
+      var d = due[key];
+      parts.push(d ? d.n + ' review' + (d.n === 1 ? '' : 's') + ' due (' + Object.keys(SKILLS).filter(function (k) { return d[k]; })
+        .map(function (k) { return SKILLS[k].toLowerCase() + ' ' + d[k]; }).join(', ') + ')' : 'no reviews due');
+    }
+    var name = key === today ? 'Today' : calDate(key).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    return name + ': ' + parts.join('; ') + '.';
+  }
+  function calendarSection() {
+    var sec = section('Calendar', 'Past days show what you studied, later days the reviews that fall due, in all skills. Today includes anything overdue.');
+    var box = el('div', 'cal-box');
+    sec.appendChild(box);
+    var draw = function (focus) {
+      var today = dayKey(), due = dueByDay();
+      var first = Object.keys(state.activity).concat(state.frozen).sort()[0] || today;
+      var last = Object.keys(due).sort().pop() || today, cap = addDays(365);
+      var minM = (first < today ? first : today).slice(0, 7), maxM = (last > cap ? cap : last > today ? last : today).slice(0, 7);
+      if (!calMonth || calMonth < minM || calMonth > maxM) calMonth = today.slice(0, 7);
+      if (!calPick || calPick.slice(0, 7) !== calMonth) calPick = calMonth === today.slice(0, 7) ? today : calMonth + '-01';
+      box.textContent = '';
+      var start = calDate(calMonth + '-01');
+      var head = el('div', 'cal-head');
+      var move = function (dir, label, ok) {
+        var b = el('button', 'icon-btn small cal-move', dir < 0 ? '‹' : '›');
+        b.type = 'button';
+        b.setAttribute('data-calmove', String(dir));
+        b.setAttribute('aria-label', label);
+        b.disabled = !ok;
+        return b;
+      };
+      head.appendChild(move(-1, 'Previous month', calMonth > minM));
+      head.appendChild(el('span', 'cal-month', start.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })));
+      head.appendChild(move(1, 'Next month', calMonth < maxM));
+      box.appendChild(head);
+      var tbl = el('table', 'cal');
+      var hr = el('tr');
+      ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].forEach(function (w) { var th = el('th', null, w.slice(0, 2)); th.setAttribute('abbr', w); th.scope = 'col'; hr.appendChild(th); });
+      var thead = el('thead');
+      thead.appendChild(hr);
+      tbl.appendChild(thead);
+      var body = el('tbody'), row = el('tr'), studied = 0, answered = 0, coming = 0;
+      for (var i = 0; i < (start.getDay() + 6) % 7; i++) row.appendChild(el('td'));
+      for (var d = new Date(start); dayKey(d).slice(0, 7) === calMonth; d.setDate(d.getDate() + 1)) {
+        var key = dayKey(d), n = dayAnswers(key), dn = key >= today && due[key] ? due[key].n : 0;
+        if (key <= today && n) { studied++; answered += n; }
+        coming += dn;
+        var b = el('button', 'cal-day' + (key > today ? ' future' : n >= state.goal ? ' goal' : n ? ' some' : state.frozen.indexOf(key) !== -1 ? ' frozen' : '') + (key === today ? ' today' : ''));
+        b.type = 'button';
+        b.setAttribute('data-day', key);
+        b.setAttribute('aria-pressed', key === calPick ? 'true' : 'false');
+        b.setAttribute('aria-label', calDayText(key, due));
+        b.tabIndex = key === calPick ? 0 : -1;
+        if (key === today) b.setAttribute('aria-current', 'date');
+        b.appendChild(el('span', 'cal-n', String(d.getDate())));
+        if (dn) b.appendChild(el('span', 'cal-due', String(dn)));
+        var td = el('td');
+        td.appendChild(b);
+        row.appendChild(td);
+        if (row.children.length === 7) { body.appendChild(row); row = el('tr'); }
+      }
+      if (row.children.length) { while (row.children.length < 7) row.appendChild(el('td')); body.appendChild(row); }
+      tbl.appendChild(body);
+      box.appendChild(tbl);
+      var info = el('p', 'cal-info', calDayText(calPick, due));
+      info.setAttribute('role', 'status');
+      box.appendChild(info);
+      var sum = [];
+      if (calMonth <= today.slice(0, 7)) sum.push(studied + ' study day' + (studied === 1 ? '' : 's') + ', ' + answered.toLocaleString('en-US') + ' answers');
+      if (calMonth >= today.slice(0, 7)) sum.push(coming.toLocaleString('en-US') + ' review' + (coming === 1 ? '' : 's') + ' due' + (calMonth === today.slice(0, 7) ? ' from today' : ''));
+      box.appendChild(el('p', 'cal-sum', 'This month: ' + sum.join('; ') + '.'));
+      var lg = el('div', 'pv-legend cal-legend');
+      [['goal', 'Goal met'], ['some', 'Studied'], ['frozen', 'Streak freeze'], ['due', 'Reviews due']].forEach(function (p) {
+        var item = el('span', 'pv-key');
+        item.appendChild(el('span', 'cal-swatch ' + p[0], p[0] === 'due' ? '3' : ''));
+        item.appendChild(el('span', null, p[1]));
+        lg.appendChild(item);
+      });
+      box.appendChild(lg);
+      if (focus) {
+        var f = focus === 'day' ? null : box.querySelector('[data-calmove="' + focus + '"]');
+        (f && !f.disabled ? f : box.querySelector('[data-day][tabindex="0"]')).focus();
+      }
+    };
+    box.addEventListener('click', function (e) {
+      var m = e.target.closest ? e.target.closest('[data-calmove]') : null;
+      if (m) {
+        var s = calDate(calMonth + '-01');
+        s.setMonth(s.getMonth() + Number(m.getAttribute('data-calmove')));
+        calMonth = dayKey(s).slice(0, 7);
+        calPick = null;
+        draw(m.getAttribute('data-calmove'));
+        return;
+      }
+      var b = e.target.closest ? e.target.closest('[data-day]') : null;
+      if (!b) return;
+      calPick = b.getAttribute('data-day');
+      draw('day');
+    });
+    // Arrow keys move the picked day (a week up or down), into the next or previous month when needed.
+    box.addEventListener('keydown', function (e) {
+      var step = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 }[e.key];
+      if (!step || !e.target.closest('[data-day]')) return;
+      e.preventDefault();
+      var d = calDate(calPick);
+      d.setDate(d.getDate() + step);
+      var key = dayKey(d), was = calMonth, wasPick = calPick;
+      calMonth = key.slice(0, 7);
+      calPick = key;
+      draw('day');
+      // Past the first or last month draw() resets the month; stay on the edge instead.
+      if (calMonth !== key.slice(0, 7)) { calMonth = was; calPick = wasPick; draw('day'); }
+    });
+    draw();
+    return sec;
+  }
   function renderProgress() {
     var body = els.pvBody;
     body.textContent = '';
@@ -253,12 +392,12 @@
     hero.appendChild(tiles);
     setLabel(els.progressTitle, 'Your progress', true);
     els.progressTitle.appendChild(document.createTextNode(': ' + SKILLS[state.skill].toLowerCase()));
-    // Tabs: what to do today, how far you are, the can-do ladder (when there is ladder data) and what you have collected.
-    var panes = { today: el('div', 'pv-pane'), progress: el('div', 'pv-pane'), ladder: el('div', 'pv-pane'), collection: el('div', 'pv-pane') };
+    // Tabs: what to do today, how far you are, the review calendar, the can-do ladder (when there is ladder data) and what you have collected.
+    var panes = { today: el('div', 'pv-pane'), progress: el('div', 'pv-pane'), calendar: el('div', 'pv-pane'), ladder: el('div', 'pv-pane'), collection: el('div', 'pv-pane') };
     var tabs = el('div', 'pv-tabs');
     tabs.setAttribute('role', 'group');
     tabs.setAttribute('aria-label', 'Progress sections');
-    [['today', 'Today'], ['progress', 'Progress'], ['ladder', 'Ladder'], ['collection', 'Collection']].forEach(function (t) {
+    [['today', 'Today'], ['progress', 'Progress'], ['calendar', 'Calendar'], ['ladder', 'Ladder'], ['collection', 'Collection']].forEach(function (t) {
       if (t[0] === 'ladder' && !EXTRA.ladder.length) return;
       var b = el('button', 'pv-tab');
       b.appendChild(zhLabel(t[1]));
@@ -450,6 +589,8 @@
     panes.progress.appendChild(mapSec);
     body.appendChild(panes.today);
     body.appendChild(panes.progress);
+    panes.calendar.appendChild(calendarSection());
+    body.appendChild(panes.calendar);
     if (EXTRA.ladder.length) { panes.ladder.appendChild(ladderSection()); body.appendChild(panes.ladder); }
     body.appendChild(panes.collection);
     showPvTab(pvTab === 'ladder' && !EXTRA.ladder.length ? 'today' : pvTab);

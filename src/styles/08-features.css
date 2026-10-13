@@ -410,3 +410,33 @@ body.labels-zh .practice-name .lbl .zl, body.labels-zh .pk-tile .lbl .zl { color
 .lg-btn .dot.learning { width: 9px; height: 9px; }
 .lg-btn .dot.known { width: 11px; height: 11px; }
 @media (prefers-reduced-motion: reduce) { .lg-btn { transition: none; } .lg-btn:hover, .lg-btn:focus-visible { transform: none; } }
+
+/* Review calendar (Progress → Calendar): past days shaded by study, later days with the reviews due. */
+.cal-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 2px 0 6px; }
+.cal-month { font-weight: 700; font-size: 16px; color: var(--text); }
+.cal-move { font-size: 22px; line-height: 1; }
+.cal { width: calc(100% + 8px); margin: 0 -4px; border-collapse: separate; border-spacing: 4px; table-layout: fixed; }
+.cal th { font-size: 12px; font-weight: 600; color: var(--muted); padding: 0 0 2px; }
+.cal td { padding: 0; }
+.cal-day { position: relative; isolation: isolate; width: 100%; height: clamp(40px, 11vw, 58px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+  padding: 0; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); color: var(--soft); font-variant-numeric: tabular-nums; }
+.cal-day::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: var(--known); opacity: 0; }
+.cal-day.some::before { opacity: .28; }
+.cal-day.frozen::before { background: var(--focus); opacity: .3; }
+.cal-day.goal { background: var(--known); border-color: var(--known-strong); color: var(--known-ink); }
+.cal-day.future { background: transparent; border-style: dashed; color: var(--muted); }
+.cal-n { font-size: 13px; line-height: 1.1; }
+.cal-day.today .cal-n { font-weight: 800; text-decoration: underline 2px var(--accent); text-underline-offset: 3px; }
+.cal-due { font-size: 11px; line-height: 1; font-weight: 700; color: var(--learn); }
+.cal-day.goal .cal-due { color: var(--known-ink); }
+.cal-day[aria-pressed="true"] { border: 2px solid var(--paper); }
+.cal-info { margin: 8px 0 2px; min-height: 2.9em; font-size: 14px; color: var(--text); }
+.cal-sum { margin: 0 0 6px; font-size: 13px; color: var(--muted); }
+.cal-legend { margin-top: 4px; }
+.cal-swatch { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 5px; border: 1px solid var(--line); font-size: 10px; font-weight: 700; position: relative; isolation: isolate; }
+.cal-swatch::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: var(--known); opacity: .28; }
+.cal-swatch.goal { background: var(--known); border-color: var(--known-strong); }
+.cal-swatch.frozen::before { background: var(--focus); opacity: .3; }
+.cal-swatch.due { border-style: dashed; color: var(--learn); }
+.cal-swatch.due::before, .cal-swatch.goal::before { opacity: 0; }
+@media (max-width: 380px) { .cal { border-spacing: 3px; } .cal-n { font-size: 12px; } .cal-due { font-size: 10px; } }

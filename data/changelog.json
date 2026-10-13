@@ -3,12 +3,13 @@
     {
       "version": "3.4",
       "date": "2026-10-13",
-      "title": "Tone pairs",
+      "title": "Tone pairs and a review calendar",
       "groups": [
         {
           "name": "",
           "items": [
-            "Tone pairs, a new listening style: hear a two-syllable word such as 学生 and pick both of its tones (2 + 1). Each choice writes the word in those tones, and the wrong ones share one of the right tones, so you learn to hear each combination. About 295 words take part."
+            "Tone pairs, a new listening style: hear a two-syllable word such as 学生 and pick both of its tones (2 + 1). Each choice writes the word in those tones, and the wrong ones share one of the right tones, so you learn to hear each combination. About 295 words take part.",
+            "A review calendar in your progress (Calendar tab): a month at a time, it shows the days you studied and met your goal, streak freezes, and how many reviews fall due on each coming day across all skills. Tap a day for its numbers, so you can plan a day off."
           ]
         }
       ]
