@@ -167,7 +167,8 @@
     wordCards.forEach(function (w, k) { if (w.zh === zh) i = k; });
     if (i === -1) return;
     OVERLAYS.forEach(function (id) { if (id !== 'listView') closeOverlay(els[id]); });
-    if (isSent()) { rememberDeck(); useDeckType('words'); syncPracticeSelect(); }
+    // The sentence deck's numbers mean nothing among the words: take the remembered word deck, or let studyCard() build one.
+    if (isSent()) { rememberDeck(); useDeckType('words'); syncPracticeSelect(); if (!recallDeck()) state.deck = []; }
     studyCard(i);
   }
   function wordsIn(topic) { return wordCards.filter(function (w) { return topic === 'all' || w.tp === topic; }); }

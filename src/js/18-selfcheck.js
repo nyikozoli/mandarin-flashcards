@@ -1595,6 +1595,22 @@
       var row = els.wordList.querySelector(rowSelector);
       if (row) row.click();
       var jumped = els.listView.hidden && currentIndex() === cards.indexOf(c5) && els.cardHanzi.textContent === c5.zh;
+      var fromSentRes = (function () {
+        // A word opened from the sentence deck (word of the day, a ladder word) must not keep the sentence deck's numbers.
+        var w = wordCards[Math.min(33, wordCards.length - 1)], err = '';
+        var keep = { deck: state.deck.slice(), pos: state.pos, mode: state.mode, level: state.level, topic: state.topic, shuffled: state.shuffled, practice: state.practice, mem: JSON.parse(JSON.stringify(state.deckMemory)) };
+        switchDeck('sentences');
+        studyWord(w.zh);
+        var valid = state.deckType === 'words' && state.deck.every(function (i) { return !!cards[i]; }) && cards[state.deck[state.pos]] === w;
+        try { progressSnapshot(); } catch (e) { err = e.message; }
+        useDeckType('words');
+        state.deck = keep.deck; state.pos = keep.pos; state.mode = keep.mode; state.level = keep.level; state.topic = keep.topic;
+        state.shuffled = keep.shuffled; state.practice = keep.practice; state.deckMemory = keep.mem;
+        syncPracticeSelect(); render(false);
+        return { ok: valid && !err, d: 'deck holds only words and shows ' + w.zh + ': ' + valid + (err ? '; saving failed: ' + err : '; saving works') };
+      })();
+      add('A word opened from the sentence deck studies it in the word deck', fromSentRes.ok, fromSentRes.d);
+
       add('Word list opens, search works, selecting a word studies it', listOpen && found && toneless && jumped,
         'List shows all ' + cards.length + ' words: ' + listOpen + '; search “' + c5.py + '” finds ' + c5.zh + ': ' + found +
         '; tone-free search “ni hao” finds 你好: ' + toneless + '; tapping it opens the card: ' + jumped);

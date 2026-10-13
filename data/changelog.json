@@ -1,6 +1,19 @@
 {
   "releases": [
     {
+      "version": "3.7",
+      "date": "2026-10-13",
+      "title": "Fix: studying a word from the sentence deck",
+      "groups": [
+        {
+          "name": "",
+          "items": [
+            "Fixed an error (“Cannot read properties of undefined”) when you opened a word, such as today’s word, while studying sentences: the card showed, but progress could not be saved."
+          ]
+        }
+      ]
+    },
+    {
       "version": "3.6",
       "date": "2026-10-13",
       "title": "Tone 1 in magenta",
