@@ -1,8 +1,8 @@
   /* ---------- practice modes ---------- */
-  var PRACTICE = { zh: 'Chinese → meaning', reverse: 'Meaning → Chinese', listen: 'Listening', choice: 'Multiple choice', hanzi: 'Characters only', tone: 'Which tone?', cloze: 'Fill the gap', build: 'Build the sentence', pairs: 'Similar words' };
+  var PRACTICE = { zh: 'Chinese → meaning', reverse: 'Meaning → Chinese', listen: 'Listening', choice: 'Multiple choice', hanzi: 'Characters only', tone: 'Which tone?', tonepair: 'Tone pairs', cloze: 'Fill the gap', build: 'Build the sentence', pairs: 'Similar words' };
   // What each style asks, for the practice style picker (menu values; sentence styles start with s-).
   var PRACTICE_ASK = { zh: 'See the word, recall the meaning', reverse: 'See the meaning, recall the word', listen: 'Hear the word, recall the meaning',
-    choice: 'Pick the meaning from four', hanzi: 'Read the word with the pinyin hidden', tone: 'Hear the word, pick its first tone',
+    choice: 'Pick the meaning from four', hanzi: 'Read the word with the pinyin hidden', tone: 'Hear the word, pick its first tone', tonepair: 'Hear a two-syllable word, pick both tones',
     cloze: 'Pick the word a sentence is missing', pairs: 'Tell look-alikes apart, like 买 and 卖',
     's-zh': 'Read a sentence, recall the meaning', 's-reverse': 'See the meaning, recall the sentence', 's-listen': 'Hear a sentence, recall the meaning',
     's-choice': 'Pick the sentence\u2019s meaning from four', 's-hanzi': 'Read sentences with the pinyin hidden', 's-build': 'Put a sentence\u2019s words in order' };
@@ -118,9 +118,9 @@
     els.optPractice.dispatchEvent(new Event('change'));
   }
   // Styles answered by picking one of the chips in #choiceBox (keys 1–4).
-  var CHOICE_STYLES = { choice: true, tone: true, cloze: true, pairs: true };
+  var CHOICE_STYLES = { choice: true, tone: true, tonepair: true, cloze: true, pairs: true };
   var choiceDone = false;
-  // The syllable the tone quiz is asking about on the current card; null when the card has no quiz.
+  // The syllable the tone quiz is asking about on the current card (with `pair` in the tone-pair drill); null when the card has no quiz.
   var toneQ = null;
   // The fill-the-gap question on the current card ({ ex, blanked, options }); null when the card has none.
   var clozeQ = null;
@@ -313,10 +313,12 @@
     }
     return similarMap[c.zh] || [];
   }
-  // In the similar-words style the deck holds only words that have a look-alike or a sound-alike.
+  // In the similar-words style the deck holds only words that have a look-alike or a sound-alike, in tone pairs only
+  // words with two full tones.
   function inPractice(c) {
     var rk = rehearseCode(state.practice);
     if (rk) return !c.sentence && !!mean(c, rk) && rehearseStarted(c);
+    if (state.practice === 'tonepair') return !!c.sentence || !!tonePairTarget(c);
     return state.practice !== 'pairs' || !!c.sentence || similarOf(c).length > 0;
   }
   // Chips that show words (characters and pinyin) rather than meanings.
@@ -357,6 +359,40 @@
     });
     choiceDone = false;
   }
+  // Four chips for a tone pair: the right pair, one that shares its first tone, one that shares its second, and one
+  // more, each written as the word in those tones; in order (1 + 1 before 1 + 2), so a pair always sits in about the same place.
+  var TONE_PAIRS = [];
+  [1, 2, 3, 4].forEach(function (a) { [1, 2, 3, 4].forEach(function (b) { if (a !== 3 || b !== 3) TONE_PAIRS.push(a * 10 + b); }); });
+  function buildTonePairChoices(t) {
+    var pick = [t.tone];
+    var take = function (list) {
+      list = list.filter(function (k) { return pick.indexOf(k) === -1; });
+      if (list.length) pick.push(list[Math.floor(Math.random() * list.length)]);
+    };
+    take(TONE_PAIRS.filter(function (k) { return Math.floor(k / 10) === t.pair[0]; }));
+    take(TONE_PAIRS.filter(function (k) { return k % 10 === t.pair[1]; }));
+    while (pick.length < 4) take(TONE_PAIRS);
+    pick.sort(function (a, b) { return a - b; });
+    els.choiceBox.textContent = '';
+    pick.forEach(function (k, i) {
+      var tones = [Math.floor(k / 10), k % 10];
+      var b = el('button', 'choice tone');
+      b.type = 'button';
+      b.setAttribute('data-ok', k === t.tone ? '1' : '0');
+      b.appendChild(el('span', 'choice-num', String(i + 1)));
+      var tx = el('span', 'choice-text');
+      var py = el('span', 'choice-py');
+      py.setAttribute('lang', 'zh-Latn-pinyin');
+      retoneAll(t.text, tones).forEach(function (s) {
+        py.appendChild(s.tone && state.toneColors ? el('span', 't' + s.tone, s.text) : document.createTextNode(s.text));
+      });
+      tx.appendChild(py);
+      tx.appendChild(el('span', 'choice-contour', tones[0] + ' + ' + tones[1] + ' · ' + TONE_CONTOUR[tones[0]] + ', ' + TONE_CONTOUR[tones[1]].toLowerCase()));
+      b.appendChild(tx);
+      els.choiceBox.appendChild(b);
+    });
+    choiceDone = false;
+  }
   function pickChoice(k) {
     if (choiceDone || !CHOICE_STYLES[state.practice] || currentIndex() === null) return;
     var btns = els.choiceBox.querySelectorAll('.choice');
@@ -372,7 +408,9 @@
     buzz(ok ? 12 : [30, 60, 30]);
     if (!ok) setRevealed(true);
     var right = cards[currentIndex()];
-    announce(ok ? 'Correct.' : state.practice === 'tone'
+    announce(ok ? 'Correct.' : toneQ && toneQ.pair
+      ? 'Not quite. ' + right.zh + ' is ' + right.py + ', tones ' + toneQ.pair.join(' and ') + '.'
+      : state.practice === 'tone'
       ? 'Not quite. ' + right.zh + ' starts with ' + toneQ.text + ', tone ' + toneQ.tone + '.'
       : state.practice === 'cloze' || state.practice === 'pairs' ? 'Not quite. The answer is ' + right.zh + ', ' + right.py + '.'
       : 'Not quite. The answer is: ' + shortText(right.en) + '.');
@@ -393,7 +431,7 @@
   }
   function applyPractice(c) {
     var p = practiceNow(), rh = rehearseCode(p);
-    toneQ = p === 'tone' ? toneQuizTarget(c) : null;
+    toneQ = p === 'tone' ? toneQuizTarget(c) : p === 'tonepair' ? tonePairTarget(c) : null;
     clozeQ = p === 'cloze' ? clozeTarget(c) : null;
     buildQ = p === 'build' ? buildTarget(c) : null;
     similarQ = p === 'pairs' && similarOf(c).length ? { opts: shuffled([c].concat(similarOf(c))) } : null;
@@ -442,7 +480,7 @@
       var lb = el('button', 'listen-btn', toneQ ? deck().tonePlay : deck().play);
       lb.type = 'button';
       lb.id = 'btnListen';
-      els.cardPrompt.appendChild(el('p', 'prompt-q', toneQ ? deck().toneQ : deck().listenQ));
+      els.cardPrompt.appendChild(el('p', 'prompt-q', toneQ ? (toneQ.pair ? deck().pairQ : deck().toneQ) : deck().listenQ));
       els.cardPrompt.appendChild(lb);
     } else if (clozeQ) {
       els.cardPrompt.appendChild(el('p', 'prompt-q', 'Which word fills the gap?'));
@@ -475,7 +513,7 @@
     }
     els.choiceBox.hidden = !(p === 'choice' || toneQ || clozeQ || similarQ);
     if (p === 'choice') buildChoices(c);
-    else if (toneQ) buildToneChoices(toneQ);
+    else if (toneQ) { if (toneQ.pair) buildTonePairChoices(toneQ); else buildToneChoices(toneQ); }
     else if (clozeQ) buildWordChoices(c, clozeQ.options);
     else if (similarQ) buildWordChoices(c, similarQ.opts, true);
     else els.choiceBox.textContent = '';

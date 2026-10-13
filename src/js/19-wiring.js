@@ -314,8 +314,9 @@
       state.revealed = state.autoReveal && state.practice === 'zh';
       stopSpeech();
       var skillChanged = useSkill(skillOf(state.practice));
-      // Similar words studies a smaller deck, so entering or leaving it rebuilds the deck.
-      var pairsChanged = (prevPractice === 'pairs') !== (state.practice === 'pairs') || isRehearseStyle(prevPractice) || isRehearseStyle(state.practice);
+      // Similar words, tone pairs and rehearsing study a smaller deck, so entering, leaving or switching between them rebuilds it.
+      var smallDeck = function (p) { return p === 'pairs' || p === 'tonepair' || isRehearseStyle(p); };
+      var pairsChanged = prevPractice !== state.practice && (smallDeck(prevPractice) || smallDeck(state.practice));
       if (type !== state.deckType) switchDeck(type, skillChanged);
       // A Due, Learning or Hardest deck was built from the previous skill's marks.
       else if ((skillChanged && state.mode !== 'all') || pairsChanged) setMode(state.mode);

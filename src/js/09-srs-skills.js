@@ -118,7 +118,7 @@
   // uploads older than the stored format, and this copy refuses to apply progress written by a newer one, so neither side drops
   // what it does not understand.
   var FORMAT = 7;
-  var SKILL_OF = { zh: 'read', hanzi: 'read', choice: 'read', cloze: 'read', pairs: 'read', reverse: 'recall', build: 'recall', listen: 'listen', tone: 'listen' };
+  var SKILL_OF = { zh: 'read', hanzi: 'read', choice: 'read', cloze: 'read', pairs: 'read', reverse: 'recall', build: 'recall', listen: 'listen', tone: 'listen', tonepair: 'listen' };
   function skillOf(p) { return SKILL_OF[p] || 'read'; }
   function emptyMarks() { return { status: {}, srs: {}, misses: {} }; }
   function stashSkill() { state.marks[state.skill] = { status: state.status, srs: state.srs, misses: state.misses }; }

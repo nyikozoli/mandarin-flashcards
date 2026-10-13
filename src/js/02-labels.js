@@ -14,7 +14,7 @@
     'All words': ['全部词语', 'quánbù cíyǔ'], 'All sentences': ['全部句子', 'quánbù jùzi'],
     'Cards': ['卡片', 'kǎpiàn'], 'Translations': ['翻译', 'fānyì'], 'Rehearse': ['温习', 'wēnxí'], 'Start': ['开始', 'kāishǐ'], 'Voice': ['语音', 'yǔyīn'], 'Sync across devices': ['同步', 'tóngbù'], 'Progress and checks': ['进度和自检', 'jìndù hé zìjiǎn']
   };
-  var PRACTICE_ZH = { zh: '认字', reverse: '中文怎么说', listen: '听力', choice: '选择题', hanzi: '只看汉字', tone: '听声调', cloze: '填空', pairs: '易混词',
+  var PRACTICE_ZH = { zh: '认字', reverse: '中文怎么说', listen: '听力', choice: '选择题', hanzi: '只看汉字', tone: '听声调', tonepair: '声调组合', cloze: '填空', pairs: '易混词',
     's-zh': '读句子', 's-reverse': '说句子', 's-listen': '听句子', 's-choice': '句子选择题', 's-hanzi': '只看汉字', 's-build': '组句' };
   var GROUP_ZH = { Words: '词语', Sentences: '句子', Rehearse: '温习' };
   // A label unit: the Chinese and the English, stacked in buttons, side by side in headings.

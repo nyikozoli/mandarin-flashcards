@@ -1076,6 +1076,43 @@
       })();
       add('Tone quiz: hear the word, pick the tone of the first syllable', toneRes.ok, toneRes.d);
 
+      var pairRes = (function () {
+        var quiz = -1, asked = 0, badRetone = [];
+        wordCards.forEach(function (w, i) {
+          var t = tonePairTarget(w);
+          if (!t) return;
+          asked++;
+          if (quiz === -1) quiz = i;
+          // Written back in its own tones, every word must give its own pinyin, or the chips would misspell it.
+          if (retoneAll(w.py, t.pair).map(function (s) { return s.text; }).join('') !== w.py) badRetone.push(w.zh + ' ' + w.py);
+        });
+        if (quiz === -1) return { ok: false, d: 'no word with a tone pair' };
+        var deckSnap = state.deck, posSnap = state.pos, practiceSnap = state.practice;
+        state.practice = 'tonepair';
+        var filtered = wordCards.every(function (w) { return inPractice(w) === !!tonePairTarget(w); });
+        var only = function (i) { state.deck = [i]; state.pos = 0; render(false); };
+        only(quiz);
+        var w = wordCards[quiz], t = tonePairTarget(w);
+        var chips = els.choiceBox.querySelectorAll('.choice'), right = -1, keys = [];
+        for (var ci = 0; ci < chips.length; ci++) {
+          if (chips[ci].getAttribute('data-ok') === '1') right = ci;
+          keys.push(chips[ci].querySelector('.choice-contour').textContent.slice(0, 5));
+        }
+        var own = t.pair[0] + ' + ' + t.pair[1];
+        var shares = keys.some(function (k) { return k !== own && k.charAt(0) === String(t.pair[0]); }) && keys.some(function (k) { return k !== own && k.charAt(4) === String(t.pair[1]); });
+        var marks = chips.length === 4 && right >= 0 && keys[right] === own && chips[right].querySelector('.choice-py').textContent === w.py && keys.slice().sort().join() === keys.join();
+        var hidden = getComputedStyle(els.cardPinyin).visibility === 'hidden' && !els.choiceBox.hidden && els.cardPrompt.textContent.indexOf(DECKS.words.pairQ) !== -1;
+        if (right >= 0) chips[right].click();
+        var graded = answeredRight(w.zh) && state.pos === 1;
+        state.deck = deckSnap; state.pos = posSnap;
+        state.practice = practiceSnap; render(false);
+        return { ok: asked > 250 && !badRetone.length && filtered && marks && shares && hidden && graded,
+          d: asked + ' words asked; rewritten in their own tones they keep their pinyin: ' + (badRetone.length ? badRetone.slice(0, 5).join(', ') + ' do not' : 'yes') +
+            '; the deck holds only them: ' + filtered + ' | ' + w.zh + ' ' + w.py + ': chips ' + keys.join(' / ') + ', right one marked and spelt as the word, in order: ' + marks +
+            ', one shares the first tone and one the second: ' + shares + ', pinyin hidden and the question shown: ' + hidden + ', right answer marks Known: ' + graded };
+      })();
+      add('Tone pairs: hear a two-syllable word, pick both tones', pairRes.ok, pairRes.d);
+
       var fadeRes = (function () {
         var deckSnap = state.deck, posSnap = state.pos, w = wordCards[0];
         var hides = function () { return els.card.classList.contains('hide-reading') && getComputedStyle(els.cardPinyin).visibility === 'hidden'; };

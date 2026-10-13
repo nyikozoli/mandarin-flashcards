@@ -93,6 +93,7 @@
       ? 'Tap the characters to hide the meaning · swipe → know · ← learning'
       : p === 'tone'
         ? (toneQ ? 'Listen, then pick the tone of the first syllable (keys 1–4)' : 'Tap the card to show the meaning')
+        : p === 'tonepair' ? (toneQ ? 'Listen, then pick both tones (keys 1–4)' : 'Tap the card to show the meaning')
         : p === 'pairs' ? (similarQ ? 'Read the meaning (and hear it), then pick the right word (keys 1–4)' : 'Tap the card to show the meaning')
         : p === 'build' ? (buildQ ? 'Tap the words in order; tap a placed word to take it back (Backspace)' : 'Tap the card to show the meaning')
         : p === 'cloze' ? (clozeQ ? 'Pick the word that fills the gap (keys 1–4)' : 'Tap the card to show the meaning')
@@ -238,14 +239,14 @@
     if (animate && !testing) {
       announce('Card ' + (state.pos + 1) + ' of ' + state.deck.length + '. ' + (practiceNow() === 'reverse' ? 'Meaning: ' + c.en + '.' :
         practiceNow() === 'listen' ? 'Listen to the ' + noun(1) + '.' :
-        toneQ ? 'Listen to ' + c.zh + ', then pick the tone of the first syllable.' :
+        toneQ ? 'Listen to ' + c.zh + ', then pick ' + (toneQ.pair ? 'both tones.' : 'the tone of the first syllable.') :
         buildQ ? 'Put the words in order: ' + c.en :
         similarQ ? 'Which word means: ' + shortText(mainMeaning(c)) + '?' :
         clozeQ ? 'Which word fills the gap? ' + clozeQ.blanked.replace(/＿+/g, ' blank ') + ' ' + clozeQ.ex.en :
         c.zh + (readingHidden ? '.' : ', ' + c.py + '.')));
     }
-    // The tone quiz always speaks: hearing the word is the question.
-    if (animate && !testing && ((state.autoplay && !readingHidden && !faceHidden) || practiceNow() === 'listen' || practiceNow() === 'tone') && userHasInteracted) {
+    // The tone quizzes always speak: hearing the word is the question.
+    if (animate && !testing && ((state.autoplay && !readingHidden && !faceHidden) || practiceNow() === 'listen' || practiceNow() === 'tone' || !!toneQ) && userHasInteracted) {
       var pos = state.pos;
       setTimeout(function () { if (state.pos === pos && currentIndex() !== null) speakParts([c.zh], null); }, 280);
     }

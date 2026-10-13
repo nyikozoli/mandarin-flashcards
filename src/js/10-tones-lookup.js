@@ -90,6 +90,23 @@
     if (syls.length > 1 && syls[0].tone === 3 && syls[1].tone === 3) return null;
     return syls[0];
   }
+  // The tone-pair drill's question: a two-character word with two full tones, or null. A neutral syllable has no tone
+  // to hear, and a 3-3 pair is said as 2-3, so neither is asked. `pair` is the two tones, `tone` the pair as a number (21).
+  function tonePairTarget(c) {
+    if (isSent() || c.sentence || charLen(c.zh) !== 2) return null;
+    var syls = pinyinTokens(c.py).filter(function (t) { return t.tone; });
+    if (syls.length !== 2 || syls[0].tone === 5 || syls[1].tone === 5 || (syls[0].tone === 3 && syls[1].tone === 3)) return null;
+    return { text: c.py, tone: syls[0].tone * 10 + syls[1].tone, pair: [syls[0].tone, syls[1].tone] };
+  }
+  // The pinyin's syllables, rewritten in the given tones (one per toned syllable), as tokens for display.
+  function retoneAll(py, tones) {
+    var i = 0;
+    return pinyinTokens(py).map(function (t) {
+      if (!t.tone) return t;
+      var n = tones[i++];
+      return { text: retone(t.text, n), tone: n };
+    });
+  }
 
   /* ---------- word lookup in sentences ---------- */
   // The app's own word list is the dictionary: longest match first, so 学生 wins over 学. Characters that are not part

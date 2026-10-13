@@ -1,6 +1,19 @@
 {
   "releases": [
     {
+      "version": "3.4",
+      "date": "2026-10-13",
+      "title": "Tone pairs",
+      "groups": [
+        {
+          "name": "",
+          "items": [
+            "Tone pairs, a new listening style: hear a two-syllable word such as 学生 and pick both of its tones (2 + 1). Each choice writes the word in those tones, and the wrong ones share one of the right tones, so you learn to hear each combination. About 295 words take part."
+          ]
+        }
+      ]
+    },
+    {
       "version": "3.3",
       "date": "2026-10-13",
       "title": "Travel pack",

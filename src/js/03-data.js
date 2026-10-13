@@ -76,7 +76,7 @@
   var DECKS = {
     words: { noun: ['word', 'words'], listTitle: 'All words', mapTitle: 'Every word', number: '#', milestone: '',
       sayIt: 'What is this in Chinese?', listenQ: 'Listen. Which word is it?', play: '🔊 Play the word',
-      toneQ: 'Listen. Which tone is the first syllable?', tonePlay: '🔊 Play the word again' },
+      toneQ: 'Listen. Which tone is the first syllable?', pairQ: 'Listen. Which two tones does it have?', tonePlay: '🔊 Play the word again' },
     sentences: { noun: ['sentence', 'sentences'], listTitle: 'All sentences', mapTitle: 'Every sentence', number: 'sentence ', milestone: 'sentence-',
       sayIt: 'Say this in Chinese:', listenQ: 'Listen. What does it say?', play: '🔊 Play the sentence' }
   };
@@ -92,7 +92,7 @@
     if (els.card) els.card.classList.toggle('sentence', isSent());
   }
   // Styles that exist for one deck only, and the style of the same skill to use on the other deck.
-  var DECK_ONLY = { tone: ['words', 'listen'], cloze: ['words', 'choice'], build: ['sentences', 'reverse'], pairs: ['words', 'choice'] };
+  var DECK_ONLY = { tone: ['words', 'listen'], tonepair: ['words', 'listen'], cloze: ['words', 'choice'], build: ['sentences', 'reverse'], pairs: ['words', 'choice'] };
   function fixStyleForDeck() {
     var o = DECK_ONLY[state.practice];
     if (!o || o[0] === state.deckType) return;
