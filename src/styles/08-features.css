@@ -350,3 +350,21 @@ body.labels-zh .practice-name .lbl .zl, body.labels-zh .pk-tile .lbl .zl { color
 /* Practice tiles fill the row on phones, so the list has one straight edge. */
 @media (max-width: 600px) { .pk-tile { flex: 1 1 100%; } }
 @media (max-width: 420px) { .today-row { column-gap: 6px; } .suggest-chip { padding: 5px 10px 5px 7px; gap: 6px; } .today-row .today-pill { padding-left: 9px; padding-right: 9px; } }
+
+/* Study settings sheet: level and topic below the practice styles. */
+.pk-where { margin-top: 18px; display: flex; flex-direction: column; gap: 8px; }
+.pk-levels { display: flex; gap: 2px; padding: 3px; border-radius: 12px; background: var(--surface2); }
+.pk-level { flex: 1; min-height: 44px; border: 0; border-radius: 9px; background: transparent; color: var(--muted); font-weight: 700; font-size: 14px; }
+.pk-level[aria-pressed="true"] { background: var(--paper); color: var(--bg); }
+.practice-line { display: flex; align-items: baseline; min-width: 0; }
+.practice-where { display: none; }
+/* Phones: the practice button is the one summary line (style · level · topic); the level row and topic button go. */
+@media (max-width: 600px) {
+  .practice-btn { min-height: 48px; padding: 5px 12px 5px 6px; }
+  .practice-seal { width: 34px; height: 34px; font-size: 20px; }
+  .practice-ask, .practice-change, .practice-name .lbl .zl, .deckbar-row { display: none; }
+  .practice-line { overflow: hidden; white-space: nowrap; }
+  .practice-name { flex: none; }
+  .practice-where { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--soft); font-weight: 600; font-size: 13.5px; }
+  .practice-btn::after { content: "▾"; flex: none; color: var(--muted); font-size: 13px; }
+}

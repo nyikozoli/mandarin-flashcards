@@ -326,6 +326,7 @@
     els.countLvAll.textContent = String(cards.length);
     LEVELS.forEach(function (lv) { var n = countsFor(lv); els['countLv' + lv].textContent = n.known + '/' + n.total; });
     updateToday();
+    syncPracticeButton();
     renderLadderStrip();
   }
 

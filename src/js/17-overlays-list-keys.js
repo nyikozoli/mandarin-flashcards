@@ -156,6 +156,7 @@
   }
   function updateTopicBtn() {
     var t = topicById(state.topic);
+    syncPracticeButton();
     els.btnTopic.hidden = !EXTRA.topics.length;
     els.topicBtnZh.textContent = t ? t.zh : '全';
     els.topicBtnName.textContent = t ? t.en : 'All topics';

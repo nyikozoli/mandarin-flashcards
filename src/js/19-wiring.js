@@ -275,6 +275,14 @@
     on('modeHard', 'click', function () { setMode('hard'); });
     on('btnPractice', 'click', openPracticeSheet);
     on('btnClosePractice', 'click', function () { closeOverlay(els.practiceView); });
+    on('practiceLevels', 'click', function (e) {
+      var b = e.target.closest ? e.target.closest('[data-plevel]') : null;
+      if (b) { setLevel(b.getAttribute('data-plevel')); renderPracticeWhere(); }
+    });
+    on('practiceTopics', 'click', function (e) {
+      var b = e.target.closest ? e.target.closest('[data-topic]') : null;
+      if (b) { setTopic(b.getAttribute('data-topic')); renderPracticeWhere(); }
+    });
     on('practiceGrid', 'click', function (e) {
       var t = e.target.closest ? e.target.closest('[data-style]') : null;
       if (t) pickPracticeStyle(t.getAttribute('data-style'));

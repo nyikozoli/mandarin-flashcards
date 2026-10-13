@@ -32,7 +32,10 @@
     els.practiceName.textContent = '';
     els.practiceName.appendChild(styleLabel(s));
     els.practiceAsk.textContent = PRACTICE_ASK[s.value] || '';
-    els.btnPractice.setAttribute('aria-label', 'Practice style: ' + s.en + ' (' + SKILLS[s.skill].toLowerCase() + '). ' + (PRACTICE_ASK[s.value] || '') + '. Change');
+    // Phones show the level and topic on the same line (CSS hides it on wider screens, which keep their own controls).
+    var t = topicById(state.topic), where = (state.level === 'all' ? 'HSK all' : 'HSK ' + state.level) + ' \u00b7 ' + (t ? t.en : 'All topics');
+    els.practiceWhere.textContent = '\u00a0\u00b7 ' + where;
+    els.btnPractice.setAttribute('aria-label', 'Practice style: ' + s.en + ' (' + SKILLS[s.skill].toLowerCase() + '). ' + (PRACTICE_ASK[s.value] || '') + '. ' + where + '. Change');
   }
   // The sheet: one section per skill, with a row of word styles and a row of sentence styles.
   function renderPracticeSheet() {
@@ -72,8 +75,28 @@
       grid.appendChild(sec);
     });
   }
+  // The sheet's level and topic sections: on phones they replace the level row and the topic button.
+  function renderPracticeWhere() {
+    var lv = els.practiceLevels;
+    lv.textContent = '';
+    ['all'].concat(LEVELS).forEach(function (l) {
+      var b = el('button', 'pk-level', l === 'all' ? 'All' : 'HSK ' + l);
+      b.type = 'button';
+      b.setAttribute('data-plevel', l);
+      b.setAttribute('aria-pressed', state.level === l ? 'true' : 'false');
+      lv.appendChild(b);
+    });
+    var tp = els.practiceTopics;
+    tp.textContent = '';
+    tp.hidden = !EXTRA.topics.length;
+    els.practiceTopics.previousElementSibling.hidden = tp.hidden;
+    if (tp.hidden) return;
+    tp.appendChild(topicTile(null, 'tp-tile'));
+    EXTRA.topics.forEach(function (t) { tp.appendChild(topicTile(t, 'tp-tile')); });
+  }
   function openPracticeSheet() {
     renderPracticeSheet();
+    renderPracticeWhere();
     openOverlay(els.practiceView, els.practiceGrid.querySelector('[aria-pressed="true"]') || els.btnClosePractice);
   }
   // Picking a tile goes through the menu's change handler, so it switches skill and deck exactly like the menu did.

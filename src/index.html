@@ -85,7 +85,7 @@ try { if (localStorage.getItem('mandarin300.theme') === 'sepia') document.docume
 
   <div class="side">
   <nav class="deckbar" aria-label="Choose what to study">
-    <button type="button" class="practice-btn" id="btnPractice" aria-haspopup="dialog"><span class="practice-seal" id="practiceSeal" lang="zh-CN" aria-hidden="true">读</span><span class="practice-txt"><span id="practiceName" class="practice-name"></span><small id="practiceAsk" class="practice-ask"></small></span><span class="practice-change" aria-hidden="true">Change</span></button>
+    <button type="button" class="practice-btn" id="btnPractice" aria-haspopup="dialog"><span class="practice-seal" id="practiceSeal" lang="zh-CN" aria-hidden="true">读</span><span class="practice-txt"><span class="practice-line"><span id="practiceName" class="practice-name"></span><span id="practiceWhere" class="practice-where"></span></span><small id="practiceAsk" class="practice-ask"></small></span><span class="practice-change" aria-hidden="true">Change</span></button>
     <label class="practice" for="optPractice" hidden><span class="visually-hidden">Practice style</span>
       <select id="optPractice">
         <optgroup label="Words">
@@ -452,12 +452,18 @@ try { if (localStorage.getItem('mandarin300.theme') === 'sepia') document.docume
 <div id="practiceView" class="overlay" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="practiceTitle">
     <div class="sheet-head">
-      <h2 id="practiceTitle" data-lbl="inline">Practice style</h2>
-      <button type="button" class="close-btn" id="btnClosePractice" aria-label="Close practice styles">✕</button>
+      <h2 id="practiceTitle" data-lbl="inline">Study settings</h2>
+      <button type="button" class="close-btn" id="btnClosePractice" aria-label="Close study settings">✕</button>
     </div>
     <div class="pv-body">
       <p class="pv-sub">Each style trains one skill: 读 reading, 说 recall or 听 listening. Every skill keeps its own progress.</p>
       <div id="practiceGrid" class="pk-grid"></div>
+      <section class="pk-where" aria-labelledby="pkLevelHead">
+        <h3 class="pk-head" id="pkLevelHead">HSK level</h3>
+        <div id="practiceLevels" class="pk-levels" role="group" aria-labelledby="pkLevelHead"></div>
+        <h3 class="pk-head" id="pkTopicHead">Topic</h3>
+        <div id="practiceTopics" class="tp-grid" role="group" aria-labelledby="pkTopicHead"></div>
+      </section>
     </div>
   </div>
 </div>
@@ -555,7 +561,7 @@ try { if (localStorage.getItem('mandarin300.theme') === 'sepia') document.docume
           <dt>Ladder (阶梯)</dt><dd>Real-life steps such as greeting people, ordering food or asking the way, each with a small set of words. A step is reached when you know all its words in reading and listening (读 and 听); take them in any order, each one is worth 40 XP. The strip on the main screen shows the next step and how many words it still needs; Practise studies just those words. The Ladder tab in the progress view shows every step, and on wide screens a narrow ladder on the right shows your climb and your rank.</dd>
           <dt>Seals and challenges</dt><dd>The progress view collects 20 red seals (印章) for milestones such as 100 words, a 7-day streak or a passed exam, each worth 50 XP. Its challenges are a 60-second blitz (as many meanings as you can) and a 20-question exam per HSK level (pass at 80%). Challenges never change your review schedule.</dd>
           <dt>Character hints</dt><dd>The back of a word card explains its characters where a well-established explanation exists (about 180 characters): a picture (山 mountain peaks), a combination of meanings (休 a person resting by a tree), or a meaning part plus a sound part (妈 = 女 woman + 马 mǎ for the sound).</dd>
-          <dt>Topics</dt><dd>The button under the level row picks a topic (food, travel, time…). Every study mode then works inside it, and a topic's seal turns red when you know all its words.</dd>
+          <dt>Topics</dt><dd>The button under the level row (on phones: the study settings line at the top) picks a topic (food, travel, time…). Every study mode then works inside it, and a topic's seal turns red when you know all its words.</dd>
           <dt>What you can read</dt><dd>The progress view counts the example sentences whose HSK words you all know, shows how much of everyday Chinese text your words cover, and suggests the next word to learn. Word frequencies come from <i>wordfreq</i> by Robyn Speer and contributors (CC BY-SA 4.0).</dd>
           <dt>XP, ranks, combo</dt><dd>Every answer earns XP (10 for a known card, 3 for one you are still learning, more during a combo). XP raises your rank from 新手 Newcomer to 大师 Master. Three or more right answers in a row show a 连 combo counter on the card.</dd>
           <dt>Progress per skill</dt><dd>Reading (Chinese → meaning, 汉字 only, multiple choice), recall (meaning → Chinese) and listening (listening, which tone) each keep their own Known and Learning marks and their own Due list, so a word you can read is not marked as one you can say or hear. Words and sentences also keep their own place in the deck.</dd>

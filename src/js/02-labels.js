@@ -6,7 +6,7 @@
     'All cards': ['全部', 'quánbù'], 'Due': ['复习', 'fùxí'], 'Learning': ['学习中', 'xuéxí zhōng'], 'New': ['新卡片', 'xīn kǎpiàn'], 'Hardest': ['易错', 'yìcuò'],
     'Still learning': ['还在学', 'hái zài xué'], 'Skip': ['跳过', 'tiàoguò'], 'I know it': ['我会了', 'wǒ huì le'],
     'Hard': ['难', 'nán'], 'Good': ['好', 'hǎo'], 'Easy': ['容易', 'róngyì'],
-    'Today': ['今天', 'jīntiān'], 'Progress': ['进度', 'jìndù'], 'Collection': ['成就', 'chéngjiù'], 'Ladder': ['阶梯', 'jiētī'], 'Practice style': ['练习方式', 'liànxí fāngshì'], 'Your progress': ['我的进度', 'wǒ de jìndù'],
+    'Today': ['今天', 'jīntiān'], 'Progress': ['进度', 'jìndù'], 'Collection': ['成就', 'chéngjiù'], 'Ladder': ['阶梯', 'jiētī'], 'Practice style': ['练习方式', 'liànxí fāngshì'], 'Study settings': ['学习设置', 'xuéxí shèzhì'], 'Your progress': ['我的进度', 'wǒ de jìndù'],
     'Today\u2019s quests': ['每日任务', 'měirì rènwu'], 'Daily goal': ['每日目标', 'měirì mùbiāo'], 'Coming reviews': ['复习计划', 'fùxí jìhuà'],
     'Last 14 days': ['最近两周', 'zuìjìn liǎng zhōu'], 'What you can read': ['阅读能力', 'yuèdú nénglì'], 'Your stats': ['统计', 'tǒngjì'],
     'Challenges': ['挑战', 'tiǎozhàn'], 'Seals': ['印章', 'yìnzhāng'], 'By topic': ['话题', 'huàtí'], 'By HSK level': ['等级', 'děngjí'],

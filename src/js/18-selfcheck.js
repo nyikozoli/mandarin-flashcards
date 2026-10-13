@@ -1314,6 +1314,28 @@
             ', Listening tile switches to listening and updates the button: ' + listen + ', Build the sentence switches to the sentence deck: ' + build + ', menu change updates the button: ' + back };
       })();
       add('Practice style picker', pickerRes.ok, pickerRes.d);
+      var foldRes = (function () {
+        var keepLv = state.level, keepTp = state.topic;
+        els.btnPractice.click();
+        var lvBtns = els.practiceLevels.querySelectorAll('[data-plevel]');
+        var hsk2 = els.practiceLevels.querySelector('[data-plevel="2"]');
+        if (hsk2) hsk2.click();
+        var level = lvBtns.length === LEVELS.length + 1 && state.level === '2' && els.practiceWhere.textContent.indexOf('HSK 2') !== -1 &&
+          !els.practiceView.hidden && els.practiceLevels.querySelector('[data-plevel="2"]').getAttribute('aria-pressed') === 'true';
+        var t = EXTRA.topics[0], topic = true;
+        if (t) {
+          els.practiceTopics.querySelector('[data-topic="' + t.id + '"]').click();
+          topic = state.topic === t.id && els.practiceWhere.textContent.indexOf(t.en) !== -1 && !els.practiceView.hidden;
+        }
+        setTopic(keepTp);
+        setLevel(keepLv);
+        closeOverlay(els.practiceView);
+        var phone = window.matchMedia('(max-width: 600px)').matches, row = getComputedStyle(document.querySelector('.deckbar-row')).display;
+        var fold = phone ? row === 'none' && getComputedStyle(els.practiceWhere).display !== 'none' : row !== 'none' && getComputedStyle(els.practiceWhere).display === 'none';
+        return { ok: level && topic && fold, d: 'level in the sheet sets HSK 2 and the summary says so: ' + level + ', topic in the sheet: ' + topic + ', ' +
+          (phone ? 'phone: level row folded into the summary' : 'wide: level row shown, summary short') + ': ' + fold };
+      })();
+      add('Study settings: level and topic in the sheet, one summary line on phones', foldRes.ok, foldRes.d);
       var sugRes = (function () {
         closeSuggest();
         state.wotdSeen = '';
