@@ -385,3 +385,11 @@ body.labels-zh .practice-name .lbl .zl, body.labels-zh .pk-tile .lbl .zl { color
 .rail-panda { position: absolute; left: 50%; bottom: clamp(0px, var(--climb), calc(100% - 30px)); width: 32px; height: 32px; transform: translate(-50%, 2px); pointer-events: none; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .35)); transition: bottom .4s ease; }
 .rail-panda svg { width: 100%; height: 100%; display: block; }
 @media (prefers-reduced-motion: reduce) { .rail-panda { transition: none; } }
+
+/* Word map: a square's size says how far along the word is (Known full, Learning smaller, New smallest), and the
+   square under the pointer grows so it is easy to hit and to see. */
+.pv-cell { position: relative; transition: transform .15s ease; }
+.pv-cell.s-learning { transform: scale(.8); }
+.pv-cell.s-unmarked { transform: scale(.6); }
+.pv-cell:hover, .pv-cell:focus-visible, .pv-cell.picked { transform: scale(1.7); z-index: 1; }
+@media (prefers-reduced-motion: reduce) { .pv-cell { transition: none; } }
