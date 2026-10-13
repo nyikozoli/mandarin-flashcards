@@ -80,6 +80,9 @@
 
 .settings-body { overflow-y: auto; flex: 1; margin: 0 -16px; padding: 0 16px 24px; display: flex; flex-direction: column; gap: 22px; }
 .set-group { display: flex; flex-direction: column; }
+.set-group.set-off { display: none; }
+.set-tabs { position: static; margin: 0 0 12px; }
+.set-tabs .pv-tab[aria-selected="true"] { background: var(--paper); color: var(--bg); }
 .set-group h3 { margin: 0 0 4px; font-size: 13px; font-weight: 700; color: var(--muted); }
 .switch { display: flex; align-items: center; gap: 12px; min-height: 50px; border-bottom: 1px solid #27303b; cursor: pointer; }
 .switch input { flex: none; width: 20px; height: 20px; accent-color: var(--known); }

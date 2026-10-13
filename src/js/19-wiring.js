@@ -131,7 +131,20 @@
       els.importFile.value = '';
     });
     on('btnApplyImport', 'click', startImport);
-    on('btnSettings', 'click', function () { openOverlay(els.settingsView, els.btnCloseSettings); });
+    on('btnSettings', 'click', openSettings);
+    on('setTabs', 'click', function (e) {
+      var b = e.target.closest ? e.target.closest('[data-settab]') : null;
+      if (b) showSetTab(b.getAttribute('data-settab'));
+    });
+    // Arrow keys, Home and End move between the tabs (the tab pattern: only the picked tab is in the Tab order).
+    on('setTabs', 'keydown', function (e) {
+      var tabs = Array.prototype.filter.call(els.setTabs.querySelectorAll('[data-settab]'), function (b) { return !b.hidden; });
+      var i = tabs.map(function (b) { return b.getAttribute('data-settab'); }).indexOf(setTab);
+      var to = { ArrowLeft: i - 1, ArrowRight: i + 1, Home: 0, End: tabs.length - 1 }[e.key];
+      if (to === undefined) return;
+      e.preventDefault();
+      showSetTab(tabs[(to + tabs.length) % tabs.length].getAttribute('data-settab'), true);
+    });
     on('btnHelp', 'click', function () { openOverlay(els.helpView, els.btnCloseHelp); els.helpView.querySelector('.help-body').scrollTop = 0; });
     on('btnCloseHelp', 'click', function () { closeOverlay(els.helpView); });
     on('btnShowTour', 'click', function () { closeOverlay(els.helpView); openTour(); });

@@ -491,6 +491,34 @@
       })();
       add('Review calendar: study days, reviews due, pick a day', calRes.ok, calRes.d);
 
+      var setTabRes = (function () {
+        var shownPanes = function () {
+          return Array.prototype.filter.call(els.settingsView.querySelectorAll('.set-group'), function (p) { return getComputedStyle(p).display !== 'none'; })
+            .map(function (p) { return p.getAttribute('data-setpane'); }).join();
+        };
+        var picked = function () { var b = els.setTabs.querySelector('[aria-selected="true"]'); return b ? b.getAttribute('data-settab') : ''; };
+        setTab = 'cards';
+        openSettings();
+        var first = picked() === 'cards' && shownPanes() === 'cards' && els.setTabs.querySelectorAll('[tabindex="0"]').length === 1;
+        els.setTabs.querySelector('[data-settab="langs"]').click();
+        var clicked = picked() === 'langs' && shownPanes() === 'langs' && !!els.settingsView.querySelector('#setLangs #optLangEn');
+        els.setTabs.querySelector('[data-settab="langs"]').dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+        var keyed = picked() === 'voice' && document.activeElement === els.setTabs.querySelector('[data-settab="voice"]') && shownPanes() === 'voice';
+        els.setTabs.querySelector('[data-settab="voice"]').dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
+        var end = picked() === 'data' && shownPanes() === 'data' && !!els.settingsView.querySelector('#setData #btnSelfCheck');
+        // The Sync tab follows the sync section: there only where sync is set up.
+        var sync = els.setTabSync.hidden === els.syncGroup.hidden;
+        closeOverlay(els.settingsView);
+        openSettings();
+        var kept = picked() === 'data';
+        closeOverlay(els.settingsView);
+        setTab = 'cards';
+        return { ok: first && clicked && keyed && end && sync && kept,
+          d: 'opens on Cards with only its group shown: ' + first + '; a tab shows its group: ' + clicked + '; the right arrow moves to the next tab and focuses it: ' + keyed +
+            '; End goes to the last: ' + end + '; Sync tab only with sync: ' + sync + '; the last tab stays picked: ' + kept };
+      })();
+      add('Settings tabs: one group at a time, keyboard moves between tabs', setTabRes.ok, setTabRes.d);
+
       var clozeRes = (function () {
         var deckSnap = state.deck, posSnap = state.pos, w = wordCards[3];
         state.practice = 'cloze';

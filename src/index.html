@@ -252,9 +252,16 @@ try { if (localStorage.getItem('mandarin300.theme') === 'sepia') document.docume
       <h2 id="settingsTitle" data-lbl="inline">Settings</h2>
       <button type="button" class="close-btn" id="btnCloseSettings" aria-label="Close settings">✕</button>
     </div>
+    <div class="pv-tabs set-tabs" id="setTabs" role="tablist" aria-label="Settings sections">
+      <button type="button" class="pv-tab" role="tab" id="setTabCards" data-settab="cards" aria-controls="setCards" data-lbl>Cards</button>
+      <button type="button" class="pv-tab" role="tab" id="setTabLangs" data-settab="langs" aria-controls="setLangs" data-lbl>Languages</button>
+      <button type="button" class="pv-tab" role="tab" id="setTabVoice" data-settab="voice" aria-controls="setVoice" data-lbl>Voice</button>
+      <button type="button" class="pv-tab" role="tab" id="setTabSync" data-settab="sync" aria-controls="syncGroup" data-lbl>Sync</button>
+      <button type="button" class="pv-tab" role="tab" id="setTabData" data-settab="data" aria-controls="setData" data-lbl>Data</button>
+    </div>
     <div class="settings-body">
-      <section class="set-group">
-        <h3 data-lbl="inline">Cards</h3>
+      <section class="set-group" id="setCards" role="tabpanel" aria-labelledby="setTabCards" data-setpane="cards">
+        <h3 class="visually-hidden">Cards</h3>
         <div class="set-row">
           <label for="optLabels">Interface labels</label>
           <select id="optLabels">
@@ -281,8 +288,8 @@ try { if (localStorage.getItem('mandarin300.theme') === 'sepia') document.docume
         <label class="switch"><input type="checkbox" id="optChoicePinyin"><span>Show pinyin in multiple choice</span></label>
         <label class="switch"><input type="checkbox" id="optVibrate"><span>Vibrate on answers</span></label>
       </section>
-      <section class="set-group">
-        <h3 data-lbl="inline">Translations</h3>
+      <section class="set-group" id="setLangs" role="tabpanel" aria-labelledby="setTabLangs" data-setpane="langs">
+        <h3 class="visually-hidden">Languages</h3>
         <p class="set-note">Show a language on cards, or rehearse it: it then also gets its own marks, comes up during your Chinese practice and sometimes takes the main meaning's place. At least one stays on; the first one on is the base meaning.</p>
         <div class="lang-switches">
           <div class="set-row lang-row" data-mlang="en"><label for="optLangEn">English</label><select id="optLangEn"><option value="off">Off</option><option value="show">Show</option><option value="rehearse">Rehearse</option></select><input type="range" id="optShareEn" class="lang-share" min="0" max="50" step="10" aria-label="English: share of cards with English as the main meaning"><output id="optShareEnOut" for="optShareEn"></output></div>
@@ -300,8 +307,8 @@ try { if (localStorage.getItem('mandarin300.theme') === 'sepia') document.docume
         </div>
         <p class="set-note" id="rehearseVoiceNote" hidden></p>
       </section>
-      <section class="set-group">
-        <h3 data-lbl="inline">Voice</h3>
+      <section class="set-group" id="setVoice" role="tabpanel" aria-labelledby="setTabVoice" data-setpane="voice">
+        <h3 class="visually-hidden">Voice</h3>
         <div class="set-row">
           <label for="optVoice">Chinese voice</label>
           <select id="optVoice"><option value="">Automatic</option></select>
@@ -320,8 +327,8 @@ try { if (localStorage.getItem('mandarin300.theme') === 'sepia') document.docume
         </div>
         <label class="switch" title="Plays a near-silent sound first so speakers or headphones are awake. Adds about a second of delay."><input type="checkbox" id="optWarmup"><span>Fix cut-off audio start</span></label>
       </section>
-      <section class="set-group" id="syncGroup">
-        <h3 data-lbl="inline">Sync across devices</h3>
+      <section class="set-group" id="syncGroup" role="tabpanel" aria-labelledby="setTabSync" data-setpane="sync">
+        <h3 class="visually-hidden">Sync across devices</h3>
         <div class="set-row" id="syncEmailRow">
           <label for="syncEmail">Email</label>
           <input type="email" id="syncEmail" autocomplete="email" inputmode="email" spellcheck="false" placeholder="you@example.com" aria-describedby="syncEmailNote">
@@ -340,8 +347,8 @@ try { if (localStorage.getItem('mandarin300.theme') === 'sepia') document.docume
         </div>
         <p id="syncStatus" class="transfer-status" role="status"></p>
       </section>
-      <section class="set-group">
-        <h3 data-lbl="inline">Progress and checks</h3>
+      <section class="set-group" id="setData" role="tabpanel" aria-labelledby="setTabData" data-setpane="data">
+        <h3 class="visually-hidden">Progress data and checks</h3>
         <div class="set-row">
           <span class="set-note">Move progress without an account.</span>
           <span class="set-btns">
@@ -558,8 +565,8 @@ try { if (localStorage.getItem('mandarin300.theme') === 'sepia') document.docume
           <dt>Sync button</dt><dd>On the website, once you sign in under Settings → Sync across devices, a ⟳ button appears in the top bar. Tap it to sync now; it spins while syncing, and a dot means changes are waiting to upload. Progress also syncs on its own.</dd>
           <dt>What's new</dt><dd>The “What’s new” link at the bottom of the page (and Settings → What's new) opens the list of every version at any time.</dd>
           <dt>Chinese labels</dt><dd>Buttons and headings carry their Chinese name (复习 fùxí = Due, 我会了 wǒ huì le = I know it), so you pick up everyday words as you use the app. Settings → Interface labels switches between 中文 + English, English, and 中文 only; hover or long-press a label to see its pinyin.</dd>
-          <dt>Translations</dt><dd>Settings → Translations shows the meanings in English, Hungarian, German, Spanish and Romanian, each Off, Show or Rehearse. At least one stays on; the first one on is the base meaning in quizzes and multiple choice. Search finds words in all five.</dd>
-          <dt>Rehearse (温习)</dt><dd>Set a language you already know to Rehearse in Settings → Translations. Its words then get their own marks: a card shows the Chinese and asks for the word in that language. These cards come up every few cards in the word deck, as a 5-card round after your daily goal, in their own practice style, and in a daily quest. The language also takes the main meaning's place on part of the cards (the slider sets how many), and its words can be read aloud.</dd>
+          <dt>Translations</dt><dd>Settings → Languages shows the meanings in English, Hungarian, German, Spanish and Romanian, each Off, Show or Rehearse. At least one stays on; the first one on is the base meaning in quizzes and multiple choice. Search finds words in all five.</dd>
+          <dt>Rehearse (温习)</dt><dd>Set a language you already know to Rehearse in Settings → Languages. Its words then get their own marks: a card shows the Chinese and asks for the word in that language. These cards come up every few cards in the word deck, as a 5-card round after your daily goal, in their own practice style, and in a daily quest. The language also takes the main meaning's place on part of the cards (the slider sets how many), and its words can be read aloud.</dd>
           <dt>读 说 听</dt><dd>On each card and in the word list, three small seals show the card's mark in every skill: 读 reading, 说 recall (meaning → Chinese), 听 listening. Green is Known, amber Learning, an outline New; the skill you are practising has a ring. The tag next to them names that skill's mark.</dd>
           <dt>Your panda</dt><dd>The panda at the top left lives on your studying. Every answer feeds it a bamboo leaf, your daily goal fills its belly, and all your answers together make it grow from newborn to sage. Tap it to see how it is doing and to give it a name.</dd>
           <dt>Word of the day</dt><dd>Each day a useful word you do not know yet appears as a chip in the Today row; tap it to see the word. “Study it” opens it; ✕ hides it until tomorrow.</dd>

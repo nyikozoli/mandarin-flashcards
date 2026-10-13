@@ -1,4 +1,26 @@
   /* ---------- overlays ---------- */
+  // Settings shows one group at a time. The Sync tab exists only where sync does (the Pages build); the tab picked
+  // last stays picked while the app runs. Panels hide with the .set-off class, because #syncGroup's hidden attribute
+  // belongs to the sync code.
+  var setTab = 'cards';
+  function showSetTab(t, focus) {
+    els.setTabSync.hidden = els.syncGroup.hidden;
+    var tabs = Array.prototype.filter.call(els.setTabs.querySelectorAll('[data-settab]'), function (b) { return !b.hidden; });
+    if (!tabs.some(function (b) { return b.getAttribute('data-settab') === t; })) t = 'cards';
+    setTab = t;
+    tabs.forEach(function (b) {
+      var on = b.getAttribute('data-settab') === t;
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+      b.tabIndex = on ? 0 : -1;
+      if (on && focus) b.focus();
+    });
+    Array.prototype.forEach.call(els.settingsView.querySelectorAll('[data-setpane]'), function (p) { p.classList.toggle('set-off', p.getAttribute('data-setpane') !== t); });
+    els.settingsView.querySelector('.settings-body').scrollTop = 0;
+  }
+  function openSettings() {
+    showSetTab(setTab);
+    openOverlay(els.settingsView, els.btnCloseSettings);
+  }
   var OVERLAYS = ['practiceView', 'newsView', 'petView', 'quizView', 'topicView', 'listView', 'progressView', 'settingsView', 'helpView', 'transferView', 'summaryView', 'tourView', 'diagView', 'confirmDialog'];
   var overlayStack = [];
   function anyOverlayOpen() {
