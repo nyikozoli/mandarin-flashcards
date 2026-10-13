@@ -337,6 +337,11 @@ try { if (localStorage.getItem('mandarin300.theme') === 'sepia') document.docume
           <span class="set-note" id="syncEmailNote">We send a sign-in link. No password to remember.</span>
           <button type="button" class="btn small" id="btnSignIn">Email me a link</button>
         </div>
+        <div class="set-row" id="syncCodeRow">
+          <label for="syncCode">Code from the email</label>
+          <span class="set-btns"><input type="text" id="syncCode" inputmode="numeric" autocomplete="one-time-code" maxlength="10" spellcheck="false" placeholder="8 digits" aria-describedby="syncCodeNote"><button type="button" class="btn small" id="btnVerifyCode">Sign in</button></span>
+        </div>
+        <p class="set-note" id="syncCodeNote">In the app installed on your Home Screen, the link opens in Safari instead: type the code from the same email here.</p>
         <div class="set-row" id="syncAccountRow" hidden>
           <span class="set-note" id="syncAccount"></span>
           <button type="button" class="btn small danger-ghost" id="btnSignOut">Sign out</button>

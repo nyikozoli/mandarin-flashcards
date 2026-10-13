@@ -158,6 +158,20 @@
       method: 'POST', body: { email: email, create_user: true }
     });
   }
+  // The same email carries a code (supabase/templates/magic_link.html). An app installed on the iPhone Home Screen
+  // has its own storage and the link opens in Safari, so there the code is the way in.
+  function verifyEmailCode(email, code) {
+    return syncApi('/auth/v1/verify', { method: 'POST', body: { type: 'email', email: email, token: code } }).then(function (d) {
+      if (!adoptSession(d)) throw new Error('The sign-in service sent no session.');
+      return sync.session;
+    });
+  }
+  // The address a link or code was last sent to, so the code can still be typed after iOS reloads the app.
+  var SYNC_EMAIL_KEY = 'mandarin300.syncEmail';
+  function rememberSyncEmail(email) {
+    if (testing) return;
+    try { if (email) window.localStorage.setItem(SYNC_EMAIL_KEY, email); else window.localStorage.removeItem(SYNC_EMAIL_KEY); } catch (e) { /* only a convenience */ }
+  }
   // GoTrue returns the session in the URL fragment: #access_token=…&refresh_token=…&expires_in=3600
   function consumeRedirect() {
     var hash = location.hash || '';
@@ -286,6 +300,8 @@
     var inSession = !!sync.session;
     els.syncEmailRow.hidden = inSession;
     els.syncLinkRow.hidden = inSession;
+    els.syncCodeRow.hidden = inSession;
+    els.syncCodeNote.hidden = inSession;
     els.syncAccountRow.hidden = !inSession;
     els.syncDatesRow.hidden = !inSession;
     els.btnSyncNow.disabled = sync.busy || !inSession;
@@ -489,6 +505,7 @@
     // syncable is not mistaken for an edit. A persisted dirty flag is left alone.
     sync.signature = syncSignature();
     var fromLink = consumeRedirect();
+    if (!sync.session) { try { els.syncEmail.value = window.localStorage.getItem(SYNC_EMAIL_KEY) || ''; } catch (e) { /* only a convenience */ } }
     renderSyncUI();
     window.addEventListener('online', function () { if (sync.dirty) flushPush(); });
     document.addEventListener('visibilitychange', function () { if (document.hidden && sync.dirty) flushPush(true); });
@@ -497,8 +514,12 @@
       if (fromLink) setSyncStatus('Signed in.');
       return;
     }
+    resumeSync(fromLink);
+  }
+  // With a session: renew it if needed, look up the email when missing, then compare with the cloud copy.
+  function resumeSync(fromLink) {
     setSyncStatus(fromLink ? 'Signed in. Checking the cloud copy…' : 'Checking the cloud copy…');
-    ensureSession().then(function (s) {
+    return ensureSession().then(function (s) {
       if (!s) { renderSyncUI(); return null; }
       if (s.email) return reconcile(fromLink ? 'after sign-in' : '');
       return syncApi('/auth/v1/user').then(function (u) {

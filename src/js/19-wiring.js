@@ -74,7 +74,8 @@
       els.btnSignIn.disabled = true;
       setSyncStatus('Sending the sign-in link…');
       requestMagicLink(email).then(function () {
-        setSyncStatus('Check ' + email + ' for the sign-in link. It expires in about an hour.');
+        rememberSyncEmail(email);
+        setSyncStatus('Check ' + email + ': tap the link, or type its code below. Both expire in about an hour.');
         toast('Sign-in link sent to ' + email);
       }).catch(function (e) {
         // Sign-ups are closed on the server: only existing accounts can sign in.
@@ -84,6 +85,28 @@
         }
         onSyncError(e);
       }).then(function () { els.btnSignIn.disabled = false; });
+    });
+    on('btnVerifyCode', 'click', function () {
+      if (!syncEnabled()) return;
+      var email = str(els.syncEmail.value), code = str(els.syncCode.value).replace(/\s+/g, '');
+      if (email.indexOf('@') < 1) { setSyncStatus('Enter the email address the code was sent to.', true); if (!testing) els.syncEmail.focus(); return; }
+      if (!/^\d{6,10}$/.test(code)) { setSyncStatus('Type the code from the email: digits only.', true); if (!testing) els.syncCode.focus(); return; }
+      els.btnVerifyCode.disabled = true;
+      setSyncStatus('Checking the code…');
+      return verifyEmailCode(email, code).then(function () {
+        els.syncCode.value = '';
+        rememberSyncEmail('');
+        renderSyncUI();
+        return resumeSync(true);
+      }).catch(function (e) {
+        if (isOffline(e)) { setSyncStatus('No connection. Try the code again when you are online.', true); return; }
+        // GoTrue answers 403 "Token has expired or is invalid" for a wrong, used or old code.
+        if (e && (e.status === 400 || e.status === 401 || e.status === 403)) { setSyncStatus('That code did not work. It may be mistyped, used already or older than an hour: ask for a new email.', true); return; }
+        onSyncError(e);
+      }).then(function () { els.btnVerifyCode.disabled = false; });
+    });
+    on('syncCode', 'keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); els.btnVerifyCode.click(); }
     });
     on('syncEmail', 'keydown', function (e) {
       if (e.key === 'Enter') { e.preventDefault(); els.btnSignIn.click(); }

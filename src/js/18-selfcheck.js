@@ -140,6 +140,23 @@
         return requestMagicLink('check@example.invalid');
       })
       .then(function () {
+        // The code from the email signs in too (the installed iPhone app cannot use the link).
+        sync.session = null;
+        var sent = null;
+        reply = { '/auth/v1/verify': function (init) {
+          sent = JSON.parse(init.body);
+          return { status: 200, body: { access_token: jwt, refresh_token: 'refresh-code', expires_in: 3600, user: { email: 'check@example.invalid' } } };
+        } };
+        return verifyEmailCode('check@example.invalid', '12345678').then(function () {
+          var ok = !!sent && sent.type === 'email' && sent.email === 'check@example.invalid' && sent.token === '12345678' &&
+            !!sync.session && sync.session.refresh_token === 'refresh-code' && sync.session.email === 'check@example.invalid';
+          sync.session = null;
+          reply = { '/auth/v1/verify': function () { return { status: 403, body: { msg: 'Token has expired or is invalid' } }; } };
+          return verifyEmailCode('check@example.invalid', '00000000').then(function () { return false; }, function (e) { return !!e && e.status === 403 && !sync.session; })
+            .then(function (refused) { checks['the code from the email signs in, a wrong one does not'] = ok && refused; });
+        });
+      })
+      .then(function () {
         sync.session = session(true); sync.dirty = true; sync.conflict = false; sync.busy = false;
         reply = { '/rest/v1/rpc/upsert_progress': function (init) {
           checks['upload on close uses keepalive'] = init.keepalive === true;
@@ -217,7 +234,7 @@
         els.syncStatus.textContent = keep.statusLine;
         var names = Object.keys(checks).filter(function (k) { return k !== 'error'; });
         var failedNames = names.filter(function (k) { return !checks[k]; });
-        var expectedChecks = 13;
+        var expectedChecks = 14;
         var ok = !failedNames.length && names.length === expectedChecks;
         return { name: name, ok: ok, info: false,
           detail: (ok ? names.join(', ') : 'Failed: ' + (failedNames.join(', ') || 'only ' + names.length + ' of ' + expectedChecks + ' steps ran')) + (checks.error ? ' — ' + checks.error : '') };

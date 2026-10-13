@@ -10,7 +10,8 @@
           "items": [
             "Tone pairs, a new listening style: hear a two-syllable word such as 学生 and pick both of its tones (2 + 1). Each choice writes the word in those tones, and the wrong ones share one of the right tones, so you learn to hear each combination. About 295 words take part.",
             "A review calendar in your progress (Calendar tab): a month at a time, it shows the days you studied and met your goal, streak freezes, and how many reviews fall due on each coming day across all skills. Tap a day for its numbers, so you can plan a day off.",
-            "Settings are split into tabs (Cards, Languages, Voice, Sync, Data), so each opens short and you find a setting without scrolling. Settings reopens on the tab you used last."
+            "Settings are split into tabs (Cards, Languages, Voice, Sync, Data), so each opens short and you find a setting without scrolling. Settings reopens on the tab you used last.",
+            "Sign in with a code: the sign-in email now also carries a code. Type it in Settings → Sync on the app installed on your iPhone Home Screen, which cannot use the link (it opens in Safari, which keeps a separate sign-in)."
           ]
         }
       ]
