@@ -262,12 +262,6 @@ otp_expiry = 3600
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
 
-# The sign-in email carries a code next to the link: the installed iPhone app has its own storage, and the link
-# opens in Safari, so the app signs in with the code (Settings → Sync).
-[auth.email.template.magic_link]
-subject = "Sign in to Mandarin HSK"
-content_path = "./supabase/templates/magic_link.html"
-
 # Uncomment to customize email template
 # [auth.email.template.invite]
 # subject = "You have been invited"

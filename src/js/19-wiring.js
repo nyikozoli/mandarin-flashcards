@@ -74,8 +74,7 @@
       els.btnSignIn.disabled = true;
       setSyncStatus('Sending the sign-in link…');
       requestMagicLink(email).then(function () {
-        rememberSyncEmail(email);
-        setSyncStatus('Check ' + email + ': tap the link, or type its code below. Both expire in about an hour.');
+        setSyncStatus('Check ' + email + ' for the sign-in link. It expires in about an hour.');
         toast('Sign-in link sent to ' + email);
       }).catch(function (e) {
         // Sign-ups are closed on the server: only existing accounts can sign in.
@@ -88,22 +87,36 @@
     });
     on('btnVerifyCode', 'click', function () {
       if (!syncEnabled()) return;
-      var email = str(els.syncEmail.value), code = str(els.syncCode.value).replace(/\s+/g, '');
-      if (email.indexOf('@') < 1) { setSyncStatus('Enter the email address the code was sent to.', true); if (!testing) els.syncEmail.focus(); return; }
-      if (!/^\d{6,10}$/.test(code)) { setSyncStatus('Type the code from the email: digits only.', true); if (!testing) els.syncCode.focus(); return; }
+      var code = str(els.syncCode.value).replace(/\s+/g, '');
+      if (!/^[A-Za-z0-9._-]{8,}$/.test(code)) { setSyncStatus('Paste the code from Safari’s Settings → Sync → Move to the app.', true); if (!testing) els.syncCode.focus(); return; }
       els.btnVerifyCode.disabled = true;
       setSyncStatus('Checking the code…');
-      return verifyEmailCode(email, code).then(function () {
+      return signInWithCode(code).then(function () {
         els.syncCode.value = '';
-        rememberSyncEmail('');
         renderSyncUI();
         return resumeSync(true);
       }).catch(function (e) {
         if (isOffline(e)) { setSyncStatus('No connection. Try the code again when you are online.', true); return; }
-        // GoTrue answers 403 "Token has expired or is invalid" for a wrong, used or old code.
-        if (e && (e.status === 400 || e.status === 401 || e.status === 403)) { setSyncStatus('That code did not work. It may be mistyped, used already or older than an hour: ask for a new email.', true); return; }
+        // A wrong code, or one already used, is an invalid refresh token (400).
+        if (e && (e.status === 400 || e.status === 401 || e.status === 403)) { setSyncStatus('That code did not work: it may be mistyped or used already. Sign in in Safari again and move the sign-in once more.', true); return; }
         onSyncError(e);
       }).then(function () { els.btnVerifyCode.disabled = false; });
+    });
+    on('btnMoveSignIn', 'click', function () {
+      if (!syncEnabled() || !sync.session) return;
+      askConfirm('Move this sign-in to the app?', 'Safari signs out here and shows a code. Paste it into Settings → Sync in the app on your Home Screen. The code works once; keep it to yourself, as it signs in to your account.', 'Move it', function () {
+        moveSignIn().then(function (code) {
+          setSyncStatus(code ? 'Signed out here. Copy the code below and paste it into the installed app.' : 'There is no sign-in to move.', !code);
+        }).catch(onSyncError);
+      });
+    });
+    on('btnCopyMoveCode', 'click', function () {
+      var done = function (ok) {
+        setSyncStatus(ok ? 'Copied. Open the installed app → Settings → Sync and paste it.' : 'Copying is blocked here, so the code is selected. Copy it with your device’s copy command.');
+        if (!ok && !testing) { els.syncMoveCode.focus(); els.syncMoveCode.select(); }
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(els.syncMoveCode.value).then(function () { done(true); }, function () { done(false); });
+      else done(false);
     });
     on('syncCode', 'keydown', function (e) {
       if (e.key === 'Enter') { e.preventDefault(); els.btnVerifyCode.click(); }

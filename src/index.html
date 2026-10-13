@@ -338,13 +338,21 @@ try { if (localStorage.getItem('mandarin300.theme') === 'sepia') document.docume
           <button type="button" class="btn small" id="btnSignIn">Email me a link</button>
         </div>
         <div class="set-row" id="syncCodeRow">
-          <label for="syncCode">Code from the email</label>
-          <span class="set-btns"><input type="text" id="syncCode" inputmode="numeric" autocomplete="one-time-code" maxlength="10" spellcheck="false" placeholder="8 digits" aria-describedby="syncCodeNote"><button type="button" class="btn small" id="btnVerifyCode">Sign in</button></span>
+          <label for="syncCode">Code from Safari</label>
+          <span class="set-btns"><input type="text" id="syncCode" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Paste the code" aria-describedby="syncCodeNote"><button type="button" class="btn small" id="btnVerifyCode">Sign in</button></span>
         </div>
-        <p class="set-note" id="syncCodeNote">In the app installed on your Home Screen, the link opens in Safari instead: type the code from the same email here.</p>
+        <p class="set-note" id="syncCodeNote">Installed on your Home Screen? The email link opens in Safari, which keeps its own sign-in. Sign in there, choose “Move to the app” in Settings → Sync, and paste the code it shows here.</p>
         <div class="set-row" id="syncAccountRow" hidden>
           <span class="set-note" id="syncAccount"></span>
           <button type="button" class="btn small danger-ghost" id="btnSignOut">Sign out</button>
+        </div>
+        <div class="set-row" id="syncMoveRow" hidden>
+          <span class="set-note">Use this sign-in in the app installed on your Home Screen.</span>
+          <button type="button" class="btn small" id="btnMoveSignIn">Move to the app</button>
+        </div>
+        <div class="set-row" id="syncMovedRow" hidden>
+          <label for="syncMoveCode">Code for the app</label>
+          <span class="set-btns"><input type="text" id="syncMoveCode" readonly spellcheck="false"><button type="button" class="btn small" id="btnCopyMoveCode">Copy</button></span>
         </div>
         <div class="set-row" id="syncDatesRow" hidden>
           <ul class="sync-dates" id="syncDates"></ul>

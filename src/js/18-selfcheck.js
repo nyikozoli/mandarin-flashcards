@@ -140,20 +140,25 @@
         return requestMagicLink('check@example.invalid');
       })
       .then(function () {
-        // The code from the email signs in too (the installed iPhone app cannot use the link).
-        sync.session = null;
-        var sent = null;
-        reply = { '/auth/v1/verify': function (init) {
-          sent = JSON.parse(init.body);
-          return { status: 200, body: { access_token: jwt, refresh_token: 'refresh-code', expires_in: 3600, user: { email: 'check@example.invalid' } } };
-        } };
-        return verifyEmailCode('check@example.invalid', '12345678').then(function () {
-          var ok = !!sent && sent.type === 'email' && sent.email === 'check@example.invalid' && sent.token === '12345678' &&
-            !!sync.session && sync.session.refresh_token === 'refresh-code' && sync.session.email === 'check@example.invalid';
-          sync.session = null;
-          reply = { '/auth/v1/verify': function () { return { status: 403, body: { msg: 'Token has expired or is invalid' } }; } };
-          return verifyEmailCode('check@example.invalid', '00000000').then(function () { return false; }, function (e) { return !!e && e.status === 403 && !sync.session; })
-            .then(function (refused) { checks['the code from the email signs in, a wrong one does not'] = ok && refused; });
+        // Moving the sign-in to the installed app: Safari hands over its refresh token without the logout call, and the
+        // app renews that code into its own session; a used or wrong code is refused.
+        var loggedOut = false, sent = null;
+        sync.session = session(true); sync.session.refresh_token = 'refresh-move'; sync.dirty = false; sync.busy = false;
+        reply = { '/auth/v1/logout': function () { loggedOut = true; return { status: 204, body: null }; } };
+        return moveSignIn().then(function (code) {
+          var handed = code === 'refresh-move' && !sync.session && sync.moveCode === 'refresh-move' && !loggedOut;
+          reply = { '/auth/v1/token': function (init, path) {
+            sent = { path: path, body: JSON.parse(init.body) };
+            return { status: 200, body: { access_token: jwt, refresh_token: 'refresh-app', expires_in: 3600, user: { email: 'check@example.invalid' } } };
+          } };
+          return signInWithCode(code).then(function () {
+            var taken = !!sent && sent.path.indexOf('grant_type=refresh_token') !== -1 && sent.body.refresh_token === 'refresh-move' &&
+              !!sync.session && sync.session.refresh_token === 'refresh-app' && sync.session.email === 'check@example.invalid';
+            sync.session = null; sync.moveCode = null;
+            reply = { '/auth/v1/token': function () { return { status: 400, body: { error_description: 'Invalid Refresh Token: Already Used' } }; } };
+            return signInWithCode('refresh-move').then(function () { return false; }, function (e) { return !!e && e.status === 400 && !sync.session; })
+              .then(function (refused) { checks['the sign-in moves to the installed app with a code'] = handed && taken && refused; });
+          });
         });
       })
       .then(function () {

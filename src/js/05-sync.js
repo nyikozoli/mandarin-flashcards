@@ -158,19 +158,28 @@
       method: 'POST', body: { email: email, create_user: true }
     });
   }
-  // The same email carries a code (supabase/templates/magic_link.html). An app installed on the iPhone Home Screen
-  // has its own storage and the link opens in Safari, so there the code is the way in.
-  function verifyEmailCode(email, code) {
-    return syncApi('/auth/v1/verify', { method: 'POST', body: { type: 'email', email: email, token: code } }).then(function (d) {
+  // An app installed on the iPhone Home Screen has its own storage, and the email link always opens in Safari. So the
+  // sign-in moves: Safari hands over its refresh token as a code (moveSignIn) and the app renews it into its own session
+  // (signInWithCode). Safari forgets the session without the logout call, which would end the session the app takes
+  // over; a refresh token renews only once, so the two could not both keep it anyway. Free-tier Supabase cannot add a
+  // code to the sign-in email (no template changes without your own SMTP), hence this route.
+  function signInWithCode(code) {
+    return syncApi('/auth/v1/token?grant_type=refresh_token', { method: 'POST', body: { refresh_token: code } }).then(function (d) {
       if (!adoptSession(d)) throw new Error('The sign-in service sent no session.');
       return sync.session;
     });
   }
-  // The address a link or code was last sent to, so the code can still be typed after iOS reloads the app.
-  var SYNC_EMAIL_KEY = 'mandarin300.syncEmail';
-  function rememberSyncEmail(email) {
-    if (testing) return;
-    try { if (email) window.localStorage.setItem(SYNC_EMAIL_KEY, email); else window.localStorage.removeItem(SYNC_EMAIL_KEY); } catch (e) { /* only a convenience */ }
+  function moveSignIn() {
+    if (!sync.session) return Promise.resolve(null);
+    // Changes waiting to upload go first, so the app finds them in the cloud.
+    return (sync.dirty ? flushPush() : Promise.resolve()).then(function () {
+      var code = sync.session && sync.session.refresh_token;
+      if (!code) return null;
+      signOut(true, false, true);
+      sync.moveCode = code;
+      renderSyncUI();
+      return code;
+    });
   }
   // GoTrue returns the session in the URL fragment: #access_token=…&refresh_token=…&expires_in=3600
   function consumeRedirect() {
@@ -197,9 +206,11 @@
     saveSyncState();
     return true;
   }
-  function signOut(quiet, keepPending) {
+  function signOut(quiet, keepPending, handedOver) {
     // scope=local: end only this device's sign-in. Without it Supabase ends every session of the account.
-    if (sync.session) { try { syncApi('/auth/v1/logout?scope=local', { method: 'POST' }).catch(function () {}); } catch (e) { /* best effort */ } }
+    // A sign-in handed over to the installed app (moveSignIn) is only forgotten here: the app is using it now.
+    sync.moveCode = null;
+    if (sync.session && !handedOver) { try { syncApi('/auth/v1/logout?scope=local', { method: 'POST' }).catch(function () {}); } catch (e) { /* best effort */ } }
     sync.session = null; sync.remoteAt = null; sync.remoteData = null; sync.conflict = false;
     if (!keepPending) { sync.lastSyncedAt = null; sync.dirty = false; }
     clearTimeout(syncTimer);
@@ -302,6 +313,9 @@
     els.syncLinkRow.hidden = inSession;
     els.syncCodeRow.hidden = inSession;
     els.syncCodeNote.hidden = inSession;
+    els.syncMoveRow.hidden = !inSession;
+    els.syncMovedRow.hidden = inSession || !sync.moveCode;
+    els.syncMoveCode.value = sync.moveCode || '';
     els.syncAccountRow.hidden = !inSession;
     els.syncDatesRow.hidden = !inSession;
     els.btnSyncNow.disabled = sync.busy || !inSession;
@@ -505,7 +519,6 @@
     // syncable is not mistaken for an edit. A persisted dirty flag is left alone.
     sync.signature = syncSignature();
     var fromLink = consumeRedirect();
-    if (!sync.session) { try { els.syncEmail.value = window.localStorage.getItem(SYNC_EMAIL_KEY) || ''; } catch (e) { /* only a convenience */ } }
     renderSyncUI();
     window.addEventListener('online', function () { if (sync.dirty) flushPush(); });
     document.addEventListener('visibilitychange', function () { if (document.hidden && sync.dirty) flushPush(true); });

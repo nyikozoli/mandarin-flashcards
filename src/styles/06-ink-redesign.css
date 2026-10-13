@@ -87,9 +87,9 @@
 .switch { display: flex; align-items: center; gap: 12px; min-height: 50px; border-bottom: 1px solid #27303b; cursor: pointer; }
 .switch input { flex: none; width: 20px; height: 20px; accent-color: var(--known); }
 .set-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 12px; min-height: 54px; padding: 6px 0; border-bottom: 1px solid #27303b; }
-.set-row select, .set-row input[type="email"], .set-row #syncCode { min-height: 40px; max-width: 100%; border-radius: 10px; border: 1px solid var(--line); background: var(--surface2); color: var(--text); padding: 4px 8px; }
+.set-row select, .set-row input[type="email"], .set-row #syncCode, .set-row #syncMoveCode { min-height: 40px; max-width: 100%; border-radius: 10px; border: 1px solid var(--line); background: var(--surface2); color: var(--text); padding: 4px 8px; }
 .set-row input[type="email"] { flex: 1 1 180px; }
-#syncCode { width: 9.5em; font-size: 17px; letter-spacing: 2px; font-variant-numeric: tabular-nums; }
+#syncCode, #syncMoveCode { width: 13em; font-size: 17px; }
 .set-note { color: var(--soft); font-size: 14px; }
 .pv-skills { margin: 0 0 12px; color: var(--soft); font-size: 14px; }
 .app-version { margin: 14px 0 0; font-size: 13px; font-variant-numeric: tabular-nums; }
