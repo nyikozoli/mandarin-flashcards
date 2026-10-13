@@ -278,6 +278,14 @@
     on('modeHard', 'click', function () { setMode('hard'); });
     on('btnPractice', 'click', openPracticeSheet);
     on('btnClosePractice', 'click', function () { closeOverlay(els.practiceView); });
+    on('practiceOrder', 'click', function (e) {
+      var b = e.target.closest ? e.target.closest('[data-porder]') : null;
+      if (!b || state.order === b.getAttribute('data-porder')) return;
+      state.order = ORDERS[b.getAttribute('data-porder')] ? b.getAttribute('data-porder') : 'hsk';
+      setMode(state.mode);
+      renderPracticeWhere();
+      if (!testing) toast(state.order === 'freq' ? 'Most used words first, across the levels you picked.' : 'Back to the HSK order.');
+    });
     on('practiceLevels', 'click', function (e) {
       var b = e.target.closest ? e.target.closest('[data-plevel]') : null;
       if (b) { setLevel(b.getAttribute('data-plevel')); renderPracticeWhere(); }

@@ -1,5 +1,11 @@
   /* ---------- deck ---------- */
   function statusOf(c) { return state.status[c.zh] || 'unmarked'; }
+  // Card order for the word deck: the HSK lists' order, or the most used words first (wordfreq rank, unranked last).
+  // Due keeps its review order and Hardest its miss count; sentences keep their own order.
+  var ORDERS = { hsk: 'HSK order', freq: 'Most used first' };
+  function byFrequency(idx) {
+    return idx.sort(function (a, b) { return (cards[a].rk || 1e9) - (cards[b].rk || 1e9) || cards[a].n - cards[b].n; });
+  }
   function buildDeck(mode) {
     if (mode === 'hard') return hardList();
     var idx = [], today = dayKey();
@@ -15,6 +21,7 @@
         return ra.d < rb.d ? -1 : ra.d > rb.d ? 1 : ra.b - rb.b;
       });
     }
+    if (mode !== 'due' && state.order === 'freq' && !isSent()) byFrequency(idx);
     var rk = rehearseCode(state.practice);
     if (mode === 'all' && rk) {
       var order = {};

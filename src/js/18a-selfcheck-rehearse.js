@@ -70,7 +70,7 @@
     useSkill('recall');
     var separate = (marksOf('recall').status[c.zh] || null) === recallBefore && marksOf('say:ro').status[c.zh] === 'learning';
     var snap = progressSnapshot();
-    var saved = snap.format === 6 && !!snap.skills['say:ro'] && snap.skills['say:ro'].status[c.zh] === 'learning';
+    var saved = snap.format >= 6 && !!snap.skills['say:ro'] && snap.skills['say:ro'].status[c.zh] === 'learning';
     var seal = Array.prototype.some.call(skillMarks(c).querySelectorAll('.sm'), function (s) { return s.textContent === 'RO'; });
     // Back to Show: the skill, the menu entry and a saved rh-ro practice go; the marks stay.
     state.practice = 'rh-ro';
@@ -81,7 +81,7 @@
       marksOf('say:ro').status[c.zh] === 'learning';
     delete state.marks['say:ro'];
     add('Rehearsed language as its own skill', exists && separate && saved && seal && gone,
-      'Romanian skill, style and menu entry: ' + exists + ', its marks are separate from recall: ' + separate + ', saved under skills (format 6): ' + saved +
+      'Romanian skill, style and menu entry: ' + exists + ', its marks are separate from recall: ' + separate + ', saved under skills (format 6 and later): ' + saved +
       ', RO seal on the card: ' + seal + ', set back to Show drops the skill but keeps its marks: ' + gone);
   } });
 

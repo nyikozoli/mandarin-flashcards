@@ -87,6 +87,7 @@
       exams: state.exams,
       milestones: state.milestones,
       practice: state.practice,
+      order: state.order,
       toneColors: state.toneColors,
       fadePinyin: state.fadePinyin,
       choicePinyin: state.choicePinyin,
@@ -160,6 +161,7 @@
     state.rehearse = readRehearse(saved && saved.rehearse);
     rebuildSkills();
     if (saved && PRACTICE[saved.practice]) state.practice = saved.practice;
+    state.order = saved && ORDERS[saved.order] ? saved.order : 'hsk';
     // A rehearse style saved by a copy where that language was rehearsed: its deck was built from that language's marks.
     var rehearseGone = !!(saved && isRehearseStyle(saved.practice) && state.practice !== saved.practice);
     fixStyleForDeck();

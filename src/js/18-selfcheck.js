@@ -1336,6 +1336,26 @@
           (phone ? 'phone: level row folded into the summary' : 'wide: level row shown, summary short') + ': ' + fold };
       })();
       add('Study settings: level and topic in the sheet, one summary line on phones', foldRes.ok, foldRes.d);
+      var orderRes = (function () {
+        var keep = state.order, keepMode = state.mode, keepType = state.deckType;
+        if (isSent()) { useDeckType('words'); }
+        els.btnPractice.click();
+        var btns = els.practiceOrder.querySelectorAll('[data-porder]');
+        els.practiceOrder.querySelector('[data-porder="freq"]').click();
+        setMode('all');
+        var rks = state.deck.map(function (i) { return cards[i].rk || 1e9; });
+        var sorted = state.order === 'freq' && rks.length > 1 && rks.every(function (r, i) { return i === 0 || rks[i - 1] <= r; });
+        var top = cards[state.deck[0]] && cards[state.deck[0]].rk === Math.min.apply(null, rks);
+        var shown = els.practiceWhere.textContent.indexOf('most used first') !== -1 && els.practiceOrder.querySelector('[data-porder="freq"]').getAttribute('aria-pressed') === 'true';
+        var saved = progressSnapshot().order === 'freq';
+        els.practiceOrder.querySelector('[data-porder="hsk"]').click();
+        var back = state.order === 'hsk' && cards[state.deck[0]].n <= cards[state.deck[state.deck.length - 1]].n;
+        closeOverlay(els.practiceView);
+        state.order = keep; useDeckType(keepType); setMode(keepMode);
+        return { ok: btns.length === 2 && sorted && top && shown && saved && back,
+          d: 'Most used first sorts the deck by frequency rank: ' + (sorted && top) + ', the sheet and the summary show it: ' + shown + ', saved with progress: ' + saved + ', HSK order restores the list order: ' + back };
+      })();
+      add('Card order: HSK order or most used first', orderRes.ok, orderRes.d);
       var travelRes = (function () {
         if (LEVELS.indexOf('4') === -1) return { ok: els.level4.hidden, d: 'no Travel pack in this build: its level button stays hidden' };
         var tw = wordCards.filter(function (w) { return String(w.lv) === '4'; }), keepLv = state.level;

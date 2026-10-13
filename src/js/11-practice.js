@@ -34,6 +34,7 @@
     els.practiceAsk.textContent = PRACTICE_ASK[s.value] || '';
     // Phones show the level and topic on the same line (CSS hides it on wider screens, which keep their own controls).
     var t = topicById(state.topic), where = (state.level === 'all' ? 'All levels' : lvName(state.level)) + ' \u00b7 ' + (t ? t.en : 'All topics');
+    if (state.order === 'freq') where += ' \u00b7 most used first';
     els.practiceWhere.textContent = '\u00a0\u00b7 ' + where;
     els.btnPractice.setAttribute('aria-label', 'Practice style: ' + s.en + ' (' + SKILLS[s.skill].toLowerCase() + '). ' + (PRACTICE_ASK[s.value] || '') + '. ' + where + '. Change');
   }
@@ -77,6 +78,16 @@
   }
   // The sheet's level and topic sections: on phones they replace the level row and the topic button.
   function renderPracticeWhere() {
+    var od = els.practiceOrder;
+    od.textContent = '';
+    Object.keys(ORDERS).forEach(function (k) {
+      var b = el('button', 'pk-level', ORDERS[k]);
+      b.type = 'button';
+      b.setAttribute('data-porder', k);
+      b.setAttribute('aria-pressed', state.order === k ? 'true' : 'false');
+      if (k === 'freq') b.title = 'The most frequent words in everyday Chinese first (wordfreq), across all levels';
+      od.appendChild(b);
+    });
     var lv = els.practiceLevels;
     lv.textContent = '';
     ['all'].concat(LEVELS).forEach(function (l) {
