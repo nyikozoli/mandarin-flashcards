@@ -368,3 +368,5 @@ body.labels-zh .practice-name .lbl .zl, body.labels-zh .pk-tile .lbl .zl { color
   .practice-where { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--soft); font-weight: 600; font-size: 13.5px; }
   .practice-btn::after { content: "▾"; flex: none; color: var(--muted); font-size: 13px; }
 }
+/* The counts sit at the right end of the Today row, in line with the tone key above the card. */
+.today-row .legend { margin-left: auto; justify-content: flex-end; flex: 0 1 auto; }
