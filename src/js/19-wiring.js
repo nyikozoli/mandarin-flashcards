@@ -50,6 +50,14 @@
     on('btnEndUnmarked', 'click', function () { setMode('unmarked'); });
     on('btnEndAll', 'click', function () { setMode('all'); });
     on('btnList', 'click', openList);
+    // The Today row's counts open the word list filtered to that status.
+    on('legendCounts', 'click', function (e) {
+      var b = e.target.closest ? e.target.closest('[data-lg]') : null;
+      if (!b) return;
+      listFilter = b.getAttribute('data-lg');
+      els.searchInput.value = '';
+      openList();
+    });
     on('revealHint', 'click', function (e) { e.stopPropagation(); toggleReveal(); });
     on('btnExport', 'click', function () { openTransfer('export'); });
     on('btnImport', 'click', function () { openTransfer('import'); });

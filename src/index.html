@@ -133,10 +133,10 @@ try { if (localStorage.getItem('mandarin300.theme') === 'sepia') document.docume
     <div class="today-row">
       <button type="button" class="today-pill" id="todayPill" aria-label="Today's progress">0/20 today</button>
       <button type="button" class="suggest-chip" id="btnSuggest" aria-expanded="false" aria-controls="suggestPop" hidden><span class="suggest-seal" id="suggestSeal" lang="zh-CN" aria-hidden="true"></span><span class="suggest-lines"><span class="suggest-cap" id="suggestCap"></span><span class="suggest-text" id="suggestText"></span></span></button>
-      <p class="legend">
-        <span><span class="dot known" aria-hidden="true"></span><b id="knownCount">0</b><span class="lg-w"> known</span></span>
-        <span><span class="dot learning" aria-hidden="true"></span><b id="learningCount">0</b><span class="lg-w"> learning</span></span>
-        <span><span class="dot" aria-hidden="true"></span><b id="unmarkedCount">0</b><span class="lg-w"> new</span></span>
+      <p class="legend" id="legendCounts">
+        <button type="button" class="lg-btn" data-lg="known" title="Show the words you know"><span class="dot known" aria-hidden="true"></span><b id="knownCount">0</b><span class="lg-w"> known</span></button>
+        <button type="button" class="lg-btn" data-lg="learning" title="Show the words you are learning"><span class="dot learning" aria-hidden="true"></span><b id="learningCount">0</b><span class="lg-w"> learning</span></button>
+        <button type="button" class="lg-btn" data-lg="unmarked" title="Show the new words"><span class="dot" aria-hidden="true"></span><b id="unmarkedCount">0</b><span class="lg-w"> new</span></button>
       </p>
       <div class="suggest-pop" id="suggestPop" hidden>
       <section id="wotd" class="wotd" aria-labelledby="wotdLabel" hidden>

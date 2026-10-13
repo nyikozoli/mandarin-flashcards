@@ -400,3 +400,13 @@ body.labels-zh .practice-name .lbl .zl, body.labels-zh .pk-tile .lbl .zl { color
 .pv-section:has(.pv-grid) { position: relative; }
 .pv-tip { position: absolute; z-index: 3; transform: translate(-50%, calc(-100% - 8px)); padding: 3px 8px; border-radius: 8px; background: var(--paper); color: var(--bg); font-size: 14px; font-weight: 700; white-space: nowrap; pointer-events: none; box-shadow: 0 4px 12px rgba(0, 0, 0, .35); }
 .pv-tip [lang], .pv-tip { font-family: var(--zh-font), var(--ui-font); }
+.level .lv-zh + .lv-pre { margin-left: .3em; }
+
+/* The Today row's counts are buttons that open the word list for that status. The dot's size follows the status
+   (known biggest, new smallest), and the count grows a little under the pointer. */
+.lg-btn { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 2px 6px; margin: -2px -6px; border: 0; border-radius: 999px; background: transparent; color: inherit; font: inherit; cursor: pointer; transition: transform .15s ease, background-color .15s ease; }
+.lg-btn:hover, .lg-btn:focus-visible { background: var(--surface2); transform: scale(1.12); }
+.lg-btn .dot { width: 7px; height: 7px; }
+.lg-btn .dot.learning { width: 9px; height: 9px; }
+.lg-btn .dot.known { width: 11px; height: 11px; }
+@media (prefers-reduced-motion: reduce) { .lg-btn { transition: none; } .lg-btn:hover, .lg-btn:focus-visible { transform: none; } }

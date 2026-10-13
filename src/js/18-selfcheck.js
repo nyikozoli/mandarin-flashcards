@@ -12,9 +12,9 @@
     var lvDetail = LEVELS.map(function (lv) {
       var got = wordCards.filter(function (c) { return String(c.lv) === lv; }).length;
       if (got !== EXPECTED_LEVELS[lv]) lvBad.push(lv);
-      return 'HSK ' + lv + ': ' + got + (got !== EXPECTED_LEVELS[lv] ? ' (expected ' + EXPECTED_LEVELS[lv] + ')' : '');
+      return lvName(lv) + ': ' + got + (got !== EXPECTED_LEVELS[lv] ? ' (expected ' + EXPECTED_LEVELS[lv] + ')' : '');
     }).join(' · ');
-    add('Every card has an HSK level and the level counts are right', lvBad.length === 0 && wordCards.every(function (c) { return c.lv >= 1 && c.lv <= 3; }), lvDetail);
+    add('Every card has an HSK level and the level counts are right', lvBad.length === 0 && wordCards.every(function (c) { return LEVELS.indexOf(String(c.lv)) !== -1; }), lvDetail);
     add('No duplicate Chinese headwords', v.dups.length === 0, v.dups.length ? 'Duplicates: ' + v.dups.join(', ') : 'All ' + v.count + ' headwords are unique.');
     var missingIds = REQUIRED_IDS.filter(function (id) { return !$(id); });
     add('All page elements used by the app exist', missingIds.length === 0, missingIds.length ? 'Missing: #' + missingIds.join(', #') : REQUIRED_IDS.length + ' elements found.');
@@ -339,7 +339,7 @@
       var cells = els.pvBody.querySelectorAll('.pv-cell').length;
       var lvRows = els.pvBody.querySelectorAll('.pv-level').length;
       var known2 = els.pvBody.querySelectorAll('.pv-cell.s-known').length;
-      var pvOk = !els.progressView.hidden && cells === cards.length && lvRows === 3 && known2 === counts().known && !!els.pvBody.querySelector('svg');
+      var pvOk = !els.progressView.hidden && cells === cards.length && lvRows === LEVELS.length && known2 === counts().known && !!els.pvBody.querySelector('svg');
       els.btnCloseProgress.click();
       var srsResult = (function () {
         state.status = {}; state.srs = {}; state.misses = {};
@@ -730,7 +730,7 @@
         key('3');
         closeOverlay(els.quizView);
         openProgress();
-        var drawn = els.pvBody.querySelectorAll('.seal-item').length === SEALS.length && els.pvBody.querySelectorAll('.ch-btn').length === 4;
+        var drawn = els.pvBody.querySelectorAll('.seal-item').length === SEALS.length && els.pvBody.querySelectorAll('.ch-btn').length === LEVELS.length + 1;
         closeOverlay(els.progressView);
         return { ok: first && again && bopen && scored && best && mixed && passed && drawn,
           d: 'first seal awarded once: ' + (first && again) + ', blitz shows 4 choices: ' + bopen + ', 20 right scored: ' + scored + ', best and seal kept: ' + best +
@@ -1361,7 +1361,7 @@
         var tw = wordCards.filter(function (w) { return String(w.lv) === '4'; }), keepLv = state.level;
         els.level4.click();
         var filtered = !els.level4.hidden && state.level === '4' && state.deck.length > 0 && state.deck.every(function (i) { return String(cards[i].lv) === '4'; });
-        var brand = tw.filter(function (w) { return w.br; })[0], plain = tw.filter(function (w) { return !w.br; })[0], tagged = true;
+        var brand = tw.filter(function (w) { return w.br; })[0], plain = tw.filter(function (w) { return !w.br; })[0], tagged = !!brand;
         if (brand) { studyWord(brand.zh); tagged = !els.cardBrand.hidden && els.cardNumber.textContent.indexOf(lvName(4)) === 0; }
         if (plain) { studyWord(plain.zh); tagged = tagged && els.cardBrand.hidden; }
         var named = lvName('4') === 'Travel' && lvName('2') === 'HSK 2';
@@ -1385,6 +1385,16 @@
         return { ok: shown && sized, d: 'pointing at a square shows its word just above it, with the hand pointer: ' + shown + ', New squares drawn smaller: ' + sized };
       })();
       add('Word map: hover label and sizes by status', mapRes.ok, mapRes.d);
+      var lgRes = (function () {
+        var keep = listFilter, b = els.legendCounts.querySelector('[data-lg="learning"]');
+        b.click();
+        var open = !els.listView.hidden && listFilter === 'learning' && getComputedStyle(b).cursor === 'pointer';
+        closeOverlay(els.listView);
+        var dk = els.legendCounts.querySelector('.dot.known').getBoundingClientRect().width, dn = els.legendCounts.querySelector('[data-lg="unmarked"] .dot').getBoundingClientRect().width;
+        listFilter = keep;
+        return { ok: open && dk > dn, d: 'a count opens the word list for that status: ' + open + ', the Known dot is bigger than the New dot: ' + (dk > dn) };
+      })();
+      add('Today counts open the word list', lgRes.ok, lgRes.d);
       var sugRes = (function () {
         closeSuggest();
         state.wotdSeen = '';
