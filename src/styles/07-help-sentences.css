@@ -1,14 +1,14 @@
 /* Help sheet and first-visit tour */
 .help-body { overflow-y: auto; flex: 1; margin: 0 -16px; padding: 0 16px 28px; display: flex; flex-direction: column; gap: 20px; }
-.help-lead { margin: 0; max-width: 62ch; color: var(--soft); font-size: 15.5px; }
+.help-lead { margin: 0; color: var(--soft); font-size: 15.5px; }
 .help-body > .btn { align-self: flex-start; }
 .help-sec h3 { margin: 0 0 8px; font-size: 16px; text-wrap: balance; }
-.help-sec ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; max-width: 65ch; color: var(--soft); font-size: 14.5px; line-height: 1.55; }
-.help-sec p { margin: 8px 0 0; max-width: 65ch; color: var(--soft); font-size: 14.5px; line-height: 1.55; }
+.help-sec ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; color: var(--soft); font-size: 14.5px; line-height: 1.55; }
+.help-sec p { margin: 8px 0 0; color: var(--soft); font-size: 14.5px; line-height: 1.55; }
 .help-sec b { color: var(--text); }
 .help-defs { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 8px 16px; font-size: 14.5px; line-height: 1.5; }
 .help-defs dt { font-weight: 700; color: var(--text); }
-.help-defs dd { margin: 0; color: var(--soft); max-width: 60ch; }
+.help-defs dd { margin: 0; color: var(--soft); }
 .help-keys { line-height: 2.3; }
 .help-keys kbd { margin: 0 2px 0 8px; }
 .help-keys kbd:first-child { margin-left: 0; }
