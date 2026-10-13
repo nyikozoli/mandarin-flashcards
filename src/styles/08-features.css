@@ -393,3 +393,5 @@ body.labels-zh .practice-name .lbl .zl, body.labels-zh .pk-tile .lbl .zl { color
 .pv-cell.s-unmarked { transform: scale(.6); }
 .pv-cell:hover, .pv-cell:focus-visible, .pv-cell.picked { transform: scale(1.7); z-index: 1; }
 @media (prefers-reduced-motion: reduce) { .pv-cell { transition: none; } }
+/* Smaller panda that stands on top of the rung (in front of the stiles), clear of the count below the ladder. */
+.rail-panda { width: 24px; height: 24px; z-index: 2; bottom: clamp(6px, var(--climb), calc(100% - 28px)); transform: translate(-50%, 0); }
