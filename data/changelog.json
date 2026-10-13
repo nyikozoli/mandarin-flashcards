@@ -1,6 +1,19 @@
 {
   "releases": [
     {
+      "version": "3.6",
+      "date": "2026-10-13",
+      "title": "Tone 1 in magenta",
+      "groups": [
+        {
+          "name": "",
+          "items": [
+            "The first tone is now magenta instead of red, so it no longer looks like a wrong answer, and it is easier to tell from tone 2 (orange) and tone 3 (green) with red-green colour blindness."
+          ]
+        }
+      ]
+    },
+    {
       "version": "3.5",
       "date": "2026-10-13",
       "title": "Sign in on the installed iPhone app",
