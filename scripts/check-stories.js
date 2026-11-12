@@ -88,7 +88,7 @@ function comparePinyin(segs, py) {
         warnings.push({ kind: 'other', text: s.text + ': expected "' + s.word.py + '", the pinyin continues with "' + got.substr(p, want.length + 6) + '"' });
         return warnings;
       }
-      const kind = /[一不]/.test(s.text) ? 'sandhi' : toneless(want).length === want.length ? 'tone' : have === toneless(have) ? 'neutral' : 'tone';
+      const kind = /[一不]/.test(s.text) ? 'sandhi' : have === toneless(have) ? 'neutral' : 'tone';
       warnings.push({ kind, text: s.text + ': ' + s.word.py + ' → ' + have });
     }
     p += want.length;
