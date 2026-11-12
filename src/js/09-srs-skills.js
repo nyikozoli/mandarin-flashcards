@@ -114,10 +114,11 @@
     g.disabled = g.hidden = !g.children.length;
     syncPracticeSelect();
   }
-  // Snapshot format. 2 added `skills`, 5 added `rungs`, 6 turned `langs` into roles and added rehearse skills, 7 added `order`. The server refuses
+  // Snapshot format. 2 added `skills`, 5 added `rungs`, 6 turned `langs` into roles and added rehearse skills, 7 added `order`,
+  // 8 added `notes` (a personal note per word) and `troubleSeen`. The server refuses
   // uploads older than the stored format, and this copy refuses to apply progress written by a newer one, so neither side drops
   // what it does not understand.
-  var FORMAT = 7;
+  var FORMAT = 8;
   var SKILL_OF = { zh: 'read', hanzi: 'read', choice: 'read', cloze: 'read', pairs: 'read', reverse: 'recall', build: 'recall', listen: 'listen', tone: 'listen', tonepair: 'listen' };
   function skillOf(p) { return SKILL_OF[p] || 'read'; }
   function emptyMarks() { return { status: {}, srs: {}, misses: {} }; }

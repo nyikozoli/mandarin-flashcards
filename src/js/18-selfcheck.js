@@ -1564,6 +1564,7 @@
       })();
       add('Colour themes: Ink and Sepia', themeRes.ok, themeRes.d);
       rehearseTests(add);
+      habitTests(add);
       var railRes = (function () {
         if (!EXTRA.ladder.length) return { ok: els.progressRail.hidden, d: 'no ladder data: the rail stays hidden' };
         renderRail();

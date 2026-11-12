@@ -14,8 +14,8 @@
       state.status[c.zh] = markAfter(c, kind);
       if (!testing) recordAnswer(kind, c, entry.prev); else entry.kind = 'skip';
     }
-    // In the review deck a missed word comes back at the end of the session.
-    if (kind === 'learning' && state.mode === 'due' && state.deck.indexOf(i, state.pos + 1) === -1) { state.deck.push(i); entry.requeued = true; }
+    // In the review deck and the trouble deck a missed word comes back at the end of the session.
+    if (kind === 'learning' && (state.mode === 'due' || state.mode === 'trouble') && state.deck.indexOf(i, state.pos + 1) === -1) { state.deck.push(i); entry.requeued = true; }
     if (kind !== 'skip') buzz(kind === 'known' ? 12 : 25);
     stopSpeech();
     var finish = function () {
@@ -192,6 +192,7 @@
     });
     if (lead) els.cardMeanMain.firstChild.appendChild(speakBtn(lead, mean(c, lead)));
     renderHints(c);
+    renderNote(c);
     els.cardExamples.textContent = '';
     c.ex.forEach(function (e, k) {
       var box = el('div', 'ex');
@@ -254,7 +255,7 @@
   var userHasInteracted = false;
 
   function showEnd() {
-    if (roundReturn && endRehearseRound()) return;
+    if (roundReturn && (roundReturn.quick ? endQuickRound() : endRehearseRound())) return;
     var n = counts();
     var total = state.deck.length;
     els.card.hidden = true;
@@ -267,9 +268,10 @@
       els.cardCounter.textContent = 'Card 0 / 0';
     } else if (!total) {
       els.endEmoji.textContent = state.mode === 'unmarked' ? '🎉' : '📭';
-      els.endTitle.textContent = state.mode === 'learning' ? 'No learning cards' : 'No new cards';
+      els.endTitle.textContent = state.mode === 'learning' ? 'No learning cards' : state.mode === 'trouble' ? 'No trouble ' + noun(2) : 'No new cards';
       els.endText.textContent = state.mode === 'learning'
         ? 'You have not marked any card as “Still learning” yet. Study all cards and swipe left on words you want to practise.'
+        : state.mode === 'trouble' ? 'Nothing here has been missed ' + TROUBLE_MISSES + ' times or more and is still not known. Choose a study mode to go on.'
         : 'Every word is already marked as Known or Learning.';
       els.cardCounter.textContent = 'Card 0 / 0';
     } else {
@@ -317,7 +319,8 @@
       var b = els[id];
       var on = b.getAttribute('data-mode') === state.mode;
       b.setAttribute('aria-checked', on ? 'true' : 'false');
-      b.tabIndex = on ? 0 : -1;
+      // The trouble deck has no button of its own: “All cards” stays the group's tab stop.
+      b.tabIndex = on || (state.mode === 'trouble' && id === 'modeAll') ? 0 : -1;
     });
     ['levelAll'].concat(LEVELS.map(function (l) { return 'level' + l; })).forEach(function (id) {
       var b = els[id];

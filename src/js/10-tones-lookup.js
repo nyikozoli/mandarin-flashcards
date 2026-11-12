@@ -185,6 +185,10 @@
     els.wordPopMore.textContent = '';
     meaningLines(els.wordPopMore, { en: '', hu: '', tr: w.tr }, 'ex-line');
     Array.prototype.forEach.call(els.wordPopMore.querySelectorAll('[lang="en"], [lang="hu"]'), function (n) { n.parentNode.removeChild(n); });
+    // Your own note for the word, when there is one; the button adds or changes it.
+    els.wordPopNote.textContent = noteOf(w.zh) ? '✎ ' + noteOf(w.zh) : '';
+    els.wordPopNote.hidden = !noteOf(w.zh);
+    els.btnWordPopNote.hidden = !wordByZh(w.zh);
     els.wordPop.hidden = false;
     anchor.setAttribute('aria-expanded', 'true');
     placeWordPop(anchor);

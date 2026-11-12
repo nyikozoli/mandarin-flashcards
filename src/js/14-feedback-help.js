@@ -65,7 +65,7 @@
     if (kind === 'known') session.k++; else session.l++;
     checkMilestones();
     renderLadderStrip();
-    if (session.n >= 20 && currentIndex() !== null) showSummary();
+    if (session.n >= 20 && currentIndex() !== null && els.quickView.hidden) showSummary();
   }
   function showSummary() {
     var b = els.summaryBody;

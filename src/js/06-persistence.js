@@ -75,6 +75,8 @@
       rungs: state.rungs,
       ladderSeen: state.ladderSeen,
       rehearseSeen: state.rehearseSeen,
+      troubleSeen: state.troubleSeen,
+      notes: state.notes,
       readMeaning: state.readMeaning,
       petName: state.petName,
       labels: state.labels,
@@ -237,6 +239,8 @@
     }
     state.ladderSeen = saved && isDay(saved.ladderSeen) ? saved.ladderSeen : '';
     state.rehearseSeen = saved && isDay(saved.rehearseSeen) ? saved.rehearseSeen : '';
+    state.troubleSeen = saved && isDay(saved.troubleSeen) ? saved.troubleSeen : '';
+    state.notes = readNotes(saved && saved.notes);
     state.frozen = saved && Array.isArray(saved.frozen) ? saved.frozen.filter(isDay).slice(-60) : [];
     state.quests = null;
     var q = saved && saved.quests;

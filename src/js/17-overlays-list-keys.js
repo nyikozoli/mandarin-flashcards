@@ -21,7 +21,7 @@
     showSetTab(setTab);
     openOverlay(els.settingsView, els.btnCloseSettings);
   }
-  var OVERLAYS = ['practiceView', 'newsView', 'petView', 'quizView', 'topicView', 'listView', 'progressView', 'settingsView', 'helpView', 'transferView', 'summaryView', 'tourView', 'diagView', 'confirmDialog'];
+  var OVERLAYS = ['practiceView', 'newsView', 'petView', 'quizView', 'topicView', 'listView', 'progressView', 'settingsView', 'helpView', 'transferView', 'summaryView', 'quickView', 'noteView', 'tourView', 'diagView', 'confirmDialog'];
   var overlayStack = [];
   function anyOverlayOpen() {
     return OVERLAYS.some(function (id) { return !els[id].hidden; });
@@ -112,7 +112,7 @@
     var maps = skillMaps();
     cards.forEach(function (c, i) {
       var s = statusOf(c);
-      if (listFilter !== 'all' && s !== listFilter) return;
+      if (listFilter === 'trouble' ? !isTrouble(c) : listFilter !== 'all' && s !== listFilter) return;
       if (listLevel !== 'all' && String(c.lv) !== listLevel) return;
       if (q && c.search.indexOf(q) === -1 && (!qc || c.searchCompact.indexOf(qc) === -1) && (!qv || c.searchCompact.indexOf(qv) === -1)) return;
       shown++;
@@ -131,9 +131,12 @@
       renderPinyin(wpy, c.py);
       txt.appendChild(wpy);
       txt.appendChild(el('span', 'wr-mean', langsOn().map(function (k) { return mean(c, k); }).join(' · ')));
+      // The trouble list is where notes get written, so it shows them, and how often each word was missed.
+      if (listFilter === 'trouble' && noteOf(c.zh)) txt.appendChild(el('span', 'wr-note', '✎ ' + noteOf(c.zh)));
       b.appendChild(txt);
       var badges = el('span', 'wr-badges');
       badges.appendChild(el('span', 'badge lv', lvName(c.lv)));
+      if (listFilter === 'trouble') badges.appendChild(el('span', 'badge learning', 'missed ' + state.misses[c.zh] + '×'));
       badges.appendChild(el('span', 'badge' + (s === 'unmarked' ? '' : ' ' + s), STATUS_NAMES[s]));
       badges.appendChild(skillMarks(c, maps));
       b.appendChild(badges);
@@ -147,7 +150,7 @@
       els.wordList.appendChild(frag);
     }
     var label = shown + ' of ' + cards.length + ' words';
-    if (listFilter !== 'all') label += ' · ' + STATUS_NAMES[listFilter];
+    if (listFilter !== 'all') label += ' · ' + (listFilter === 'trouble' ? 'Trouble' : STATUS_NAMES[listFilter]);
     if (listLevel !== 'all') label += ' · ' + lvName(listLevel);
     var lvc = els.lvChips.querySelectorAll('.chip');
     for (var q = 0; q < lvc.length; q++) lvc[q].setAttribute('aria-pressed', lvc[q].getAttribute('data-lv') === listLevel ? 'true' : 'false');
@@ -158,8 +161,12 @@
     for (var k = 0; k < chips.length; k++) {
       var f = chips[k].getAttribute('data-filter');
       chips[k].setAttribute('aria-pressed', f === listFilter ? 'true' : 'false');
-      chips[k].textContent = (f === 'all' ? 'All' : STATUS_NAMES[f]) + ' (' + (f === 'all' ? n.total : n[f]) + ')';
+      chips[k].textContent = (f === 'all' ? 'All' : f === 'trouble' ? 'Trouble' : STATUS_NAMES[f]) + ' (' + (f === 'all' ? n.total : f === 'trouble' ? troubleCount() : n[f]) + ')';
     }
+    // The Trouble chip takes a row of its own on phones, so it shows only when there is something behind it.
+    els.listView.querySelector('.chip[data-filter="trouble"]').hidden = listFilter !== 'trouble' && !troubleCount();
+    els.btnListTrouble.hidden = listFilter !== 'trouble' || !troubleCount();
+    els.btnListTrouble.textContent = 'Study these ' + troubleCount() + ' as a deck';
   }
   // Opens a word from anywhere (progress view, word of the day), switching to the words deck if needed.
   function studyWord(zh) {

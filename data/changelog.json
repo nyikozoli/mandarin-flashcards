@@ -1,6 +1,21 @@
 {
   "releases": [
     {
+      "version": "3.8",
+      "date": "2026-11-12",
+      "title": "Just 5 cards, trouble words and notes",
+      "groups": [
+        {
+          "name": "",
+          "items": [
+            "Just 5 cards: on a day you have not studied yet, a button under the Today row starts a round of five (reviews that are due first, then new cards). It takes about two minutes and keeps your streak; at the end you choose five more or stop for the day.",
+            "Trouble words (难词): a word you have missed three or more times in the skill you are practising, and that is not Known yet. A 难 chip in the Today row, the Trouble filter in the word list and your stats open them as a deck of their own, most missed first; a miss there brings the word back at the end.",
+            "My note: add a short note of your own to any word (up to 200 characters), from the back of its card or from a word you tapped in a sentence. It shows only after the answer and is saved, exported and synced with your progress."
+          ]
+        }
+      ]
+    },
+    {
       "version": "3.7",
       "date": "2026-10-13",
       "title": "Fix: studying a word from the sentence deck",

@@ -678,13 +678,14 @@
   // showing, and ✕ hides it until tomorrow.
   function renderLadderStrip() {
     renderRehearseStrip();
+    renderTroubleStrip();
     renderRail();
     drawLadderStrip();
     renderSuggest();
   }
   function drawLadderStrip() {
     var r = nextRung();
-    els.ladderStrip.hidden = !r || state.ladderSeen === dayKey() || !els.wotd.hidden;
+    els.ladderStrip.hidden = !r || state.ladderSeen === dayKey() || !els.wotd.hidden || !els.troubleStrip.hidden;
     if (els.ladderStrip.hidden) return;
     var p = rungProgress(r);
     els.ladderZh.textContent = r.zh;
@@ -824,24 +825,25 @@
   }
 
   /* ---------- suggestion chip ---------- */
-  // The Today row's chip stands for the one strip showing (the word of the day or the next ladder step);
+  // The Today row's chip stands for the one strip showing (the rehearse round, the word of the day, the trouble
+  // words or the next ladder step);
   // tapping it opens that strip as a popover.
-  function shownStrip() { return [els.rehearseStrip, els.wotd, els.ladderStrip].filter(function (s) { return !s.hidden; })[0] || null; }
+  function shownStrip() { return [els.rehearseStrip, els.wotd, els.troubleStrip, els.ladderStrip].filter(function (s) { return !s.hidden; })[0] || null; }
   function renderSuggest() {
     var s = shownStrip();
     els.btnSuggest.hidden = !s;
     if (!s) { closeSuggest(); return; }
-    var kind = s === els.wotd ? 'wotd' : s === els.ladderStrip ? 'ladder' : 'rehearse';
+    var kind = s === els.wotd ? 'wotd' : s === els.ladderStrip ? 'ladder' : s === els.troubleStrip ? 'trouble' : 'rehearse';
     els.suggestSeal.textContent = s.querySelector('.wotd-seal').textContent;
     els.suggestSeal.className = 'suggest-seal ' + kind;
-    els.suggestCap.textContent = kind === 'wotd' ? 'Today’s word' : 'Next step';
-    els.suggestText.textContent = kind === 'wotd' ? els.wotdZh.textContent + ' ' + els.wotdPy.textContent : kind === 'ladder' ? els.ladderZh.textContent : els.rehearseText.textContent;
+    els.suggestCap.textContent = kind === 'wotd' ? 'Today’s word' : kind === 'trouble' ? 'To revisit' : 'Next step';
+    els.suggestText.textContent = kind === 'wotd' ? els.wotdZh.textContent + ' ' + els.wotdPy.textContent : kind === 'ladder' ? els.ladderZh.textContent : kind === 'trouble' ? els.troubleText.textContent : els.rehearseText.textContent;
     // The ladder's count drops out on phones, where the row has no room; the popover shows it.
     if (kind === 'ladder') els.suggestText.appendChild(el('span', 'sg-more', ' \u00b7 ' + els.ladderLeft.firstChild.textContent + ' to go'));
     // Larger screens also show the meaning or the step's can-do line (sg-en, hidden on phones).
     var en = kind === 'wotd' ? els.wotdEn.textContent : kind === 'ladder' ? els.ladderEn.textContent : '';
     if (en) els.suggestText.appendChild(el('span', 'sg-en', ' \u00b7 ' + en));
-    els.btnSuggest.setAttribute('aria-label', (kind === 'wotd' ? 'Word of the day: ' + els.wotdZh.textContent : kind === 'rehearse' ? 'Rehearse round: ' + els.rehearseText.textContent : 'Next ladder step: ' + els.ladderZh.textContent + ', ' + els.ladderLeft.textContent) + '. Show');
+    els.btnSuggest.setAttribute('aria-label', (kind === 'wotd' ? 'Word of the day: ' + els.wotdZh.textContent : kind === 'rehearse' ? 'Rehearse round: ' + els.rehearseText.textContent : kind === 'trouble' ? 'To revisit: ' + els.troubleText.textContent : 'Next ladder step: ' + els.ladderZh.textContent + ', ' + els.ladderLeft.textContent) + '. Show');
   }
   function openSuggest() {
     els.suggestPop.hidden = false;

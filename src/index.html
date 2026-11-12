@@ -158,8 +158,15 @@ try { if (localStorage.getItem('mandarin300.theme') === 'sepia') document.docume
         <button type="button" class="btn small" id="btnRehearseGo" data-lbl>Start</button>
         <button type="button" class="icon-btn small" id="btnRehearseClose" aria-label="Hide the rehearse round until tomorrow">✕</button>
       </section>
+      <section id="troubleStrip" class="wotd trouble-strip" aria-label="Trouble words" hidden>
+        <div class="wotd-seal" lang="zh-CN" aria-hidden="true">难</div>
+        <p class="wotd-body" id="troubleText"></p>
+        <button type="button" class="btn small" id="btnTroubleGo" data-lbl>Study</button>
+        <button type="button" class="icon-btn small" id="btnTroubleClose" aria-label="Hide the trouble words until tomorrow">✕</button>
+      </section>
       </div>
     </div>
+    <button type="button" class="quick-btn" id="btnQuick" hidden><span class="quick-seal" lang="zh-CN" aria-hidden="true">五</span><span class="quick-txt"><span class="quick-name" data-lbl="inline">Just 5 cards</span><small id="quickSub" class="quick-sub"></small></span><span class="quick-go" aria-hidden="true">Start</span></button>
     <div class="progress" id="progressBar" role="progressbar" aria-label="Words marked as known" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0">
       <div class="seg known" id="progKnown"></div>
       <div class="seg learning" id="progLearning"></div>
@@ -210,6 +217,7 @@ try { if (localStorage.getItem('mandarin300.theme') === 'sepia') document.docume
         <div class="meaning" data-mlang="hu"><span class="tag hu">HU</span><p id="cardHu" lang="hu"></p></div>
         <div id="cardMeanMore"></div>
         <div id="cardHints" class="hints" hidden></div>
+        <div id="cardNote" class="card-note" hidden></div>
         <div id="cardExamples" class="examples"></div>
       </div>
       <button type="button" id="revealHint" class="hint" aria-expanded="false" aria-controls="cardAnswer">Tap the card to show the meaning</button>
@@ -400,6 +408,7 @@ try { if (localStorage.getItem('mandarin300.theme') === 'sepia') document.docume
       <button type="button" class="chip" data-filter="known" aria-pressed="false">Known</button>
       <button type="button" class="chip" data-filter="learning" aria-pressed="false">Learning</button>
       <button type="button" class="chip" data-filter="unmarked" aria-pressed="false">New</button>
+      <button type="button" class="chip" data-filter="trouble" aria-pressed="false">Trouble</button>
     </div>
     <div class="chips" id="lvChips" role="group" aria-label="Filter by HSK level">
       <button type="button" class="chip lvchip" data-lv="all" aria-pressed="true">All levels</button>
@@ -409,6 +418,7 @@ try { if (localStorage.getItem('mandarin300.theme') === 'sepia') document.docume
       <button type="button" class="chip lvchip" id="lvChipTravel" data-lv="4" aria-pressed="false">Travel</button>
     </div>
     <p class="list-summary" id="listSummary" aria-live="polite"></p>
+    <button type="button" class="btn small list-trouble" id="btnListTrouble" hidden></button>
     <ul class="word-list" id="wordList"></ul>
   </div>
 </div>
@@ -527,6 +537,32 @@ try { if (localStorage.getItem('mandarin300.theme') === 'sepia') document.docume
   </div>
 </div>
 
+<div id="quickView" class="overlay dialog-wrap" hidden>
+  <div class="dialog quick-done" role="dialog" aria-modal="true" aria-labelledby="quickTitle">
+    <h2 id="quickTitle"></h2>
+    <p id="quickText"></p>
+    <div class="dialog-actions">
+      <button type="button" class="btn" id="btnQuickDone" data-lbl>Done for today</button>
+      <button type="button" class="btn primary" id="btnQuickMore" data-lbl>Keep going</button>
+    </div>
+  </div>
+</div>
+
+<div id="noteView" class="overlay dialog-wrap" hidden>
+  <div class="dialog note-dialog" role="dialog" aria-modal="true" aria-labelledby="noteTitle">
+    <h2 id="noteTitle" data-lbl="inline">My note</h2>
+    <p class="note-word"><span id="noteZh" class="note-zh" lang="zh-CN"></span> <span id="notePy" class="note-py" lang="zh-Latn-pinyin"></span> <span id="noteMean" class="note-mean"></span></p>
+    <label class="visually-hidden" for="noteText">Your own note for this word</label>
+    <textarea id="noteText" class="note-input" rows="3" maxlength="200" autocomplete="off" placeholder="Your own way to remember it"></textarea>
+    <p class="note-count" id="noteCount" aria-live="polite"></p>
+    <div class="dialog-actions">
+      <button type="button" class="btn note-delete" id="btnNoteDelete" data-lbl>Delete</button>
+      <button type="button" class="btn" id="btnNoteCancel" data-lbl>Cancel</button>
+      <button type="button" class="btn primary" id="btnNoteSave" data-lbl>Save</button>
+    </div>
+  </div>
+</div>
+
 <div id="helpView" class="overlay" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
     <div class="sheet-head">
@@ -556,6 +592,7 @@ try { if (localStorage.getItem('mandarin300.theme') === 'sepia') document.docume
           <dt>Learning</dt><dd>Words you marked “Still learning”.</dd>
           <dt>New</dt><dd>Cards you have not answered yet.</dd>
           <dt>Hardest</dt><dd>The 20 words you have missed most often.</dd>
+          <dt>Trouble words (难词)</dt><dd>A word you have missed three or more times in the skill you are practising, and that is not Known yet. When you have some, a 难 chip in the Today row, the Trouble filter in the word list and your stats in the progress view open them as a deck of their own; a miss there brings the word back at the end. A word leaves the list once it is Known. Pick any study mode to go back.</dd>
         </dl>
         <p>The level buttons (All, 1, 2, 3) narrow every mode to one HSK level.</p>
       </section>
@@ -582,6 +619,8 @@ try { if (localStorage.getItem('mandarin300.theme') === 'sepia') document.docume
           <dt>Rehearse (温习)</dt><dd>Set a language you already know to Rehearse in Settings → Languages. Its words then get their own marks: a card shows the Chinese and asks for the word in that language. These cards come up every few cards in the word deck, as a 5-card round after your daily goal, in their own practice style, and in a daily quest. The language also takes the main meaning's place on part of the cards (the slider sets how many), and its words can be read aloud.</dd>
           <dt>读 说 听</dt><dd>On each card and in the word list, three small seals show the card's mark in every skill: 读 reading, 说 recall (meaning → Chinese), 听 listening. Green is Known, amber Learning, an outline New; the skill you are practising has a ring. The tag next to them names that skill's mark.</dd>
           <dt>Your panda</dt><dd>The panda at the top left lives on your studying. Every answer feeds it a bamboo leaf, your daily goal fills its belly, and all your answers together make it grow from newborn to sage. Tap it to see how it is doing and to give it a name.</dd>
+          <dt>Just 5 cards</dt><dd>On a day you have not studied yet, the <b>Just 5 cards</b> button under the Today row starts a round of five: reviews that are due first, then new cards, in your current practice style. One answer is enough to keep the streak. At the end, choose five more or stop for the day.</dd>
+          <dt>My note</dt><dd>Every word can carry a short note of your own (up to 200 characters), such as a way to remember it. Add or change it under the meanings on the back of a word card, or from the word you tapped in a sentence. It shows only after the answer, and it travels with your progress (export, import, sync).</dd>
           <dt>Word of the day</dt><dd>Each day a useful word you do not know yet appears as a chip in the Today row; tap it to see the word. “Study it” opens it; ✕ hides it until tomorrow.</dd>
           <dt>Daily quests</dt><dd>Three small goals each day, shown in the progress view. Each finished quest gives 30 XP; all three give 50 XP more and a 🧊 streak freeze. You can save two, and a saved freeze keeps your streak alive over a missed day. Every Monday a short recap of last week appears.</dd>
           <dt>Ladder (阶梯)</dt><dd>Real-life steps such as greeting people, ordering food or asking the way, each with a small set of words. A step is reached when you know all its words in reading and listening (读 and 听); take them in any order, each one is worth 40 XP. The strip on the main screen shows the next step and how many words it still needs; Practise studies just those words. The Ladder tab in the progress view shows every step, and on wide screens a narrow ladder on the right shows your climb and your rank.</dd>
@@ -699,7 +738,8 @@ try { if (localStorage.getItem('mandarin300.theme') === 'sepia') document.docume
   <p class="ex-line" data-mlang="en"><span class="tag en">EN</span><span id="wordPopEn"></span></p>
   <p class="ex-line" data-mlang="hu" lang="hu"><span class="tag hu">HU</span><span id="wordPopHu"></span></p>
   <div id="wordPopMore"></div>
-  <button type="button" class="btn small wp-speak" id="btnWordPopSpeak">🔊 Read aloud</button>
+  <p id="wordPopNote" class="wp-note" hidden></p>
+  <div class="wp-actions"><button type="button" class="btn small wp-speak" id="btnWordPopSpeak">🔊 Read aloud</button><button type="button" class="btn small" id="btnWordPopNote"><span aria-hidden="true">✎ </span><span data-lbl="inline">My note</span></button></div>
   <button type="button" class="close-btn wp-close" id="btnWordPopClose" aria-label="Close the word">✕</button>
 </div>
 

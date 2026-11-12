@@ -12,7 +12,10 @@
     'Challenges': ['挑战', 'tiǎozhàn'], 'Seals': ['印章', 'yìnzhāng'], 'By topic': ['话题', 'huàtí'], 'By HSK level': ['等级', 'děngjí'],
     'Settings': ['设置', 'shèzhì'], 'What\'s new': ['新功能', 'xīn gōngnéng'], 'How it works': ['使用说明', 'shǐyòng shuōmíng'], 'Topics': ['话题', 'huàtí'], 'Your panda': ['我的熊猫', 'wǒ de xióngmāo'],
     'All words': ['全部词语', 'quánbù cíyǔ'], 'All sentences': ['全部句子', 'quánbù jùzi'],
-    'Cards': ['卡片', 'kǎpiàn'], 'Translations': ['翻译', 'fānyì'], 'Rehearse': ['温习', 'wēnxí'], 'Start': ['开始', 'kāishǐ'], 'Voice': ['语音', 'yǔyīn'], 'Sync across devices': ['同步', 'tóngbù'], 'Sync': ['同步', 'tóngbù'], 'Languages': ['语言', 'yǔyán'], 'Data': ['数据', 'shùjù'], 'Progress and checks': ['进度和自检', 'jìndù hé zìjiǎn']
+    'Cards': ['卡片', 'kǎpiàn'], 'Translations': ['翻译', 'fānyì'], 'Rehearse': ['温习', 'wēnxí'], 'Start': ['开始', 'kāishǐ'], 'Voice': ['语音', 'yǔyīn'], 'Sync across devices': ['同步', 'tóngbù'], 'Sync': ['同步', 'tóngbù'], 'Languages': ['语言', 'yǔyán'], 'Data': ['数据', 'shùjù'], 'Progress and checks': ['进度和自检', 'jìndù hé zìjiǎn'],
+    'Just 5 cards': ['只学五张', 'zhǐ xué wǔ zhāng'], 'Keep going': ['继续', 'jìxù'], 'Done for today': ['今天就到这儿', 'jīntiān jiù dào zhèr'],
+    'Trouble words': ['难词', 'náncí'], 'Study': ['学习', 'xuéxí'], 'My note': ['我的笔记', 'wǒ de bǐjì'], 'Add a note': ['加笔记', 'jiā bǐjì'], 'Edit': ['修改', 'xiūgǎi'],
+    'Save': ['保存', 'bǎocún'], 'Delete': ['删除', 'shānchú'], 'Cancel': ['取消', 'qǔxiāo']
   };
   var PRACTICE_ZH = { zh: '认字', reverse: '中文怎么说', listen: '听力', choice: '选择题', hanzi: '只看汉字', tone: '听声调', tonepair: '声调组合', cloze: '填空', pairs: '易混词',
     's-zh': '读句子', 's-reverse': '说句子', 's-listen': '听句子', 's-choice': '句子选择题', 's-hanzi': '只看汉字', 's-build': '组句' };

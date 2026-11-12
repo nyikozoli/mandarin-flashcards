@@ -96,6 +96,13 @@ Row-level security is what makes the anon key safe to publish:
 
 Reading (Chinese → meaning, 汉字 only, multiple choice), recall (meaning → Chinese) and listening (listening, which tone) each keep their own Known/Learning marks, review schedule and Due list. Words and sentences each remember their own place in the deck. In the saved progress, reading stays in the top-level `status`, `srs` and `misses`, and the other skills sit under `skills`, so an older copy of the app still reads the reading skill.
 
+The saved progress also holds `notes`, your own short note per word (`{ headword: text }`, at most 200 characters each, words only, always shown as plain text), added in snapshot format 8. Notes are exported and synced with the rest; they need no database change, because the server stores the snapshot as one JSON value and only compares its format number.
+
+## Small sessions and trouble words
+
+- **Just 5 cards:** while the day has no answer yet, a button under the Today row starts a round of five cards (due reviews first, then new ones) in the current practice style. The answers count like any others, and one answer keeps the streak. The round ends with a choice between five more and stopping.
+- **Trouble words:** a card missed three or more times in the active skill that is not Known there. They form a study mode of their own (`trouble`), reached from the 难 chip in the Today row, the Trouble filter of the word list and the stats in the progress view; a miss brings the card back at the end of the deck.
+
 ## Reading help
 
 - **Tap a word:** in example sentences and on sentence cards, every HSK 1–3 word is tappable and shows its pinyin, meaning and level. Sentences are split by longest match against the app's own word list, which covers about 95% of the characters in the sentences.
