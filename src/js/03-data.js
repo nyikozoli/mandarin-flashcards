@@ -92,7 +92,7 @@
     if (els.card) els.card.classList.toggle('sentence', isSent());
   }
   // Styles that exist for one deck only, and the style of the same skill to use on the other deck.
-  var DECK_ONLY = { tone: ['words', 'listen'], tonepair: ['words', 'listen'], cloze: ['words', 'choice'], build: ['sentences', 'reverse'], pairs: ['words', 'choice'] };
+  var DECK_ONLY = { type: ['words', 'reverse'], dictate: ['words', 'listen'], tone: ['words', 'listen'], tonepair: ['words', 'listen'], cloze: ['words', 'choice'], build: ['sentences', 'reverse'], pairs: ['words', 'choice'] };
   function fixStyleForDeck() {
     var o = DECK_ONLY[state.practice];
     if (!o || o[0] === state.deckType) return;

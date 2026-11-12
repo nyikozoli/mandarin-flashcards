@@ -88,9 +88,12 @@
     els.revealHint.setAttribute('aria-expanded', state.revealed ? 'true' : 'false');
     els.revealHint.setAttribute('aria-label', state.revealed ? 'Hide the answer' : 'Show the answer');
     var p = practiceNow();
-    els.cardPrompt.hidden = state.revealed || !(p === 'reverse' || p === 'listen' || toneQ || clozeQ || buildQ || similarQ || isRehearseStyle(p));
+    els.cardPrompt.hidden = state.revealed || !(p === 'reverse' || p === 'listen' || toneQ || clozeQ || buildQ || similarQ || typedQ || isRehearseStyle(p));
     els.revealHint.textContent = state.revealed
-      ? 'Tap the characters to hide the meaning · swipe → know · ← learning'
+      ? (typedQ && typedQ.done ? 'Enter or Next goes on · counts as ' + (typedQ.kind === 'right' ? '“I know it”' : '“Still learning”')
+        : 'Tap the characters to hide the meaning · swipe → know · ← learning')
+      : typedQ ? (p === 'dictate' ? 'Listen, type the pinyin with tones (xue2sheng or xuésheng), then press Enter'
+        : 'Type the pinyin with tones (xue2sheng or xuésheng), then press Enter')
       : p === 'tone'
         ? (toneQ ? 'Listen, then pick the tone of the first syllable (keys 1–4)' : 'Tap the card to show the meaning')
         : p === 'tonepair' ? (toneQ ? 'Listen, then pick both tones (keys 1–4)' : 'Tap the card to show the meaning')
@@ -232,6 +235,7 @@
     els.cardCounter.appendChild(el('span', 'counter-word', 'Card '));
     els.cardCounter.appendChild(document.createTextNode((state.pos + 1) + ' / ' + state.deck.length));
     setActionsEnabled(true);
+    if (animate) focusTyped();
     if (animate && !reduceMotion && !testing) {
       els.card.classList.remove('enter');
       void els.card.offsetWidth;
@@ -240,6 +244,7 @@
     if (animate && !testing) {
       announce('Card ' + (state.pos + 1) + ' of ' + state.deck.length + '. ' + (practiceNow() === 'reverse' ? 'Meaning: ' + c.en + '.' :
         practiceNow() === 'listen' ? 'Listen to the ' + noun(1) + '.' :
+        typedQ ? (practiceNow() === 'dictate' ? 'Listen to the word, then type its pinyin.' : 'Meaning: ' + shortText(mainMeaning(c)) + '. Type the pinyin.') :
         toneQ ? 'Listen to ' + c.zh + ', then pick ' + (toneQ.pair ? 'both tones.' : 'the tone of the first syllable.') :
         buildQ ? 'Put the words in order: ' + c.en :
         similarQ ? 'Which word means: ' + shortText(mainMeaning(c)) + '?' :
@@ -247,7 +252,7 @@
         c.zh + (readingHidden ? '.' : ', ' + c.py + '.')));
     }
     // The tone quizzes always speak: hearing the word is the question.
-    if (animate && !testing && ((state.autoplay && !readingHidden && !faceHidden) || practiceNow() === 'listen' || practiceNow() === 'tone' || !!toneQ) && userHasInteracted) {
+    if (animate && !testing && ((state.autoplay && !readingHidden && !faceHidden) || practiceNow() === 'listen' || practiceNow() === 'dictate' || practiceNow() === 'tone' || !!toneQ) && userHasInteracted) {
       var pos = state.pos;
       setTimeout(function () { if (state.pos === pos && currentIndex() !== null) speakParts([c.zh], null); }, 280);
     }

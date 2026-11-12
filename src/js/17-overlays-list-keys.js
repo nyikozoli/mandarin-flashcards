@@ -305,6 +305,7 @@
       case 's': case 'S': e.preventDefault(); speakCurrent(); break;
       case 't': case 'T': {
         var typeBox = els.cardPrompt.hidden ? null : els.cardPrompt.querySelector('.type-input');
+        if (typedQ) typeBox = els.typedInput;
         if (typeBox) { e.preventDefault(); typeBox.focus(); }
         break;
       }

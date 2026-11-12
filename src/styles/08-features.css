@@ -481,3 +481,27 @@ body.labels-zh .practice-name .lbl .zl, body.labels-zh .pk-tile .lbl .zl { color
 .wp-note { margin: 2px 0 0; padding: 6px 8px; border-radius: 8px; background: var(--surface); color: var(--text); font-size: 13.5px; white-space: pre-wrap; overflow-wrap: anywhere; }
 .wp-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
 .wp-actions .wp-speak { margin-top: 0; }
+
+/* typed answers (Type it, Dictation): the field stays in the card; the result sits right above it */
+.typed { width: 100%; max-width: 400px; margin: 8px auto 4px; text-align: center; }
+.typed-row { display: flex; gap: 8px; }
+.typed .type-input { min-height: 48px; font-size: 18px; text-align: center; -webkit-user-select: text; user-select: text; }
+.typed .type-input.graded { border-width: 2px; }
+.typed .type-input.right { border-color: var(--known); }
+.typed .type-input.tone, .typed .type-input.wrong { border-color: var(--learn); }
+.typed-row .btn { flex: none; min-width: 78px; min-height: 48px; }
+.typed-result { margin: 0 0 10px; padding: 8px 12px 9px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface2); }
+.typed-result.right { border-color: var(--known); }
+.typed-result.tone, .typed-result.wrong { border-color: var(--learn); }
+.typed-verdict { margin: 0; font-size: 16px; font-weight: 800; }
+.typed-result.right .typed-verdict { color: var(--known); }
+.typed-result.tone .typed-verdict, .typed-result.wrong .typed-verdict { color: var(--learn); }
+.typed-word { margin: 2px 0 0; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: center; gap: 2px 10px; line-height: 1.5; }
+.typed-zh { font-family: var(--zh-font); font-size: 20px; color: var(--paper); }
+.typed-py { font-size: 22px; color: var(--pinyin); }
+.typed-mean { margin: 0; font-size: 15px; color: var(--text); overflow-wrap: anywhere; }
+.typed-py .syl-off { text-decoration: underline wavy var(--cinnabar); text-decoration-thickness: 2px; text-underline-offset: 6px; }
+.typed-note { margin: 3px 0 0; font-size: 14px; color: var(--soft); overflow-wrap: anywhere; }
+.typed-override { display: inline-block; margin-top: 10px; min-height: 40px; padding: 0 6px; font-size: 14px; }
+.typed-override .typed-typo { font-weight: 400; color: var(--soft); }
+.card.typed-mode .prompt { padding-top: 16px; }

@@ -3,14 +3,17 @@
     {
       "version": "3.8",
       "date": "2026-11-12",
-      "title": "Just 5 cards, trouble words and notes",
+      "title": "Just 5 cards, trouble words, notes and typed answers",
       "groups": [
         {
           "name": "",
           "items": [
             "Just 5 cards: on a day you have not studied yet, a button under the Today row starts a round of five (reviews that are due first, then new cards). It takes about two minutes and keeps your streak; at the end you choose five more or stop for the day.",
             "Trouble words (难词): a word you have missed three or more times in the skill you are practising, and that is not Known yet. A 难 chip in the Today row, the Trouble filter in the word list and your stats open them as a deck of their own, most missed first; a miss there brings the word back at the end.",
-            "My note: add a short note of your own to any word (up to 200 characters), from the back of its card or from a word you tapped in a sentence. It shows only after the answer and is saved, exported and synced with your progress."
+            "My note: add a short note of your own to any word (up to 200 characters), from the back of its card or from a word you tapped in a sentence. It shows only after the answer and is saved, exported and synced with your progress.",
+            "Type it: a new practice style under Recall. You see the meaning and type the word’s pinyin with its tones, and the app grades it: right counts as “I know it”, anything else as “Still learning”. Type tone numbers (ni3hao3, peng2you) or tone marks (nǐhǎo); v or u: gives ü, and a neutral tone needs no number.",
+            "Dictation: the same under Listening. You hear the word and type its pinyin with tones.",
+            "Tones are graded too: right letters with a wrong tone count as a miss, and the answer shows which syllables were off. After the result the card shows the word, and Enter or Next goes on. “I was right” is there for a slip of the finger."
           ]
         }
       ]

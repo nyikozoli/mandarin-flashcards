@@ -235,41 +235,9 @@
   }
 
   /* ---------- typed answers ---------- */
-  // Does the typed pinyin match the card? Accepts tone numbers (xue2sheng, 5 or 0 or nothing for neutral) or tone marks
-  // (xuésheng), any spacing, apostrophes and capitals, v or u: for ü, the tone digit after an erhua r, and the
-  // citation tone of 一 and 不 as well as the changed one that the card shows.
-  function typedMatches(input, c) {
-    var raw = String(input || '').toLowerCase().replace(/u:/g, 'v').replace(/ü/g, 'v').replace(/[\s'’\-·.,]/g, '');
-    if (!raw) return false;
-    var plain = '', marks = [];
-    Array.from(raw).forEach(function (ch) {
-      var v = PLAIN_VOWEL[ch];
-      if (v) { plain += v === 'ü' ? 'v' : v; marks.push(TONE_MARK[v].indexOf(ch) + 1); }
-      else { plain += ch; marks.push(0); }
-    });
-    var toks = pinyinTokens(c.py).filter(function (t) { return t.tone; });
-    var han = Array.from(c.zh).filter(isHan), pos = 0;
-    for (var i = 0; i < toks.length; i++) {
-      var base = stripTone(toks[i].text).toLowerCase().replace(/ü/g, 'v'), tone = 0, k;
-      var digitR = /r$/.test(base) && base.length > 2 && plain.substr(pos, base.length - 1) === base.slice(0, -1) &&
-        /[0-5]/.test(plain.charAt(pos + base.length - 1)) && plain.charAt(pos + base.length) === 'r';
-      if (digitR) {
-        var d0 = Number(plain.charAt(pos + base.length - 1));
-        for (k = pos; k < pos + base.length - 1; k++) if (marks[k]) tone = marks[k];
-        if (!tone) tone = d0 === 0 ? 5 : d0;
-        pos += base.length + 1;
-      } else {
-        if (plain.substr(pos, base.length) !== base) return false;
-        for (k = pos; k < pos + base.length; k++) if (marks[k]) tone = marks[k];
-        pos += base.length;
-        if (/[0-5]/.test(plain.charAt(pos))) { var d = Number(plain.charAt(pos)); if (!tone) tone = d === 0 ? 5 : d; pos++; }
-      }
-      if (!tone) tone = 5;
-      var want = toks[i].tone, ch = han.length === toks.length ? han[i] : '';
-      if (!(tone === want || (ch === '一' && [1, 2, 4].indexOf(tone) !== -1) || (ch === '不' && [2, 4].indexOf(tone) !== -1))) return false;
-    }
-    return pos === plain.length;
-  }
+  // Does the typed pinyin match the card? The optional box of Meaning → Chinese: a miss only says so and lets you try
+  // again. The rules (tone numbers or marks, ü, neutral tones, 一 and 不) are typedGrade()'s, in 12d-typed.js.
+  function typedMatches(input, c) { return typedGrade(input, c).kind === 'right'; }
   function checkTyped(form) {
     var i = currentIndex(), input = form.querySelector('input'), res = els.cardPrompt.querySelector('.type-result');
     if (i === null || !input || !input.value.trim() || input.disabled) return;

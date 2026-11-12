@@ -15,9 +15,10 @@
     'Cards': ['卡片', 'kǎpiàn'], 'Translations': ['翻译', 'fānyì'], 'Rehearse': ['温习', 'wēnxí'], 'Start': ['开始', 'kāishǐ'], 'Voice': ['语音', 'yǔyīn'], 'Sync across devices': ['同步', 'tóngbù'], 'Sync': ['同步', 'tóngbù'], 'Languages': ['语言', 'yǔyán'], 'Data': ['数据', 'shùjù'], 'Progress and checks': ['进度和自检', 'jìndù hé zìjiǎn'],
     'Just 5 cards': ['只学五张', 'zhǐ xué wǔ zhāng'], 'Keep going': ['继续', 'jìxù'], 'Done for today': ['今天就到这儿', 'jīntiān jiù dào zhèr'],
     'Trouble words': ['难词', 'náncí'], 'Study': ['学习', 'xuéxí'], 'My note': ['我的笔记', 'wǒ de bǐjì'], 'Add a note': ['加笔记', 'jiā bǐjì'], 'Edit': ['修改', 'xiūgǎi'],
-    'Save': ['保存', 'bǎocún'], 'Delete': ['删除', 'shānchú'], 'Cancel': ['取消', 'qǔxiāo']
+    'Save': ['保存', 'bǎocún'], 'Delete': ['删除', 'shānchú'], 'Cancel': ['取消', 'qǔxiāo'],
+    'Check': ['检查', 'jiǎnchá'], 'Next': ['下一个', 'xià yí gè'], 'I was right': ['我答对了', 'wǒ dá duì le']
   };
-  var PRACTICE_ZH = { zh: '认字', reverse: '中文怎么说', listen: '听力', choice: '选择题', hanzi: '只看汉字', tone: '听声调', tonepair: '声调组合', cloze: '填空', pairs: '易混词',
+  var PRACTICE_ZH = { zh: '认字', reverse: '中文怎么说', type: '打拼音', listen: '听力', dictate: '听写', choice: '选择题', hanzi: '只看汉字', tone: '听声调', tonepair: '声调组合', cloze: '填空', pairs: '易混词',
     's-zh': '读句子', 's-reverse': '说句子', 's-listen': '听句子', 's-choice': '句子选择题', 's-hanzi': '只看汉字', 's-build': '组句' };
   var GROUP_ZH = { Words: '词语', Sentences: '句子', Rehearse: '温习' };
   // A label unit: the Chinese and the English, stacked in buttons, side by side in headings.

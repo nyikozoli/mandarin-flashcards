@@ -410,6 +410,7 @@
       var i = currentIndex();
       if (i !== null) speakParts([cards[i].zh], b);
     });
+    wireTyped();
     wireQuick();
     wireTrouble();
     on('btnSummaryClose', 'click', function () { closeOverlay(els.summaryView); });

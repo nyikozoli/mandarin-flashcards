@@ -67,8 +67,8 @@
   }
 
   /* ---------- skills: separate progress per kind of practice ---------- */
-  // Reading (Chinese → meaning, 汉字 only, multiple choice), recall (meaning → Chinese) and listening (listening, which
-  // tone) each keep their own marks, review schedule and miss counts. state.status / srs / misses always hold the
+  // Reading (Chinese → meaning, 汉字 only, multiple choice), recall (meaning → Chinese, type it) and listening (listening,
+  // dictation, which tone) each keep their own marks, review schedule and miss counts. state.status / srs / misses always hold the
   // active skill's maps, so the rest of the app needs no skill logic; state.marks holds every skill, and stashSkill()
   // writes the active maps back before anything reads another skill.
   var SKILL_ZH = { read: '读', recall: '说', listen: '听' };
@@ -115,11 +115,11 @@
     syncPracticeSelect();
   }
   // Snapshot format. 2 added `skills`, 5 added `rungs`, 6 turned `langs` into roles and added rehearse skills, 7 added `order`,
-  // 8 added `notes` (a personal note per word) and `troubleSeen`. The server refuses
+  // 8 added `notes` (a personal note per word) and `troubleSeen`; the typed styles (Type it, Dictation) added no field. The server refuses
   // uploads older than the stored format, and this copy refuses to apply progress written by a newer one, so neither side drops
   // what it does not understand.
   var FORMAT = 8;
-  var SKILL_OF = { zh: 'read', hanzi: 'read', choice: 'read', cloze: 'read', pairs: 'read', reverse: 'recall', build: 'recall', listen: 'listen', tone: 'listen', tonepair: 'listen' };
+  var SKILL_OF = { zh: 'read', hanzi: 'read', choice: 'read', cloze: 'read', pairs: 'read', reverse: 'recall', type: 'recall', build: 'recall', listen: 'listen', dictate: 'listen', tone: 'listen', tonepair: 'listen' };
   function skillOf(p) { return SKILL_OF[p] || 'read'; }
   function emptyMarks() { return { status: {}, srs: {}, misses: {} }; }
   function stashSkill() { state.marks[state.skill] = { status: state.status, srs: state.srs, misses: state.misses }; }

@@ -41,7 +41,8 @@
     roundReturn = { quick: true };
     render(true);
     save();
-    if (!testing) { try { els.revealHint.focus({ preventScroll: true }); } catch (e) { /* ignore */ } }
+    // In the typed styles the field takes the focus (inside the tap, so a phone opens its keyboard).
+    if (!testing) { try { (typedQ ? els.typedInput : els.revealHint).focus({ preventScroll: true }); } catch (e) { /* ignore */ } }
     return true;
   }
   // Called when the round's deck ends: back to the deck from before it, then the finish.

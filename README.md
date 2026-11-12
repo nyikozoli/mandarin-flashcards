@@ -1,7 +1,7 @@
 # Mandarin HSK flashcards
 
 Offline flashcards for 598 HSK 1–3 words and their 777 example sentences, with pinyin, English and Hungarian, read-aloud, spaced repetition per skill and optional cloud sync. It also has:
-- **Practice styles:** 15, from flashcards and listening to fill-the-gap, sentence building, typed pinyin, a tone quiz and look-alike/sound-alike drills.
+- **Practice styles:** 17, from flashcards and listening to fill-the-gap, sentence building, typed and graded pinyin (Type it, Dictation), a tone quiz and look-alike/sound-alike drills.
 - **Learning aids:** character memory hints, topics, and word frequency.
 - **Motivation and games:** daily quests, a 60-second blitz, level exams, seals to collect, and a panda that grows as you study.
 - **Interface:** labels in 中文 + English.

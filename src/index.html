@@ -91,7 +91,9 @@ try { if (localStorage.getItem('mandarin300.theme') === 'sepia') document.docume
         <optgroup label="Words">
           <option value="zh">汉字 → meaning</option>
           <option value="reverse">Meaning → 汉字</option>
+          <option value="type">Type it (the pinyin)</option>
           <option value="listen">Listening</option>
+          <option value="dictate">Dictation (listen and type)</option>
           <option value="choice">Multiple choice</option>
           <option value="hanzi">汉字 only (pinyin hidden)</option>
           <option value="tone">Which tone? (listen)</option>
@@ -203,6 +205,15 @@ try { if (localStorage.getItem('mandarin300.theme') === 'sepia') document.docume
         <div id="cardPinyin" class="pinyin" lang="zh-Latn-pinyin">Loading…</div>
         <button type="button" id="btnSpeak" class="speak-btn" aria-label="Read aloud: speak the word and its example sentences (S)"><svg class="speak-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span id="speakLabel">Read aloud</span></button>
       </div>
+      <form id="typedForm" class="typed" novalidate hidden>
+        <div id="typedResult" class="typed-result" hidden></div>
+        <label id="typedLabel" class="visually-hidden" for="typedInput">Type the pinyin, with tone numbers or tone marks</label>
+        <div class="typed-row">
+          <input id="typedInput" class="type-input" type="text" inputmode="text" lang="zh-Latn-pinyin" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" enterkeyhint="go" maxlength="60" placeholder="ni3hao3 or nǐhǎo">
+          <button type="submit" id="btnTypedCheck" class="btn small">Check</button>
+        </div>
+        <button type="button" id="btnTypedRight" class="linkish typed-override" hidden><span data-lbl="inline">I was right</span> <span class="typed-typo">(it was a typo)</span></button>
+      </form>
       <div id="choiceBox" class="choices" hidden></div>
       <div id="cardAnswer" class="answer">
         <p id="cardRehearse" class="rh-answer" hidden></p>
@@ -603,10 +614,12 @@ try { if (localStorage.getItem('mandarin300.theme') === 'sepia') document.docume
           <dt>汉字 → meaning</dt><dd>See the Chinese, recall the meaning.</dd>
           <dt>Meaning → 汉字</dt><dd>See English and Hungarian, say the Chinese word, then tap to check.</dd>
           <dt>Listening</dt><dd>Hear the word, guess it, then tap to see it.</dd>
+          <dt>Type it</dt><dd>See the meaning and type the word’s pinyin with its tones, then press Enter. The app grades it: right counts as “I know it”, anything else as “Still learning”. Tone numbers after each syllable (ni3hao3, peng2you) or tone marks (nǐhǎo) both work; spaces, apostrophes and capitals do not matter; v, u: or ü all give ü; a neutral tone is 5, 0 or nothing. For 一 and 不 the tone on the card (yíhuìr) and the dictionary tone (yi1hui4r) are both right. Right letters with a wrong tone are marked syllable by syllable. The card then shows the word; Enter or Next goes on. If it was only a slip of the finger, “I was right” counts it as known. Words only; it trains recall. <kbd>T</kbd> jumps to the field, <kbd>Esc</kbd> leaves it.</dd>
+          <dt>Dictation</dt><dd>Hear the word and type its pinyin with tones, graded like Type it. A word that sounds the same is right. Words only; it trains listening.</dd>
           <dt>Multiple choice</dt><dd>Pick the right meaning from four. A right answer counts as “I know it”.</dd>
           <dt>汉字 only</dt><dd>Only the characters show; pinyin, tone colours and audio appear when you tap the card. Use it for words you can say but cannot read yet. A word card's back also has <b>Practice these sentences</b>, which opens just that word's example sentences in the current style.</dd>
           <dt>Build the sentence</dt><dd>Sentences only. The translation shows, with the sentence's words shuffled below it: tap them in order (tap a placed word, or press Backspace, to take it back). A right order counts as “I know it” toward recall. Another order can still be correct Chinese, so a mismatch shows the sentence and you mark it yourself.</dd>
-          <dt>Typing the answer</dt><dd>In Meaning → 汉字 (words) you can type the pinyin and press Enter: tone numbers (xue2sheng) or tone marks (xuésheng) both work, and neutral tones can be left out. A right answer counts as “I know it”. <kbd>T</kbd> jumps to the box.</dd>
+          <dt>Typing the answer</dt><dd>In Meaning → 汉字 (words) you can also type the pinyin and press Enter, as a check for yourself (a miss lets you try again; Type it is the graded style): tone numbers (xue2sheng) or tone marks (xuésheng) both work, and neutral tones can be left out. A right answer counts as “I know it”. <kbd>T</kbd> jumps to the box.</dd>
           <dt>Similar words</dt><dd>Words only. The meaning shows (🔊 plays the word); pick the right one among words that look or sound alike, such as 买 mǎi “buy” and 卖 mài “sell”, 他 / 她 / 它, or 大 / 太. Only the about 135 words that have such a twin are in this deck; it counts toward reading.</dd>
           <dt>Fill the gap</dt><dd>One of the word's example sentences with the word blanked out, and its translation. Pick the word that fits from four of the same length; keys 1–4 pick. Words only; it counts toward reading.</dd>
           <dt>Tone pairs</dt><dd>Hear a two-syllable word, then pick both of its tones, such as 2 + 1 for 学生 xuéshēng. Each chip writes the word in those tones; one of the wrong ones shares the first tone, another the second. Only the about 295 words with two full tones are in this deck (no neutral tone, no 3 + 3 pair, which is said as 2 + 3); it counts toward listening.</dd>
