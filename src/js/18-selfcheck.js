@@ -259,6 +259,10 @@
       activity: JSON.parse(JSON.stringify(state.activity)), milestones: state.milestones.slice(), seenTour: state.seenTour
     };
     var undoSnap = undoStack.slice();
+    // The story's strip is put away while the checks run (as ✕ does), so the other strips show as they did before it
+    // existed; storyTests() sets up its own states.
+    var storySnap = JSON.stringify(state.story);
+    state.story.seen = dayKey();
     var langsSnap = JSON.parse(JSON.stringify(state.langs)), rehearseSnap = JSON.parse(JSON.stringify(state.rehearse));
     state.langs = readLangs(null);
     state.rehearse = readRehearse({ every: 0 });
@@ -1564,6 +1568,8 @@
       })();
       add('Colour themes: Ink and Sepia', themeRes.ok, themeRes.d);
       rehearseTests(add);
+      habitTests(add);
+      storyTests(add);
       var railRes = (function () {
         if (!EXTRA.ladder.length) return { ok: els.progressRail.hidden, d: 'no ladder data: the rail stays hidden' };
         renderRail();
@@ -1673,6 +1679,7 @@
       state.petName = snap.petName; closeOverlay(els.petView); renderPet();
       state.seals = snap.seals; state.questDays = snap.questDays; state.blitzBest = snap.blitzBest; state.exams = snap.exams; stopQuiz(); quiz = null;
       state.quests = snap.quests; state.freezes = snap.freezes; state.frozen = snap.frozen; state.wotdSeen = snap.wotdSeen; state.rungs = snap.rungs; state.ladderSeen = snap.ladderSeen; renderWotd();
+      state.story = JSON.parse(storySnap); closeOverlay(els.storyView);
       state.topic = snap.topic; state.xp = snap.xp; state.bestCombo = snap.bestCombo; state.learned = snap.learned;
       combo = 0; renderCombo(); updateTopicBtn();
       state.marks = marksSnap;

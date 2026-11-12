@@ -264,6 +264,7 @@
       if (t) { closeOverlay(els.progressView); setTopic(t.getAttribute('data-topic')); return; }
       var w = e.target.closest ? e.target.closest('[data-study]') : null;
       if (w) { studyWord(w.getAttribute('data-study')); return; }
+      if (e.target.closest && e.target.closest('[data-trouble]')) { studyTrouble(true); return; }
       var qz = e.target.closest ? e.target.closest('[data-quiz]') : null;
       if (qz) { closeOverlay(els.progressView); startQuiz(qz.getAttribute('data-quiz'), qz.getAttribute('data-lv') || state.level); }
     });
@@ -409,6 +410,10 @@
       var i = currentIndex();
       if (i !== null) speakParts([cards[i].zh], b);
     });
+    wireTyped();
+    wireQuick();
+    wireTrouble();
+    wireStory();
     on('btnSummaryClose', 'click', function () { closeOverlay(els.summaryView); });
     on('btnSummaryProgress', 'click', function () { closeOverlay(els.summaryView); openProgress(); });
     document.addEventListener('pointerdown', function () { userHasInteracted = true; }, true);
@@ -459,6 +464,8 @@
     updateTopicBtn();
     renderCombo();
     if (applyFreezes()) save();
+    // A goal already reached today (on another device, or before this version) still opens its episode.
+    if (checkStoryUnlock()) save();
     renderWotd();
     renderPet();
     pickVoice();

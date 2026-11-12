@@ -119,8 +119,10 @@
     return lexicon;
   }
   // Splits a sentence into runs of { text, word, len }; word is the card for a known word, null for anything else.
-  function segment(zh) {
-    var lex = getLexicon(), chars = Array.from(zh), out = [], i = 0;
+  // `lex` is the dictionary to use: the word list, or the story's (storyLexicon(), which adds its names).
+  function segment(zh, lex) {
+    lex = lex || getLexicon();
+    var chars = Array.from(zh), out = [], i = 0;
     while (i < chars.length) {
       var hit = null, len = 0;
       if (isHan(chars[i])) {
@@ -167,14 +169,15 @@
   }
   var popAnchor = null, popWord = null;
   function openWordPop(anchor) {
-    var w = getLexicon().map[anchor.getAttribute('data-w')];
+    // A word of the word list, or one of the story's own (a name): those have no level, note or card.
+    var w = getLexicon().map[anchor.getAttribute('data-w')] || storyWord(anchor.getAttribute('data-w'));
     if (!w) return;
     closeWordPop(false);
     popAnchor = anchor;
     popWord = w;
     renderHanzi(els.wordPopZh, w.zh, w.py);
     renderPinyin(els.wordPopPy, w.py);
-    els.wordPopLv.textContent = lvName(w.lv);
+    els.wordPopLv.textContent = w.kind ? (w.kind === 'names' ? 'Name' : 'Story word') : lvName(w.lv);
     els.wordPopEn.textContent = w.en;
     els.wordPopHu.textContent = w.hu;
     setSpeaker(els.wordPopEn, 'en', w.en);
@@ -185,6 +188,12 @@
     els.wordPopMore.textContent = '';
     meaningLines(els.wordPopMore, { en: '', hu: '', tr: w.tr }, 'ex-line');
     Array.prototype.forEach.call(els.wordPopMore.querySelectorAll('[lang="en"], [lang="hu"]'), function (n) { n.parentNode.removeChild(n); });
+    // Your own note for the word, when there is one; the button adds or changes it.
+    els.wordPopNote.textContent = noteOf(w.zh) ? '✎ ' + noteOf(w.zh) : '';
+    els.wordPopNote.hidden = !noteOf(w.zh);
+    els.btnWordPopNote.hidden = !wordByZh(w.zh);
+    // From the story a word can go straight to its card.
+    els.btnWordPopStudy.hidden = !wordByZh(w.zh) || !els.storyView.contains(anchor);
     els.wordPop.hidden = false;
     anchor.setAttribute('aria-expanded', 'true');
     placeWordPop(anchor);
@@ -222,50 +231,19 @@
       if (els.wordPop.hidden || els.wordPop.contains(e.target)) return;
       if (e.target.closest && e.target.closest('button.w')) return;
       closeWordPop(false);
-      if (els.card.contains(e.target)) { e.stopPropagation(); e.preventDefault(); }
+      if (els.card.contains(e.target) || (e.target.closest && e.target.closest('.sy-line'))) { e.stopPropagation(); e.preventDefault(); }
     }, true);
     window.addEventListener('resize', function () { closeWordPop(false); });
     window.addEventListener('scroll', function () { closeWordPop(false); }, true);
     on('btnWordPopClose', 'click', function () { closeWordPop(true); });
     on('btnWordPopSpeak', 'click', function () { if (popWord) speakParts([popWord.zh], els.btnWordPopSpeak); });
+    on('btnWordPopStudy', 'click', function () { var w = popWord; closeWordPop(false); if (w) studyWord(w.zh); });
   }
 
   /* ---------- typed answers ---------- */
-  // Does the typed pinyin match the card? Accepts tone numbers (xue2sheng, 5 or 0 or nothing for neutral) or tone marks
-  // (xuésheng), any spacing, apostrophes and capitals, v or u: for ü, the tone digit after an erhua r, and the
-  // citation tone of 一 and 不 as well as the changed one that the card shows.
-  function typedMatches(input, c) {
-    var raw = String(input || '').toLowerCase().replace(/u:/g, 'v').replace(/ü/g, 'v').replace(/[\s'’\-·.,]/g, '');
-    if (!raw) return false;
-    var plain = '', marks = [];
-    Array.from(raw).forEach(function (ch) {
-      var v = PLAIN_VOWEL[ch];
-      if (v) { plain += v === 'ü' ? 'v' : v; marks.push(TONE_MARK[v].indexOf(ch) + 1); }
-      else { plain += ch; marks.push(0); }
-    });
-    var toks = pinyinTokens(c.py).filter(function (t) { return t.tone; });
-    var han = Array.from(c.zh).filter(isHan), pos = 0;
-    for (var i = 0; i < toks.length; i++) {
-      var base = stripTone(toks[i].text).toLowerCase().replace(/ü/g, 'v'), tone = 0, k;
-      var digitR = /r$/.test(base) && base.length > 2 && plain.substr(pos, base.length - 1) === base.slice(0, -1) &&
-        /[0-5]/.test(plain.charAt(pos + base.length - 1)) && plain.charAt(pos + base.length) === 'r';
-      if (digitR) {
-        var d0 = Number(plain.charAt(pos + base.length - 1));
-        for (k = pos; k < pos + base.length - 1; k++) if (marks[k]) tone = marks[k];
-        if (!tone) tone = d0 === 0 ? 5 : d0;
-        pos += base.length + 1;
-      } else {
-        if (plain.substr(pos, base.length) !== base) return false;
-        for (k = pos; k < pos + base.length; k++) if (marks[k]) tone = marks[k];
-        pos += base.length;
-        if (/[0-5]/.test(plain.charAt(pos))) { var d = Number(plain.charAt(pos)); if (!tone) tone = d === 0 ? 5 : d; pos++; }
-      }
-      if (!tone) tone = 5;
-      var want = toks[i].tone, ch = han.length === toks.length ? han[i] : '';
-      if (!(tone === want || (ch === '一' && [1, 2, 4].indexOf(tone) !== -1) || (ch === '不' && [2, 4].indexOf(tone) !== -1))) return false;
-    }
-    return pos === plain.length;
-  }
+  // Does the typed pinyin match the card? The optional box of Meaning → Chinese: a miss only says so and lets you try
+  // again. The rules (tone numbers or marks, ü, neutral tones, 一 and 不) are typedGrade()'s, in 12d-typed.js.
+  function typedMatches(input, c) { return typedGrade(input, c).kind === 'right'; }
   function checkTyped(form) {
     var i = currentIndex(), input = form.querySelector('input'), res = els.cardPrompt.querySelector('.type-result');
     if (i === null || !input || !input.value.trim() || input.disabled) return;

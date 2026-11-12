@@ -1,7 +1,7 @@
 # Mandarin HSK flashcards
 
 Offline flashcards for 598 HSK 1–3 words and their 777 example sentences, with pinyin, English and Hungarian, read-aloud, spaced repetition per skill and optional cloud sync. It also has:
-- **Practice styles:** 15, from flashcards and listening to fill-the-gap, sentence building, typed pinyin, a tone quiz and look-alike/sound-alike drills.
+- **Practice styles:** 17, from flashcards and listening to fill-the-gap, sentence building, typed and graded pinyin (Type it, Dictation), a tone quiz and look-alike/sound-alike drills.
 - **Learning aids:** character memory hints, topics, and word frequency.
 - **Motivation and games:** daily quests, a 60-second blitz, level exams, seals to collect, and a panda that grows as you study.
 - **Interface:** labels in 中文 + English.
@@ -49,6 +49,7 @@ The build stops if a check fails.
 | `data/hsk12/sentence-pinyin.js` | Pinyin for every HSK 1–2 example sentence, keyed by the Chinese sentence. |
 | `data/hsk3/*.json` | HSK 3 words. Entry: `[hanzi, pinyin, english, hungarian, sentence, sentencePinyin, sentenceEn, sentenceHu, (…)]` |
 | `data/lists/hsk1.json`, `hsk2.json`, `hsk3.json` | Official HSK 2.0 word lists (from github.com/drkameleon/complete-hsk-vocabulary). They set each card's level. |
+| `data/stories.json` | The story in daily episodes. See [The story](#the-story). |
 | `scripts/` | `build.js`, `verify.js`, `check.js` and the individual checks, `fix-hsk3.js`, `validate.py`. |
 | `supabase/` | `config.toml` and `migrations/` for cloud sync. |
 | `.github/workflows/pages.yml` | CI: data checks, build, deploy `dist/site` to GitHub Pages. |
@@ -96,6 +97,38 @@ Row-level security is what makes the anon key safe to publish:
 
 Reading (Chinese → meaning, 汉字 only, multiple choice), recall (meaning → Chinese) and listening (listening, which tone) each keep their own Known/Learning marks, review schedule and Due list. Words and sentences each remember their own place in the deck. In the saved progress, reading stays in the top-level `status`, `srs` and `misses`, and the other skills sit under `skills`, so an older copy of the app still reads the reading skill.
 
+The saved progress also holds `notes`, your own short note per word (`{ headword: text }`, at most 200 characters each, words only, always shown as plain text), added in snapshot format 8. Notes are exported and synced with the rest; they need no database change, because the server stores the snapshot as one JSON value and only compares its format number.
+
+## Small sessions and trouble words
+
+- **Just 5 cards:** while the day has no answer yet, a button under the Today row starts a round of five cards (due reviews first, then new ones) in the current practice style. The answers count like any others, and one answer keeps the streak. The round ends with a choice between five more and stopping.
+- **Trouble words:** a card missed three or more times in the active skill that is not Known there. They form a study mode of their own (`trouble`), reached from the 难 chip in the Today row, the Trouble filter of the word list and the stats in the progress view; a miss brings the card back at the end of the deck.
+
+## The story
+
+`data/stories.json` is a story in 30 episodes of 6 to 8 lines, written with the app's own words. Episode 1 is open from the start; each day the daily goal is reached opens the next one (at most one a day, in order), and an open episode stays readable. The reader shows every word as a tappable word, the story's names with their pinyin, the pinyin of each line, the translation of a line when it is tapped, and reads a line or the whole episode aloud. The saved progress holds `story`: `{ unlocked, days: { episode: day it opened }, read: { episode: day first read }, seen, py }`, exported and synced like the rest.
+
+```json
+{
+  "names": [{ "zh": "安娜", "py": "Ānnà", "en": "Anna", "hu": "Anna", "de": "Anna", "es": "Anna", "ro": "Anna" }],
+  "extra": [],
+  "episodes": [{
+    "id": 1,
+    "level": 1,
+    "title": { "zh": "下雨了", "py": "Xià yǔ le", "en": "…", "hu": "…", "de": "…", "es": "…", "ro": "…" },
+    "recap": { "en": "", "hu": "", "de": "", "es": "", "ro": "" },
+    "lines": [{ "who": "王先生", "zh": "…", "py": "…", "en": "…", "hu": "…", "de": "…", "es": "…", "ro": "…" }]
+  }]
+}
+```
+
+- `names` are the proper names the story uses and `extra` any other allow-listed word outside the word list (same shape, empty now); neither may be a headword. In the reader they are tappable like words and marked as names.
+- `episodes` have the ids 1…N in order. `level` says which words an episode may use: 1 is HSK 1; 2 is HSK 1–2 and the Travel pack; 3 is HSK 1–3 and the Travel pack. It never goes down.
+- `recap` is one line per language about the story so far, shown above the episode; it is empty in episode 1.
+- A line's optional `who` is its speaker, written in Chinese with names and headwords. A line without it is the narrator.
+- `node scripts/check-stories.js` (part of `npm run check`, and run by the build) fails when a Chinese character is covered by no headword or name, a word is above the episode's level, a text is missing in one of the five languages, or the shape is off. It prints, as warnings to read, every place where a line's pinyin differs from its words' own (tone changes of 一 and 不, neutral tones). `--segments` shows how each sentence was split.
+- The file is optional: without it the story hides and the build still passes. `STORIES_FILE=path npm run build` builds with another file, for trying a draft.
+
 ## Reading help
 
 - **Tap a word:** in example sentences and on sentence cards, every HSK 1–3 word is tappable and shows its pinyin, meaning and level. Sentences are split by longest match against the app's own word list, which covers about 95% of the characters in the sentences.
@@ -116,7 +149,7 @@ Reading (Chinese → meaning, 汉字 only, multiple choice), recall (meaning →
 | `data/choice-exclude.json` | Multiple choice: pairs of words that can mean the same (`pairs`), never offered as each other's wrong option. Words that share an English sense, and homophones in listening questions, are kept apart by `optionClash()` without a list | Found with `scripts/judge-choice.js` (Jev), then checked by hand. The build fails if a pair is not two headwords. |
 | `data/hints.json` | Memory hints for 180 characters (picture, combined meaning, or meaning + sound part) | Written from the Shuowen and mainstream modern etymology, then fact-checked by an independent review; contested readings are marked "Traditionally" |
 
-The build adds rank, frequency and topic to each card and puts the topic list, character frequencies, hints and the ladder in a second JSON block (`extra-data`). These files are optional: without them the related features hide.
+The build adds rank, frequency and topic to each card and puts the topic list, character frequencies, hints, the ladder and the story in a second JSON block (`extra-data`). These files are optional: without them the related features hide.
 
 ## Interface labels
 
@@ -137,6 +170,7 @@ npm run check                                   # all of the below
 node scripts/check-hsk12.js                     # HSK 1–2 words
 node scripts/check-sentence-pinyin.js           # every HSK 1–2 sentence has pinyin with the right syllable count
 node scripts/check-hsk3.js data/hsk3/h3-1.json  # one HSK 3 file
+node scripts/check-stories.js                   # the story: coverage by the word list, levels, five languages
 node scripts/fix-hsk3.js fixes.json             # apply [headword, old text, new text] corrections to the HSK 3 files
 ```
 

@@ -8,6 +8,7 @@
   }
   function buildDeck(mode) {
     if (mode === 'hard') return hardList();
+    if (mode === 'trouble') return troubleList();
     var idx = [], today = dayKey();
     cards.forEach(function (c, i) {
       if (!inLevel(c)) return;
@@ -50,7 +51,7 @@
     if (!state.deck.length) {
       toast({ learning: 'No cards are marked “Still learning” yet.', unmarked: 'No new cards left – great work!',
         due: 'Nothing is due for review right now. 🎉', hard: 'No hard words yet – words you mark “Still learning” collect here.',
-        all: 'No cards here.' }[mode]);
+        trouble: 'No trouble ' + noun(2) + ' right now.', all: 'No cards here.' }[mode]);
     }
   }
   function shuffleDeck() {

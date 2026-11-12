@@ -14,8 +14,8 @@
       state.status[c.zh] = markAfter(c, kind);
       if (!testing) recordAnswer(kind, c, entry.prev); else entry.kind = 'skip';
     }
-    // In the review deck a missed word comes back at the end of the session.
-    if (kind === 'learning' && state.mode === 'due' && state.deck.indexOf(i, state.pos + 1) === -1) { state.deck.push(i); entry.requeued = true; }
+    // In the review deck and the trouble deck a missed word comes back at the end of the session.
+    if (kind === 'learning' && (state.mode === 'due' || state.mode === 'trouble') && state.deck.indexOf(i, state.pos + 1) === -1) { state.deck.push(i); entry.requeued = true; }
     if (kind !== 'skip') buzz(kind === 'known' ? 12 : 25);
     stopSpeech();
     var finish = function () {
@@ -88,9 +88,12 @@
     els.revealHint.setAttribute('aria-expanded', state.revealed ? 'true' : 'false');
     els.revealHint.setAttribute('aria-label', state.revealed ? 'Hide the answer' : 'Show the answer');
     var p = practiceNow();
-    els.cardPrompt.hidden = state.revealed || !(p === 'reverse' || p === 'listen' || toneQ || clozeQ || buildQ || similarQ || isRehearseStyle(p));
+    els.cardPrompt.hidden = state.revealed || !(p === 'reverse' || p === 'listen' || toneQ || clozeQ || buildQ || similarQ || typedQ || isRehearseStyle(p));
     els.revealHint.textContent = state.revealed
-      ? 'Tap the characters to hide the meaning · swipe → know · ← learning'
+      ? (typedQ && typedQ.done ? 'Enter or Next goes on · counts as ' + (typedQ.kind === 'right' ? '“I know it”' : '“Still learning”')
+        : 'Tap the characters to hide the meaning · swipe → know · ← learning')
+      : typedQ ? (p === 'dictate' ? 'Listen, type the pinyin with tones (xue2sheng or xuésheng), then press Enter'
+        : 'Type the pinyin with tones (xue2sheng or xuésheng), then press Enter')
       : p === 'tone'
         ? (toneQ ? 'Listen, then pick the tone of the first syllable (keys 1–4)' : 'Tap the card to show the meaning')
         : p === 'tonepair' ? (toneQ ? 'Listen, then pick both tones (keys 1–4)' : 'Tap the card to show the meaning')
@@ -192,6 +195,7 @@
     });
     if (lead) els.cardMeanMain.firstChild.appendChild(speakBtn(lead, mean(c, lead)));
     renderHints(c);
+    renderNote(c);
     els.cardExamples.textContent = '';
     c.ex.forEach(function (e, k) {
       var box = el('div', 'ex');
@@ -231,6 +235,7 @@
     els.cardCounter.appendChild(el('span', 'counter-word', 'Card '));
     els.cardCounter.appendChild(document.createTextNode((state.pos + 1) + ' / ' + state.deck.length));
     setActionsEnabled(true);
+    if (animate) focusTyped();
     if (animate && !reduceMotion && !testing) {
       els.card.classList.remove('enter');
       void els.card.offsetWidth;
@@ -239,6 +244,7 @@
     if (animate && !testing) {
       announce('Card ' + (state.pos + 1) + ' of ' + state.deck.length + '. ' + (practiceNow() === 'reverse' ? 'Meaning: ' + c.en + '.' :
         practiceNow() === 'listen' ? 'Listen to the ' + noun(1) + '.' :
+        typedQ ? (practiceNow() === 'dictate' ? 'Listen to the word, then type its pinyin.' : 'Meaning: ' + shortText(mainMeaning(c)) + '. Type the pinyin.') :
         toneQ ? 'Listen to ' + c.zh + ', then pick ' + (toneQ.pair ? 'both tones.' : 'the tone of the first syllable.') :
         buildQ ? 'Put the words in order: ' + c.en :
         similarQ ? 'Which word means: ' + shortText(mainMeaning(c)) + '?' :
@@ -246,7 +252,7 @@
         c.zh + (readingHidden ? '.' : ', ' + c.py + '.')));
     }
     // The tone quizzes always speak: hearing the word is the question.
-    if (animate && !testing && ((state.autoplay && !readingHidden && !faceHidden) || practiceNow() === 'listen' || practiceNow() === 'tone' || !!toneQ) && userHasInteracted) {
+    if (animate && !testing && ((state.autoplay && !readingHidden && !faceHidden) || practiceNow() === 'listen' || practiceNow() === 'dictate' || practiceNow() === 'tone' || !!toneQ) && userHasInteracted) {
       var pos = state.pos;
       setTimeout(function () { if (state.pos === pos && currentIndex() !== null) speakParts([c.zh], null); }, 280);
     }
@@ -254,7 +260,7 @@
   var userHasInteracted = false;
 
   function showEnd() {
-    if (roundReturn && endRehearseRound()) return;
+    if (roundReturn && (roundReturn.quick ? endQuickRound() : endRehearseRound())) return;
     var n = counts();
     var total = state.deck.length;
     els.card.hidden = true;
@@ -267,9 +273,10 @@
       els.cardCounter.textContent = 'Card 0 / 0';
     } else if (!total) {
       els.endEmoji.textContent = state.mode === 'unmarked' ? '🎉' : '📭';
-      els.endTitle.textContent = state.mode === 'learning' ? 'No learning cards' : 'No new cards';
+      els.endTitle.textContent = state.mode === 'learning' ? 'No learning cards' : state.mode === 'trouble' ? 'No trouble ' + noun(2) : 'No new cards';
       els.endText.textContent = state.mode === 'learning'
         ? 'You have not marked any card as “Still learning” yet. Study all cards and swipe left on words you want to practise.'
+        : state.mode === 'trouble' ? 'Nothing here has been missed ' + TROUBLE_MISSES + ' times or more and is still not known. Choose a study mode to go on.'
         : 'Every word is already marked as Known or Learning.';
       els.cardCounter.textContent = 'Card 0 / 0';
     } else {
@@ -317,7 +324,8 @@
       var b = els[id];
       var on = b.getAttribute('data-mode') === state.mode;
       b.setAttribute('aria-checked', on ? 'true' : 'false');
-      b.tabIndex = on ? 0 : -1;
+      // The trouble deck has no button of its own: “All cards” stays the group's tab stop.
+      b.tabIndex = on || (state.mode === 'trouble' && id === 'modeAll') ? 0 : -1;
     });
     ['levelAll'].concat(LEVELS.map(function (l) { return 'level' + l; })).forEach(function (id) {
       var b = els[id];

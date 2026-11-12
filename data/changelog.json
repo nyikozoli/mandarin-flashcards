@@ -1,6 +1,27 @@
 {
   "releases": [
     {
+      "version": "3.8",
+      "date": "2026-11-12",
+      "title": "A story in daily episodes, Just 5 cards, trouble words, notes and typed answers",
+      "groups": [
+        {
+          "name": "",
+          "items": [
+            "The story (故事): a story in 30 short episodes about Anna, a Hungarian in Beijing, written with the words of the app (episodes 1 to 10 use HSK 1 words, 11 to 20 add HSK 2 and the Travel pack, 21 to 30 add HSK 3). Episode 1 is open now. Every day you reach your daily goal opens the next one, one a day, and an open episode stays open.",
+            "The 故 chip in the Today row says which episode is waiting and how far today’s goal is; when the goal opens an episode, the goal message, the session summary and the “Just 5 cards” finish offer it with one tap.",
+            "In an episode, tap any word for its meaning (names are underlined and show their pinyin), and “Study” takes a word to its card. Tap a line, or 译, for its translation in your languages. 🔊 reads a line and “Play all” the whole episode. Pinyin can be switched off. The first reading of an episode gives 20 XP.",
+            "Just 5 cards: on a day you have not studied yet, a button under the Today row starts a round of five (reviews that are due first, then new cards). It takes about two minutes and keeps your streak; at the end you choose five more or stop for the day.",
+            "Trouble words (难词): a word you have missed three or more times in the skill you are practising, and that is not Known yet. A 难 chip in the Today row, the Trouble filter in the word list and your stats open them as a deck of their own, most missed first; a miss there brings the word back at the end.",
+            "My note: add a short note of your own to any word (up to 200 characters), from the back of its card or from a word you tapped in a sentence. It shows only after the answer and is saved, exported and synced with your progress.",
+            "Type it: a new practice style under Recall. You see the meaning and type the word’s pinyin with its tones, and the app grades it: right counts as “I know it”, anything else as “Still learning”. Type tone numbers (ni3hao3, peng2you) or tone marks (nǐhǎo); v or u: gives ü, and a neutral tone needs no number.",
+            "Dictation: the same under Listening. You hear the word and type its pinyin with tones.",
+            "Tones are graded too: right letters with a wrong tone count as a miss, and the answer shows which syllables were off. After the result the card shows the word, and Enter or Next goes on. “I was right” is there for a slip of the finger."
+          ]
+        }
+      ]
+    },
+    {
       "version": "3.7",
       "date": "2026-10-13",
       "title": "Fix: studying a word from the sentence deck",

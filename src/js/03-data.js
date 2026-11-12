@@ -1,10 +1,10 @@
   /* ---------- extras: character frequency, topics, hints ---------- */
-  var EXTRA = { chars: {}, topics: [], hints: {}, news: [], ladder: [], clozeExclude: [], choiceExclude: [] };
+  var EXTRA = { chars: {}, topics: [], hints: {}, news: [], ladder: [], clozeExclude: [], choiceExclude: [], story: { names: [], extra: [], episodes: [] } };
   function loadExtra() {
     var node = $('extra-data');
     try {
       var d = JSON.parse(node.textContent);
-      EXTRA = { chars: d.chars || {}, topics: Array.isArray(d.topics) ? d.topics : [], hints: d.hints || {}, news: Array.isArray(d.news) ? d.news : [], ladder: Array.isArray(d.ladder) ? d.ladder : [], clozeExclude: Array.isArray(d.clozeExclude) ? d.clozeExclude : [], choiceExclude: Array.isArray(d.choiceExclude) ? d.choiceExclude : [] };
+      EXTRA = { chars: d.chars || {}, topics: Array.isArray(d.topics) ? d.topics : [], hints: d.hints || {}, news: Array.isArray(d.news) ? d.news : [], ladder: Array.isArray(d.ladder) ? d.ladder : [], clozeExclude: Array.isArray(d.clozeExclude) ? d.clozeExclude : [], choiceExclude: Array.isArray(d.choiceExclude) ? d.choiceExclude : [], story: readStory(d.story) };
     } catch (e) { /* optional data: the app works without it */ }
   }
   function topicById(id) {
@@ -92,7 +92,7 @@
     if (els.card) els.card.classList.toggle('sentence', isSent());
   }
   // Styles that exist for one deck only, and the style of the same skill to use on the other deck.
-  var DECK_ONLY = { tone: ['words', 'listen'], tonepair: ['words', 'listen'], cloze: ['words', 'choice'], build: ['sentences', 'reverse'], pairs: ['words', 'choice'] };
+  var DECK_ONLY = { type: ['words', 'reverse'], dictate: ['words', 'listen'], tone: ['words', 'listen'], tonepair: ['words', 'listen'], cloze: ['words', 'choice'], build: ['sentences', 'reverse'], pairs: ['words', 'choice'] };
   function fixStyleForDeck() {
     var o = DECK_ONLY[state.practice];
     if (!o || o[0] === state.deckType) return;

@@ -1,7 +1,8 @@
   /* ---------- practice modes ---------- */
-  var PRACTICE = { zh: 'Chinese → meaning', reverse: 'Meaning → Chinese', listen: 'Listening', choice: 'Multiple choice', hanzi: 'Characters only', tone: 'Which tone?', tonepair: 'Tone pairs', cloze: 'Fill the gap', build: 'Build the sentence', pairs: 'Similar words' };
+  var PRACTICE = { zh: 'Chinese → meaning', reverse: 'Meaning → Chinese', type: 'Type it', listen: 'Listening', dictate: 'Dictation', choice: 'Multiple choice', hanzi: 'Characters only', tone: 'Which tone?', tonepair: 'Tone pairs', cloze: 'Fill the gap', build: 'Build the sentence', pairs: 'Similar words' };
   // What each style asks, for the practice style picker (menu values; sentence styles start with s-).
-  var PRACTICE_ASK = { zh: 'See the word, recall the meaning', reverse: 'See the meaning, recall the word', listen: 'Hear the word, recall the meaning',
+  var PRACTICE_ASK = { zh: 'See the word, recall the meaning', reverse: 'See the meaning, recall the word', type: 'See the meaning, type the pinyin with tones',
+    listen: 'Hear the word, recall the meaning', dictate: 'Hear the word, type its pinyin with tones',
     choice: 'Pick the meaning from four', hanzi: 'Read the word with the pinyin hidden', tone: 'Hear the word, pick its first tone', tonepair: 'Hear a two-syllable word, pick both tones',
     cloze: 'Pick the word a sentence is missing', pairs: 'Tell look-alikes apart, like 买 and 卖',
     's-zh': 'Read a sentence, recall the meaning', 's-reverse': 'See the meaning, recall the sentence', 's-listen': 'Hear a sentence, recall the meaning',
@@ -435,10 +436,12 @@
     clozeQ = p === 'cloze' ? clozeTarget(c) : null;
     buildQ = p === 'build' ? buildTarget(c) : null;
     similarQ = p === 'pairs' && similarOf(c).length ? { opts: shuffled([c].concat(similarOf(c))) } : null;
-    faceHidden = p === 'reverse' || p === 'listen' || !!clozeQ || !!buildQ || !!similarQ;
+    setupTyped(c, p);
+    faceHidden = p === 'reverse' || p === 'listen' || !!clozeQ || !!buildQ || !!similarQ || !!typedQ;
     els.card.classList.toggle('hide-face', faceHidden);
     // Characters only, the tone quiz and faded pinyin: the reading is the answer, so pinyin, tone colours and audio wait for the reveal.
-    readingHidden = p === 'hanzi' || !!toneQ || (p === 'zh' && state.fadePinyin && wellKnown(c)) || (p === 'choice' && !state.choicePinyin);
+    // In Type it the pinyin is the answer too; in Dictation the word is heard, so only its face is hidden.
+    readingHidden = p === 'hanzi' || !!toneQ || (p === 'zh' && state.fadePinyin && wellKnown(c)) || (p === 'choice' && !state.choicePinyin) || (!!typedQ && p === 'type');
     els.card.classList.toggle('hide-reading', readingHidden);
     els.card.classList.toggle('tone-mode', !!toneQ);
     els.card.classList.toggle('rh-mode', !!rh);
@@ -474,13 +477,16 @@
         tr.setAttribute('role', 'status');
         els.cardPrompt.appendChild(tr);
       }
+    } else if (typedQ && p === 'type') {
+      els.cardPrompt.appendChild(el('p', 'prompt-q', 'Type the pinyin, with tones:'));
+      promptMeanings(c, false);
     } else if (rh) {
       els.cardPrompt.appendChild(el('p', 'prompt-q', rh.toUpperCase() + ' · In ' + langName(rh) + '?'));
-    } else if (p === 'listen' || toneQ) {
+    } else if (p === 'listen' || toneQ || typedQ) {
       var lb = el('button', 'listen-btn', toneQ ? deck().tonePlay : deck().play);
       lb.type = 'button';
       lb.id = 'btnListen';
-      els.cardPrompt.appendChild(el('p', 'prompt-q', toneQ ? (toneQ.pair ? deck().pairQ : deck().toneQ) : deck().listenQ));
+      els.cardPrompt.appendChild(el('p', 'prompt-q', typedQ ? 'Listen, then type the pinyin with tones:' : toneQ ? (toneQ.pair ? deck().pairQ : deck().toneQ) : deck().listenQ));
       els.cardPrompt.appendChild(lb);
     } else if (clozeQ) {
       els.cardPrompt.appendChild(el('p', 'prompt-q', 'Which word fills the gap?'));

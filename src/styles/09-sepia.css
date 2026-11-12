@@ -86,3 +86,4 @@
 [data-theme="sepia"] .btn.danger-ghost { border-color: rgba(194, 58, 34, .55); color: #a8321e; }
 [data-theme="sepia"] .banner.error { background: #f8dcd6; border-color: #c9584a; color: #6e1d14; }
 [data-theme="sepia"] .banner.error strong { color: #4a120c; }
+[data-theme="sepia"] .toast-btn { background: var(--bg); color: var(--paper); }

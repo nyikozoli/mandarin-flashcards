@@ -55,6 +55,7 @@
     els.todayPill.appendChild(el('span', 'streak', '🔥 ' + s));
     els.todayPill.classList.toggle('done', today >= state.goal);
     els.todayPill.setAttribute('aria-label', today + ' of ' + state.goal + ' cards answered today, ' + s + '-day streak. Open progress.');
+    renderQuick();
   }
 
   var SVGNS = 'http://www.w3.org/2000/svg';
@@ -222,6 +223,8 @@
       h.appendChild(document.createTextNode(', missed ' + state.misses[hardest] + ' time' + (state.misses[hardest] === 1 ? '' : 's') + '.'));
       sec.appendChild(h);
     }
+    var tl = troubleLine();
+    if (tl) sec.appendChild(tl);
     return sec;
   }
   function topicSection() {
@@ -443,7 +446,7 @@
     gSel.id = 'optGoal';
     GOALS.forEach(function (g) { var o = el('option', null, g + ' cards / day'); o.value = String(g); gSel.appendChild(o); });
     gSel.value = String(state.goal);
-    gSel.addEventListener('change', function () { state.goal = parseInt(gSel.value, 10) || 20; save(); updateToday(); renderProgress(); });
+    gSel.addEventListener('change', function () { state.goal = parseInt(gSel.value, 10) || 20; checkStoryUnlock(); save(); updateToday(); renderLadderStrip(); renderProgress(); });
     gLabel.appendChild(gSel);
     gRow.appendChild(gLabel);
     goal.appendChild(gRow);

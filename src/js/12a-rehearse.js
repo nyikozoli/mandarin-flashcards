@@ -70,7 +70,8 @@
     if (kind === 'skip' || rehearseCard) return;
     sinceRehearse++;
     if (!state.rehearse.every || sinceRehearse < state.rehearse.every) return;
-    if (state.deckType !== 'words' || isRehearseStyle(state.practice) || currentIndex() === null) return;
+    // Not inside a round either: the five cards of “Just 5 cards” stay five.
+    if (state.deckType !== 'words' || isRehearseStyle(state.practice) || currentIndex() === null || roundReturn) return;
     var code = pickRehearseLang();
     if (!code) return;
     var pick = rehearsePool(code).filter(function (c) { return rehearsedThisSession.indexOf(code + ':' + c.zh) === -1; })[0];
