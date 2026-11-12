@@ -63,9 +63,12 @@
     checkRungs();
     session.n++;
     if (kind === 'known') session.k++; else session.l++;
+    // The story's next episode opens with the goal; announceEpisode() decides where to say so.
+    var ep = checkStoryUnlock();
     checkMilestones();
     renderLadderStrip();
     if (session.n >= 20 && currentIndex() !== null && els.quickView.hidden) showSummary();
+    if (ep) announceEpisode(ep);
   }
   function showSummary() {
     var b = els.summaryBody;
@@ -89,6 +92,8 @@
     b.appendChild(el('p', 'sum-line', '+' + session.xp + ' XP · ' + rk[1] + ' ' + rk[2] + ' · you can read ' + rd.n + ' of ' + rd.total + ' sentences'));
     b.appendChild(el('p', 'sum-line', today >= state.goal ? '🎯 Daily goal done (' + today + '/' + state.goal + ') · 🔥 ' + streak() + '-day streak'
       : '🎯 ' + today + ' / ' + state.goal + ' today – ' + (state.goal - today) + ' more to reach your goal · 🔥 ' + streak() + '-day streak'));
+    var sl = storySummaryLine();
+    if (sl) b.appendChild(sl);
     session = { n: 0, k: 0, l: 0, xp: 0, t0: Date.now() };
     openOverlay(els.summaryView, els.btnSummaryClose);
   }

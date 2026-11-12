@@ -91,6 +91,14 @@ if (LADDER) {
     (r.sentences || []).forEach((x) => { if (!exs.has(x)) throw new Error('Ladder rung ' + r.id + ': not an example sentence: ' + x); });
   });
 }
+//   data/stories.json  the serialized story: { names, extra, episodes: [{ id, level, title, recap, lines }] }, checked by
+//   scripts/check-stories.js (README.md has the format). STORIES_FILE names another file, for trying a draft.
+const STORIES_PATH = process.env.STORIES_FILE || dataPath('stories.json');
+const STORIES = optJson(STORIES_PATH);
+if (STORIES) {
+  const problems = require('./check-stories.js').check(STORIES_PATH);
+  if (problems.length) throw new Error('Story: ' + problems.length + ' problem(s), e.g. ' + problems[0] + ' (run node scripts/check-stories.js)');
+}
 //   data/i18n/<code>.json  extra meaning languages: { code, name, words: { headword: meaning }, sentences: { sentence: translation } }
 const I18N = fs.existsSync(dataPath('i18n')) ? fs.readdirSync(dataPath('i18n')).filter((f) => /^[a-z]{2}\.json$/.test(f)).sort()
   .map((f) => JSON.parse(read(dataPath('i18n', f)))) : [];
@@ -123,7 +131,8 @@ const total = Object.keys(expected).reduce((n, l) => n + expected[l], 0);
 const safeJson = (v) => JSON.stringify(v).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026')
   .replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
 const json = safeJson(cards);
-const extraJson = safeJson({ chars: FREQ ? FREQ.chars : {}, topics: TOPICS ? TOPICS.topics : [], hints: HINTS ? HINTS.hints : {}, news: CHANGELOG ? CHANGELOG.releases : [], ladder: LADDER ? LADDER.rungs : [], clozeExclude: CLOZE_EXCLUDE ? CLOZE_EXCLUDE.exclude : [], choiceExclude: CHOICE_EXCLUDE ? CHOICE_EXCLUDE.pairs : [] });
+const extraJson = safeJson({ chars: FREQ ? FREQ.chars : {}, topics: TOPICS ? TOPICS.topics : [], hints: HINTS ? HINTS.hints : {}, news: CHANGELOG ? CHANGELOG.releases : [], ladder: LADDER ? LADDER.rungs : [], clozeExclude: CLOZE_EXCLUDE ? CLOZE_EXCLUDE.exclude : [], choiceExclude: CHOICE_EXCLUDE ? CHOICE_EXCLUDE.pairs : [],
+  story: STORIES ? { names: STORIES.names || [], extra: STORIES.extra || [], episodes: STORIES.episodes } : null });
 
 // ---------- html ----------
 // The app's source: src/index.html is the page. Its /*__STYLES__*/ and /*__SCRIPTS__*/ lines are replaced by the

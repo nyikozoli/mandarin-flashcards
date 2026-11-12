@@ -677,6 +677,7 @@
   // The main-screen strip: the next step and how many words it still needs. It waits while the word of the day is
   // showing, and ✕ hides it until tomorrow.
   function renderLadderStrip() {
+    renderStoryStrip();
     renderRehearseStrip();
     renderTroubleStrip();
     renderRail();
@@ -685,7 +686,7 @@
   }
   function drawLadderStrip() {
     var r = nextRung();
-    els.ladderStrip.hidden = !r || state.ladderSeen === dayKey() || !els.wotd.hidden || !els.troubleStrip.hidden;
+    els.ladderStrip.hidden = !r || state.ladderSeen === dayKey() || !els.wotd.hidden || !els.troubleStrip.hidden || storyUrgent();
     if (els.ladderStrip.hidden) return;
     var p = rungProgress(r);
     els.ladderZh.textContent = r.zh;
@@ -825,17 +826,21 @@
   }
 
   /* ---------- suggestion chip ---------- */
-  // The Today row's chip stands for the one strip showing (the rehearse round, the word of the day, the trouble
-  // words or the next ladder step);
-  // tapping it opens that strip as a popover.
-  function shownStrip() { return [els.rehearseStrip, els.wotd, els.troubleStrip, els.ladderStrip].filter(function (s) { return !s.hidden; })[0] || null; }
+  // The Today row's chip stands for the first strip showing (the story while it has news, the rehearse round, the
+  // word of the day, the trouble words or the next ladder step, and the story again when nothing else is left);
+  // tapping it opens the strips as a popover.
+  function shownStrip() {
+    return [storyUrgent() ? els.storyStrip : null, els.rehearseStrip, els.wotd, els.troubleStrip, els.ladderStrip, els.storyStrip]
+      .filter(function (s) { return s && !s.hidden; })[0] || null;
+  }
   function renderSuggest() {
     var s = shownStrip();
     els.btnSuggest.hidden = !s;
     if (!s) { closeSuggest(); return; }
-    var kind = s === els.wotd ? 'wotd' : s === els.ladderStrip ? 'ladder' : s === els.troubleStrip ? 'trouble' : 'rehearse';
+    var kind = s === els.wotd ? 'wotd' : s === els.ladderStrip ? 'ladder' : s === els.troubleStrip ? 'trouble' : s === els.storyStrip ? 'story' : 'rehearse';
     els.suggestSeal.textContent = s.querySelector('.wotd-seal').textContent;
     els.suggestSeal.className = 'suggest-seal ' + kind;
+    if (kind === 'story') { renderStoryChip(); return; }
     els.suggestCap.textContent = kind === 'wotd' ? 'Today’s word' : kind === 'trouble' ? 'To revisit' : 'Next step';
     els.suggestText.textContent = kind === 'wotd' ? els.wotdZh.textContent + ' ' + els.wotdPy.textContent : kind === 'ladder' ? els.ladderZh.textContent : kind === 'trouble' ? els.troubleText.textContent : els.rehearseText.textContent;
     // The ladder's count drops out on phones, where the row has no room; the popover shows it.

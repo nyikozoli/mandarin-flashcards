@@ -1,10 +1,10 @@
   /* ---------- extras: character frequency, topics, hints ---------- */
-  var EXTRA = { chars: {}, topics: [], hints: {}, news: [], ladder: [], clozeExclude: [], choiceExclude: [] };
+  var EXTRA = { chars: {}, topics: [], hints: {}, news: [], ladder: [], clozeExclude: [], choiceExclude: [], story: { names: [], extra: [], episodes: [] } };
   function loadExtra() {
     var node = $('extra-data');
     try {
       var d = JSON.parse(node.textContent);
-      EXTRA = { chars: d.chars || {}, topics: Array.isArray(d.topics) ? d.topics : [], hints: d.hints || {}, news: Array.isArray(d.news) ? d.news : [], ladder: Array.isArray(d.ladder) ? d.ladder : [], clozeExclude: Array.isArray(d.clozeExclude) ? d.clozeExclude : [], choiceExclude: Array.isArray(d.choiceExclude) ? d.choiceExclude : [] };
+      EXTRA = { chars: d.chars || {}, topics: Array.isArray(d.topics) ? d.topics : [], hints: d.hints || {}, news: Array.isArray(d.news) ? d.news : [], ladder: Array.isArray(d.ladder) ? d.ladder : [], clozeExclude: Array.isArray(d.clozeExclude) ? d.clozeExclude : [], choiceExclude: Array.isArray(d.choiceExclude) ? d.choiceExclude : [], story: readStory(d.story) };
     } catch (e) { /* optional data: the app works without it */ }
   }
   function topicById(id) {

@@ -5,17 +5,20 @@ const { spawnSync } = require('child_process');
 
 const here = __dirname;
 const hsk3 = path.join(here, '..', 'data', 'hsk3');
+const stories = path.join(here, '..', 'data', 'stories.json');
 const runs = [
   ['check-hsk12.js'],
   ['check-sentence-pinyin.js'],
-  ...fs.readdirSync(hsk3).filter((f) => /\.json$/.test(f)).sort().map((f) => ['check-hsk3.js', path.join(hsk3, f)])
+  ...fs.readdirSync(hsk3).filter((f) => /\.json$/.test(f)).sort().map((f) => ['check-hsk3.js', path.join(hsk3, f)]),
+  // The story is optional, like the other extras.
+  ...(fs.existsSync(stories) ? [['check-stories.js', stories]] : [])
 ];
 
 let failed = 0;
 for (const [script, ...args] of runs) {
   const r = spawnSync(process.execPath, [path.join(here, script), ...args], { encoding: 'utf8' });
   const out = (r.stdout || '') + (r.stderr || '');
-  // check-hsk12 and check-sentence-pinyin print "ERRORS n" / "errors n"; check-hsk3 prints "n problems" and exits 1.
+  // check-hsk12 and check-sentence-pinyin print "ERRORS n" / "errors n"; check-hsk3 and check-stories print "n problems" and exit 1.
   const bad = r.status !== 0 || /ERRORS [1-9]|errors [1-9]|[1-9]\d* problems/.test(out);
   if (bad) failed++;
   console.log((bad ? 'FAIL ' : 'ok   ') + [script, ...args.map((a) => path.relative(path.join(here, '..'), a))].join(' '));

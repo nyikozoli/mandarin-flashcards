@@ -77,6 +77,7 @@
       rehearseSeen: state.rehearseSeen,
       troubleSeen: state.troubleSeen,
       notes: state.notes,
+      story: state.story,
       readMeaning: state.readMeaning,
       petName: state.petName,
       labels: state.labels,
@@ -241,6 +242,7 @@
     state.rehearseSeen = saved && isDay(saved.rehearseSeen) ? saved.rehearseSeen : '';
     state.troubleSeen = saved && isDay(saved.troubleSeen) ? saved.troubleSeen : '';
     state.notes = readNotes(saved && saved.notes);
+    state.story = readStoryState(saved && saved.story);
     state.frozen = saved && Array.isArray(saved.frozen) ? saved.frozen.filter(isDay).slice(-60) : [];
     state.quests = null;
     var q = saved && saved.quests;

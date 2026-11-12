@@ -115,7 +115,8 @@
     syncPracticeSelect();
   }
   // Snapshot format. 2 added `skills`, 5 added `rungs`, 6 turned `langs` into roles and added rehearse skills, 7 added `order`,
-  // 8 added `notes` (a personal note per word) and `troubleSeen`; the typed styles (Type it, Dictation) added no field. The server refuses
+  // 8 added `notes` (a personal note per word) and `troubleSeen`; the typed styles (Type it, Dictation) added no field, and
+  // `story` (the episodes opened and read) joined 8 before it was published. The server refuses
   // uploads older than the stored format, and this copy refuses to apply progress written by a newer one, so neither side drops
   // what it does not understand.
   var FORMAT = 8;

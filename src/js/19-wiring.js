@@ -413,6 +413,7 @@
     wireTyped();
     wireQuick();
     wireTrouble();
+    wireStory();
     on('btnSummaryClose', 'click', function () { closeOverlay(els.summaryView); });
     on('btnSummaryProgress', 'click', function () { closeOverlay(els.summaryView); openProgress(); });
     document.addEventListener('pointerdown', function () { userHasInteracted = true; }, true);
@@ -463,6 +464,8 @@
     updateTopicBtn();
     renderCombo();
     if (applyFreezes()) save();
+    // A goal already reached today (on another device, or before this version) still opens its episode.
+    if (checkStoryUnlock()) save();
     renderWotd();
     renderPet();
     pickVoice();

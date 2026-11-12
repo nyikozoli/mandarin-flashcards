@@ -27,6 +27,7 @@
   function refreshSpeakButtons() {
     Array.prototype.forEach.call(document.querySelectorAll('.mean-speak'), function (b) { b.hidden = !canSpeak(b.getAttribute('data-lang')); });
     if (els.rehearseVoiceNote) syncSettingsUI();
+    syncStorySpeech();
   }
   // A small speaker button for a meaning line; hidden when the device has no voice for the language.
   function speakBtn(k, text) {

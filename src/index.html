@@ -142,6 +142,12 @@ try { if (localStorage.getItem('mandarin300.theme') === 'sepia') document.docume
         <button type="button" class="lg-btn" data-lg="unmarked" title="Show the new words"><span class="dot" aria-hidden="true"></span><b id="unmarkedCount">0</b><span class="lg-w"> new</span></button>
       </p>
       <div class="suggest-pop" id="suggestPop" hidden>
+      <section id="storyStrip" class="wotd story-strip" aria-label="Story" hidden>
+        <div class="wotd-seal" lang="zh-CN" aria-hidden="true">故</div>
+        <p class="wotd-body" id="storyText"></p>
+        <button type="button" class="btn small" id="btnStoryGo">Read</button>
+        <button type="button" class="icon-btn small" id="btnStoryClose" aria-label="Hide the story until tomorrow">✕</button>
+      </section>
       <section id="wotd" class="wotd" aria-labelledby="wotdLabel" hidden>
         <div class="wotd-seal" lang="zh-CN" aria-hidden="true">日</div>
         <p class="wotd-body"><span class="visually-hidden" id="wotdLabel">Word of the day: </span><span id="wotdZh" lang="zh-CN"></span> <span id="wotdPy" class="wotd-py" lang="zh-Latn-pinyin"></span> <span id="wotdEn" class="wotd-en"></span><span id="wotdHint" hidden></span></p>
@@ -554,8 +560,19 @@ try { if (localStorage.getItem('mandarin300.theme') === 'sepia') document.docume
     <p id="quickText"></p>
     <div class="dialog-actions">
       <button type="button" class="btn" id="btnQuickDone" data-lbl>Done for today</button>
+      <button type="button" class="btn" id="btnQuickStory" hidden>📖 Read the episode</button>
       <button type="button" class="btn primary" id="btnQuickMore" data-lbl>Keep going</button>
     </div>
+  </div>
+</div>
+
+<div id="storyView" class="overlay" hidden>
+  <div class="sheet story-sheet" role="dialog" aria-modal="true" aria-labelledby="storyTitle">
+    <div class="sheet-head">
+      <h2 id="storyTitle" data-lbl="inline">Story</h2>
+      <button type="button" class="close-btn" id="btnCloseStory" aria-label="Close the story">✕</button>
+    </div>
+    <div class="pv-body story-body" id="storyBody"></div>
   </div>
 </div>
 
@@ -664,6 +681,7 @@ try { if (localStorage.getItem('mandarin300.theme') === 'sepia') document.docume
           <li>The chart button opens your progress: words known per level, the last 14 days, and a map of every word. Tap a square to study that word.</li>
           <li>Its Calendar tab shows a month at a time: the days you studied (bright green when you met your goal, blue for a streak freeze) and how many reviews fall due on each coming day, in all skills. Tap a day, or use the arrow keys, to see its numbers, so you can plan a day off.</li>
           <li>After every 20 cards you get a short summary.</li>
+          <li><b>The story (故事).</b> A story in 30 short episodes, written with the words of the app: episodes 1 to 10 use HSK 1 words, 11 to 20 add HSK 2 and the Travel pack, 21 to 30 add HSK 3. Episode 1 is open from the start. Each day you reach your daily goal opens the next one, one a day, and what you have opened stays. The 故 chip in the Today row says what is waiting and opens the story. In an episode, tap a word for its meaning (names are underlined), tap a line for its translation, and use 🔊 for one line or <b>Play all</b> for the whole episode. The first reading of an episode gives 20 XP.</li>
         </ul>
       </section>
 
@@ -752,7 +770,7 @@ try { if (localStorage.getItem('mandarin300.theme') === 'sepia') document.docume
   <p class="ex-line" data-mlang="hu" lang="hu"><span class="tag hu">HU</span><span id="wordPopHu"></span></p>
   <div id="wordPopMore"></div>
   <p id="wordPopNote" class="wp-note" hidden></p>
-  <div class="wp-actions"><button type="button" class="btn small wp-speak" id="btnWordPopSpeak">🔊 Read aloud</button><button type="button" class="btn small" id="btnWordPopNote"><span aria-hidden="true">✎ </span><span data-lbl="inline">My note</span></button></div>
+  <div class="wp-actions"><button type="button" class="btn small wp-speak" id="btnWordPopSpeak">🔊 Read aloud</button><button type="button" class="btn small" id="btnWordPopStudy" hidden><span data-lbl="inline">Study</span></button><button type="button" class="btn small" id="btnWordPopNote"><span aria-hidden="true">✎ </span><span data-lbl="inline">My note</span></button></div>
   <button type="button" class="close-btn wp-close" id="btnWordPopClose" aria-label="Close the word">✕</button>
 </div>
 

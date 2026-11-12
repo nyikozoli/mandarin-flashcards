@@ -59,8 +59,12 @@
     // A round of skips answered nothing: no finish to show.
     if (!n && !testing) { toast('Round done. Back to your deck.', 3000); return; }
     els.quickTitle.textContent = s > 1 ? '🔥 ' + s + '-day streak kept' : '🔥 Today counts';
+    // The round can end on the answer that reaches the goal: the story's episode opens here, and this dialog offers it.
+    checkStoryUnlock();
+    var ep = storyFreshToday();
+    els.btnQuickStory.hidden = !ep;
     els.quickText.textContent = n + (n === 1 ? ' card' : ' cards') + ' answered today' + (n >= state.goal ? ', daily goal reached' : '') +
-      '. Five more, or stop here: both are fine.';
+      '.' + (ep ? ' Episode ' + ep + ' of the story is open.' : '') + ' Five more, or stop here: both are fine.';
     openOverlay(els.quickView, els.btnQuickMore);
   }
   function wireQuick() {

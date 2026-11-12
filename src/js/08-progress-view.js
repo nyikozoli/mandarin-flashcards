@@ -446,7 +446,7 @@
     gSel.id = 'optGoal';
     GOALS.forEach(function (g) { var o = el('option', null, g + ' cards / day'); o.value = String(g); gSel.appendChild(o); });
     gSel.value = String(state.goal);
-    gSel.addEventListener('change', function () { state.goal = parseInt(gSel.value, 10) || 20; save(); updateToday(); renderProgress(); });
+    gSel.addEventListener('change', function () { state.goal = parseInt(gSel.value, 10) || 20; checkStoryUnlock(); save(); updateToday(); renderLadderStrip(); renderProgress(); });
     gLabel.appendChild(gSel);
     gRow.appendChild(gLabel);
     goal.appendChild(gRow);

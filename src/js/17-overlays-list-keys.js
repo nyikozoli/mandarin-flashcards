@@ -21,7 +21,7 @@
     showSetTab(setTab);
     openOverlay(els.settingsView, els.btnCloseSettings);
   }
-  var OVERLAYS = ['practiceView', 'newsView', 'petView', 'quizView', 'topicView', 'listView', 'progressView', 'settingsView', 'helpView', 'transferView', 'summaryView', 'quickView', 'noteView', 'tourView', 'diagView', 'confirmDialog'];
+  var OVERLAYS = ['practiceView', 'newsView', 'petView', 'quizView', 'topicView', 'listView', 'progressView', 'settingsView', 'helpView', 'transferView', 'summaryView', 'quickView', 'storyView', 'noteView', 'tourView', 'diagView', 'confirmDialog'];
   var overlayStack = [];
   function anyOverlayOpen() {
     return OVERLAYS.some(function (id) { return !els[id].hidden; });
@@ -44,6 +44,7 @@
   function closeOverlay(node) {
     if (node.hidden) return;
     if (node === els.quizView) stopQuiz();
+    if (node === els.storyView) stopSpeech();
     node.hidden = true;
     overlayStack = overlayStack.filter(function (n) { return n !== node; });
     syncOverlayState();

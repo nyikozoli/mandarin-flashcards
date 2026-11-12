@@ -16,6 +16,8 @@
     'Just 5 cards': ['只学五张', 'zhǐ xué wǔ zhāng'], 'Keep going': ['继续', 'jìxù'], 'Done for today': ['今天就到这儿', 'jīntiān jiù dào zhèr'],
     'Trouble words': ['难词', 'náncí'], 'Study': ['学习', 'xuéxí'], 'My note': ['我的笔记', 'wǒ de bǐjì'], 'Add a note': ['加笔记', 'jiā bǐjì'], 'Edit': ['修改', 'xiūgǎi'],
     'Save': ['保存', 'bǎocún'], 'Delete': ['删除', 'shānchú'], 'Cancel': ['取消', 'qǔxiāo'],
+    'Story': ['故事', 'gùshi'], 'Read': ['读', 'dú'], 'Open': ['打开', 'dǎkāi'], 'Episodes': ['目录', 'mùlù'], 'Previously': ['前情', 'qiánqíng'], 'Play all': ['全部播放', 'quánbù bōfàng'],
+    'Pinyin': ['拼音', 'pīnyīn'], 'Previous': ['上一集', 'shàng yì jí'], 'Next episode': ['下一集', 'xià yì jí'], 'To be continued': ['未完待续', 'wèi wán dài xù'],
     'Check': ['检查', 'jiǎnchá'], 'Next': ['下一个', 'xià yí gè'], 'I was right': ['我答对了', 'wǒ dá duì le']
   };
   var PRACTICE_ZH = { zh: '认字', reverse: '中文怎么说', type: '打拼音', listen: '听力', dictate: '听写', choice: '选择题', hanzi: '只看汉字', tone: '听声调', tonepair: '声调组合', cloze: '填空', pairs: '易混词',

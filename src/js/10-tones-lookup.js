@@ -119,8 +119,10 @@
     return lexicon;
   }
   // Splits a sentence into runs of { text, word, len }; word is the card for a known word, null for anything else.
-  function segment(zh) {
-    var lex = getLexicon(), chars = Array.from(zh), out = [], i = 0;
+  // `lex` is the dictionary to use: the word list, or the story's (storyLexicon(), which adds its names).
+  function segment(zh, lex) {
+    lex = lex || getLexicon();
+    var chars = Array.from(zh), out = [], i = 0;
     while (i < chars.length) {
       var hit = null, len = 0;
       if (isHan(chars[i])) {
@@ -167,14 +169,15 @@
   }
   var popAnchor = null, popWord = null;
   function openWordPop(anchor) {
-    var w = getLexicon().map[anchor.getAttribute('data-w')];
+    // A word of the word list, or one of the story's own (a name): those have no level, note or card.
+    var w = getLexicon().map[anchor.getAttribute('data-w')] || storyWord(anchor.getAttribute('data-w'));
     if (!w) return;
     closeWordPop(false);
     popAnchor = anchor;
     popWord = w;
     renderHanzi(els.wordPopZh, w.zh, w.py);
     renderPinyin(els.wordPopPy, w.py);
-    els.wordPopLv.textContent = lvName(w.lv);
+    els.wordPopLv.textContent = w.kind ? (w.kind === 'names' ? 'Name' : 'Story word') : lvName(w.lv);
     els.wordPopEn.textContent = w.en;
     els.wordPopHu.textContent = w.hu;
     setSpeaker(els.wordPopEn, 'en', w.en);
@@ -189,6 +192,8 @@
     els.wordPopNote.textContent = noteOf(w.zh) ? '✎ ' + noteOf(w.zh) : '';
     els.wordPopNote.hidden = !noteOf(w.zh);
     els.btnWordPopNote.hidden = !wordByZh(w.zh);
+    // From the story a word can go straight to its card.
+    els.btnWordPopStudy.hidden = !wordByZh(w.zh) || !els.storyView.contains(anchor);
     els.wordPop.hidden = false;
     anchor.setAttribute('aria-expanded', 'true');
     placeWordPop(anchor);
@@ -226,12 +231,13 @@
       if (els.wordPop.hidden || els.wordPop.contains(e.target)) return;
       if (e.target.closest && e.target.closest('button.w')) return;
       closeWordPop(false);
-      if (els.card.contains(e.target)) { e.stopPropagation(); e.preventDefault(); }
+      if (els.card.contains(e.target) || (e.target.closest && e.target.closest('.sy-line'))) { e.stopPropagation(); e.preventDefault(); }
     }, true);
     window.addEventListener('resize', function () { closeWordPop(false); });
     window.addEventListener('scroll', function () { closeWordPop(false); }, true);
     on('btnWordPopClose', 'click', function () { closeWordPop(true); });
     on('btnWordPopSpeak', 'click', function () { if (popWord) speakParts([popWord.zh], els.btnWordPopSpeak); });
+    on('btnWordPopStudy', 'click', function () { var w = popWord; closeWordPop(false); if (w) studyWord(w.zh); });
   }
 
   /* ---------- typed answers ---------- */

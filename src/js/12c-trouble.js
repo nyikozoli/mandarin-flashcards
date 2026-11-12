@@ -24,7 +24,7 @@
   }
   // The strip in #suggestPop: after the word of the day, before the ladder; ✕ hides it until tomorrow.
   function renderTroubleStrip() {
-    var n = state.mode === 'trouble' || state.troubleSeen === dayKey() || !els.wotd.hidden || !els.rehearseStrip.hidden ? 0 : troubleList().length;
+    var n = state.mode === 'trouble' || state.troubleSeen === dayKey() || !els.wotd.hidden || !els.rehearseStrip.hidden || storyUrgent() ? 0 : troubleList().length;
     els.troubleStrip.hidden = !n;
     els.troubleText.textContent = n ? n + ' trouble ' + noun(n) : '';
   }
