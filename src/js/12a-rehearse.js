@@ -20,7 +20,7 @@
     return null;
   }
   function rehearseStarted(c) {
-    return !!(marksOf('read').status[c.zh] || marksOf('recall').status[c.zh] || marksOf('listen').status[c.zh]);
+    return !!(marksOf('read').status[c.zh] || marksOf('chars').status[c.zh] || marksOf('recall').status[c.zh] || marksOf('listen').status[c.zh]);
   }
   // Words started in Chinese with a meaning in k: due in k first, then Learning in k, then the most missed,
   // then new ones by frequency rank, then the rest.

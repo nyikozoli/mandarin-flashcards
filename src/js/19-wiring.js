@@ -20,7 +20,7 @@
     on('btnUndo', 'click', undo);
     on('btnReset', 'click', function () {
       closeOverlay(els.settingsView);
-      askConfirm('Reset all progress?', 'This clears every “Known” and “Still learning” mark, the review schedule and the hardest-word counts in all three skills (reading, recall, listening) for words and sentences, and starts again from card 1. Your activity history and streak are kept. This cannot be undone.', 'Reset progress', function () {
+      askConfirm('Reset all progress?', 'This clears every “Known” and “Still learning” mark, the review schedule and the hardest-word counts in every skill (reading, characters, recall, listening) for words and sentences, and starts again from card 1. Your activity history and streak are kept. This cannot be undone.', 'Reset progress', function () {
         stopSpeech();
         resetMarks();
         state.deckMemory = {};

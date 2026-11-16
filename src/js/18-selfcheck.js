@@ -1043,7 +1043,7 @@
         state.marks.listen.status[w.zh] = 'learning';
         state.deck = [0]; state.pos = 0; render(false);
         var seals = els.cardSkills.querySelectorAll('.sm');
-        var three = seals.length === 3 && seals[2].classList.contains('sm-learning') && els.cardSkills.querySelector('.sm.active') === seals[0] &&
+        var three = seals.length === 4 && seals[3].classList.contains('sm-learning') && els.cardSkills.querySelector('.sm.active') === seals[0] &&
           /Listening: Learning/.test(els.cardSkills.firstChild.getAttribute('aria-label'));
         openList();
         var inList = els.wordList.querySelectorAll('.skill-marks').length > 0;
@@ -1051,9 +1051,9 @@
         if (keepL) state.marks.listen.status[w.zh] = keepL; else delete state.marks.listen.status[w.zh];
         state.deck = deckSnap; state.pos = posSnap; render(false);
         var panda = !!els.btnPet.closest('.topbar');
-        return { ok: three && inList && panda, d: 'card shows 读 说 听 with listening Learning and reading ringed: ' + three + ', word list shows them: ' + inList + ', panda in the top bar: ' + panda };
+        return { ok: three && inList && panda, d: 'card shows 读 字 说 听 with listening Learning and reading ringed: ' + three + ', word list shows them: ' + inList + ', panda in the top bar: ' + panda };
       })();
-      add('Marks for all three skills; panda in the top bar', marksRes.ok, marksRes.d);
+      add('Marks for all four skills; panda in the top bar', marksRes.ok, marksRes.d);
 
       var langRes = (function () {
         var keep = JSON.parse(JSON.stringify(state.langs)), deckSnap = state.deck.slice(), posSnap = state.pos;
@@ -1435,11 +1435,11 @@
         els.btnPractice.click();
         var open = !els.practiceView.hidden, secs = els.practiceGrid.querySelectorAll('.pk-skill');
         var tiles = els.practiceGrid.querySelectorAll('[data-style]');
-        var all = tiles.length === els.optPractice.options.length && secs.length === 3;
+        var all = tiles.length === els.optPractice.options.length && secs.length === 4;
         var marked = !!els.practiceGrid.querySelector('[aria-pressed="true"][data-style="' + before + '"]');
         // Every tile sits under the skill it trains.
         var bySkill = Array.prototype.every.call(secs, function (sec, i) {
-          return Array.prototype.every.call(sec.querySelectorAll('[data-style]'), function (t) { return skillOf(t.getAttribute('data-style').replace(/^s-/, '')) === ['read', 'recall', 'listen'][i]; });
+          return Array.prototype.every.call(sec.querySelectorAll('[data-style]'), function (t) { return skillOf(t.getAttribute('data-style').replace(/^s-/, '')) === ['read', 'chars', 'recall', 'listen'][i]; });
         });
         els.practiceGrid.querySelector('[data-style="listen"]').click();
         var listen = els.practiceView.hidden && state.practice === 'listen' && state.skill === 'listen' && els.practiceSeal.textContent === '听' && els.practiceAsk.textContent === PRACTICE_ASK.listen;

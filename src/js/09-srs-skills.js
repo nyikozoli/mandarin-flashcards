@@ -67,14 +67,15 @@
   }
 
   /* ---------- skills: separate progress per kind of practice ---------- */
-  // Reading (Chinese → meaning, 汉字 only, multiple choice), recall (meaning → Chinese, type it) and listening (listening,
+  // Reading (Chinese → meaning with the pinyin shown, multiple choice), characters (汉字 only: the pinyin hidden, so Known means
+  // the characters are read), recall (meaning → Chinese, type it) and listening (listening,
   // dictation, which tone) each keep their own marks, review schedule and miss counts. state.status / srs / misses always hold the
   // active skill's maps, so the rest of the app needs no skill logic; state.marks holds every skill, and stashSkill()
   // writes the active maps back before anything reads another skill.
-  var SKILL_ZH = { read: '读', recall: '说', listen: '听' };
-  var BASE_SKILLS = { read: 'Reading', recall: 'Recall', listen: 'Listening' };
-  // The three skills plus one per rehearsed language ('say:ro' → 'Romanian'); rebuilt by rebuildSkills().
-  var SKILLS = { read: 'Reading', recall: 'Recall', listen: 'Listening' };
+  var SKILL_ZH = { read: '读', chars: '字', recall: '说', listen: '听' };
+  var BASE_SKILLS = { read: 'Reading', chars: 'Characters', recall: 'Recall', listen: 'Listening' };
+  // The four skills plus one per rehearsed language ('say:ro' → 'Romanian'); rebuilt by rebuildSkills().
+  var SKILLS = { read: 'Reading', chars: 'Characters', recall: 'Recall', listen: 'Listening' };
   function rehearseSkill(k) { return 'say:' + k; }
   // Rebuilds the rehearse skills and their practice styles (rh-<code>) from the language roles.
   // A skill that goes keeps its marks in state.marks; only the menu entry and the style go.
@@ -116,11 +117,11 @@
   }
   // Snapshot format. 2 added `skills`, 5 added `rungs`, 6 turned `langs` into roles and added rehearse skills, 7 added `order`,
   // 8 added `notes` (a personal note per word) and `troubleSeen`; the typed styles (Type it, Dictation) added no field, and
-  // `story` (the episodes opened and read) joined 8 before it was published. The server refuses
+  // `story` (the episodes opened and read) joined 8 before it was published; 9 added the characters skill (`skills.chars`). The server refuses
   // uploads older than the stored format, and this copy refuses to apply progress written by a newer one, so neither side drops
   // what it does not understand.
-  var FORMAT = 8;
-  var SKILL_OF = { zh: 'read', hanzi: 'read', choice: 'read', cloze: 'read', pairs: 'read', reverse: 'recall', type: 'recall', build: 'recall', listen: 'listen', dictate: 'listen', tone: 'listen', tonepair: 'listen' };
+  var FORMAT = 9;
+  var SKILL_OF = { zh: 'read', hanzi: 'chars', choice: 'read', cloze: 'read', pairs: 'read', reverse: 'recall', type: 'recall', build: 'recall', listen: 'listen', dictate: 'listen', tone: 'listen', tonepair: 'listen' };
   function skillOf(p) { return SKILL_OF[p] || 'read'; }
   function emptyMarks() { return { status: {}, srs: {}, misses: {} }; }
   function stashSkill() { state.marks[state.skill] = { status: state.status, srs: state.srs, misses: state.misses }; }
@@ -131,7 +132,7 @@
     state.misses = m.misses;
   }
   function marksOf(k) { stashSkill(); return state.marks[k] || emptyMarks(); }
-  function resetMarks() { state.marks = { read: emptyMarks(), recall: emptyMarks(), listen: emptyMarks() }; loadSkill(); }
+  function resetMarks() { state.marks = { read: emptyMarks(), chars: emptyMarks(), recall: emptyMarks(), listen: emptyMarks() }; loadSkill(); }
   // Returns true when the skill changed. Undo entries belong to the skill they were made in, so they go.
   function useSkill(k) {
     if (!SKILLS[k]) k = 'read';
@@ -143,13 +144,13 @@
     undoStack = [];
     return true;
   }
-  // The card's mark in every skill, as three small seals: 读 reading, 说 recall, 听 listening. Green Known, amber
+  // The card's mark in every skill, as small seals: 读 reading, 字 characters, 说 recall, 听 listening. Green Known, amber
   // Learning, outlined New; the skill you are practising has a ring. maps (optional) saves lookups in long lists.
   function skillMaps() { var m = {}; Object.keys(SKILLS).forEach(function (k) { m[k] = marksOf(k).status; }); return m; }
   function skillMarks(c, maps) {
     maps = maps || skillMaps();
     var w = el('span', 'skill-marks'), parts = [];
-    // Rehearse skills are words only, so sentences show just the three skills.
+    // Rehearse skills are words only, so sentences show just the four skills.
     Object.keys(SKILLS).filter(function (k) { return !c.sentence || k.indexOf('say:') !== 0; }).forEach(function (k) {
       var s = (maps[k] || {})[c.zh] || 'unmarked';
       var m = el('span', 'sm sm-' + s + (k === skillNow() ? ' active' : ''), SKILL_ZH[k]);
