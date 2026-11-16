@@ -31,9 +31,9 @@
   }
   // The reading skill stays at the top level (status, srs, misses), so older copies of the app still read it;
   // the other skills go under `skills`.
-  // Recall, listening and every rehearse skill ever used (kept while a language is set back to Show).
+  // Characters, recall, listening and every rehearse skill ever used (kept while a language is set back to Show).
   function skillsSnapshot() {
-    var out = { recall: marksOf('recall'), listen: marksOf('listen') };
+    var out = { chars: marksOf('chars'), recall: marksOf('recall'), listen: marksOf('listen') };
     Object.keys(state.marks).forEach(function (k) { if (k.indexOf('say:') === 0) out[k] = marksOf(k); });
     return out;
   }
@@ -187,7 +187,7 @@
       return m;
     };
     var sk = saved && saved.skills && typeof saved.skills === 'object' ? saved.skills : {};
-    state.marks = { read: readMarks(saved), recall: readMarks(sk.recall), listen: readMarks(sk.listen) };
+    state.marks = { read: readMarks(saved), chars: readMarks(sk.chars), recall: readMarks(sk.recall), listen: readMarks(sk.listen) };
     MEANING_LANGS.forEach(function (l) { var k = rehearseSkill(l[0]); if (sk[k]) state.marks[k] = readMarks(sk[k]); });
     state.skill = skillOf(state.practice);
     loadSkill();

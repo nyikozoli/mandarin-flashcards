@@ -1,6 +1,21 @@
 {
   "releases": [
     {
+      "version": "3.9",
+      "date": "2026-11-16",
+      "title": "Characters (字): a skill of its own",
+      "groups": [
+        {
+          "name": "",
+          "items": [
+            "Characters (字) is a new skill, next to Reading, Recall and Listening. It is trained only by “Characters only”, where the pinyin stays hidden until you check, so Known in 字 means you can read the characters themselves.",
+            "Reading (读) is now the meaning with the pinyin shown (Chinese → meaning, Multiple choice, Fill the gap, Similar words). Your Reading progress stays as it was; 字 starts empty, because the app cannot tell which earlier answers were given without the pinyin.",
+            "Every card and the word list show four marks: 读 字 说 听. The ladder steps still need Reading and Listening."
+          ]
+        }
+      ]
+    },
+    {
       "version": "3.8",
       "date": "2026-11-12",
       "title": "A story in daily episodes, Just 5 cards, trouble words, notes and typed answers",

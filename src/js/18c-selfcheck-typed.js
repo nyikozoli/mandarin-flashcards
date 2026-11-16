@@ -240,3 +240,36 @@
       ', trouble deck brings a typed miss back: ' + trouble + ', Due moves a right answer up: ' + dueOk + ', a rehearse card has no field: ' + rh +
       ', the next word card has it again: ' + backAgain + ', sentences fall back to listening: ' + sent);
   } });
+
+  /* ---------- self-check: the characters skill ---------- */
+  HABIT_TESTS.push({ title: 'Characters (字): its own skill, earned only with the pinyin hidden', run: function (add) {
+    var w = typedTestWord('朋友');
+    typedTestStyle('hanzi');
+    var style = state.skill === 'chars' && els.practiceSeal.textContent === '字' && skillOf('hanzi') === 'chars' && skillOf('zh') === 'read';
+    typedTestShow('朋友');
+    var hidden = els.card.classList.contains('hide-reading');
+    act('known');
+    // A first right answer moves the word up one review box (Known comes once its review is days away).
+    var own = marksOf('chars').srs[w.zh].b === 1 && !marksOf('read').status[w.zh] && !marksOf('read').srs[w.zh];
+    marksOf('chars').status[w.zh] = 'known';
+    // Reading with the pinyin shown leaves the characters mark alone.
+    typedTestStyle('zh');
+    typedTestShow('朋友');
+    act('learning');
+    var apart = marksOf('read').status[w.zh] === 'learning' && marksOf('chars').status[w.zh] === 'known' && marksOf('chars').srs[w.zh].b === 1;
+    var seals = els.cardSkills.querySelectorAll('.sm'), four = seals.length >= 4 && seals[1].textContent === '字' && seals[1].classList.contains('sm-known');
+    var snap = progressSnapshot(), saved = snap.format >= 9 && !!snap.skills.chars && snap.skills.chars.status[w.zh] === 'known' && snap.status[w.zh] === 'learning';
+    var keep = state.marks;
+    restore(JSON.parse(JSON.stringify(snap)));
+    var back = marksOf('chars').status[w.zh] === 'known' && marksOf('read').status[w.zh] === 'learning';
+    state.marks = keep; loadSkill();
+    // A copy saved before the skill existed starts it empty.
+    var old = JSON.parse(JSON.stringify(snap)); delete old.skills.chars; old.format = 8;
+    restore(old);
+    var fresh = !marksOf('chars').status[w.zh] && marksOf('read').status[w.zh] === 'learning';
+    state.marks = keep; loadSkill();
+    add('Characters (字): its own skill', style && hidden && own && apart && four && saved && back && fresh,
+      'Characters only trains 字, Chinese → meaning trains 读: ' + style + ', pinyin hidden: ' + hidden + ', the mark goes to 字 only: ' + own +
+      ', a reading answer leaves 字 alone: ' + apart + ', the card shows 字 second: ' + four + ', saved under skills.chars (format 9): ' + saved +
+      ', restored: ' + back + ', an older copy starts 字 empty: ' + fresh);
+  } });

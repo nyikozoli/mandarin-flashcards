@@ -113,7 +113,7 @@
     var total = storyEpisodes().length;
     state.story = { unlocked: 4, days: { 2: storyTestDay(-2), 3: storyTestDay(-1), 4: today }, read: { 1: storyTestDay(-2), 2: storyTestDay(-1) }, seen: today, py: false };
     var snap = JSON.parse(JSON.stringify(progressSnapshot())), exp = JSON.parse(exportText()).progress, want = JSON.stringify(state.story);
-    var inSnap = snap.format === FORMAT && FORMAT === 8 && JSON.stringify(snap.story) === want && JSON.stringify(exp.story) === want && DEVICE_ONLY.indexOf('story') === -1;
+    var inSnap = snap.format === FORMAT && FORMAT >= 8 && JSON.stringify(snap.story) === want && JSON.stringify(exp.story) === want && DEVICE_ONLY.indexOf('story') === -1;
     state.story = readStoryState(null);
     restore(snap);
     var restored = JSON.stringify(state.story) === want && storyAvailable() === 4;

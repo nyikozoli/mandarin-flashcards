@@ -421,7 +421,7 @@
       });
       return ' ' + langName(k) + ': ' + kn + ' known, ' + le + ' learning, ' + (pool.length - kn - le) + ' new, ' + due + ' due.';
     }).join('');
-    panes.progress.appendChild(el('p', 'pv-skills', 'Known ' + noun(2) + ' per skill: reading ' + knownIn('read') + ', recall ' + knownIn('recall') +
+    panes.progress.appendChild(el('p', 'pv-skills', 'Known ' + noun(2) + ' per skill: reading (with pinyin) ' + knownIn('read') + ', characters (no pinyin) ' + knownIn('chars') + ', recall ' + knownIn('recall') +
       ', listening ' + knownIn('listen') + '. The practice style you pick decides which one you are training.' + rhLine));
     panes.progress.appendChild(readingSection());
     panes.collection.appendChild(statsSection());
